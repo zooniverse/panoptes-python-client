@@ -2,6 +2,12 @@
 
 ## Installation
 
+Install latest release:
+
+```
+$ pip install panoptes-client
+```
+
 Install HEAD directly from GitHub:
 
 ```
