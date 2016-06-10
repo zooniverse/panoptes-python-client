@@ -193,7 +193,7 @@ class PanoptesObject(object):
 
     @classmethod
     def url(cls, *args):
-        return '/'.join(['', cls.slug] + list(args))
+        return '/'.join(['', cls._api_slug] + map(unicode, args))
 
     @classmethod
     def get(cls, path, params={}, headers={}):
@@ -202,6 +202,10 @@ class PanoptesObject(object):
             params,
             headers
         )
+
+    @classmethod
+    def paginated_results(cls, response):
+        return PanoptesResultPaginator(cls, response)
 
     def __init__(self, raw=None, client=None):
         if not client:
@@ -219,3 +223,33 @@ class PanoptesObject(object):
                 self.__class__.__name__,
                 name
             ))
+
+class PanoptesResultPaginator(object):
+    def __init__(self, object_class, response):
+        self.object_class = object_class
+        self.set_page(response)
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        if self.object_index >= self.object_count:
+            if self.next_href:
+                response = Panoptes.client().get(self.next_href)
+                self.set_page(response)
+            else:
+                raise StopIteration
+
+        i = self.object_index
+        self.object_index += 1
+        return self.object_class(self.object_list[i])
+
+    def set_page(self, response):
+        self.meta = response.get('meta', {})
+        self.meta = self.meta.get(self.object_class._api_slug, {})
+        self.page = self.meta.get('page', 1)
+        self.page_count = self.meta.get('page_count', 1)
+        self.next_href = self.meta.get('next_href')
+        self.object_list = response.get(self.object_class._api_slug, [])
+        self.object_count = len(self.object_list)
+        self.object_index = 0

@@ -1,7 +1,7 @@
 from panoptes_client.panoptes import PanoptesObject
 
 class Project(PanoptesObject):
-    slug = 'projects'
+    _api_slug = 'projects'
 
     @classmethod
     def find(cls, project_id='', slug=None, display_name=None):
@@ -13,7 +13,7 @@ class Project(PanoptesObject):
             'display_name': display_name,
         }
 
-        return map(Project, cls.get(project_id, params=params)['projects'])
+        return cls.paginated_results(cls.get(project_id, params=params))
 
     def __repr__(self):
-        return "Project ID %s: %s" % (self.id, self.title)
+        return '<Project {}>'.format(self.id)
