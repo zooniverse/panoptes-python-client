@@ -89,10 +89,24 @@ class Panoptes(object):
         _headers.update(headers)
         headers = _headers
         url = self.endpoint + '/api' + path
-        return self.session.get(url, params=params,  headers=headers)
+        response = self.session.get(url, params=params,  headers=headers)
+        if response.status_code >= 500:
+            raise PanoptesAPIException(
+                'Received HTTP status code {} from API'.format(
+                    response.status_code
+                )
+            )
+        return response
 
     def get(self, path, params={}, headers={}):
-        return self.get_request(path, params, headers).json()
+        json_response = self.get_request(path, params, headers).json()
+        if 'errors' in json_response:
+            raise PanoptesAPIException(', '.join(
+                map(lambda e: e.get('message', ''),
+                    json_response['errors']
+                   )
+            ))
+        return json_response
 
     def put_request(self, path, params={}, headers={}):
         _headers = self._headers_for_put().copy()
@@ -253,3 +267,6 @@ class PanoptesResultPaginator(object):
         self.object_list = response.get(self.object_class._api_slug, [])
         self.object_count = len(self.object_list)
         self.object_index = 0
+
+class PanoptesAPIException(Exception):
+    pass
