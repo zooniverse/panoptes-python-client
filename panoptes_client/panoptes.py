@@ -5,14 +5,17 @@ from datetime import datetime, timedelta
 class Panoptes(object):
     _client = None
 
-    _default_headers = {
-        'Accept': 'application/vnd.api+json; version=1',
-    }
-    _default_get_headers = {}
-    _default_put_headers = {}
-    _default_post_headers = {}
-    _default_put_post_headers = {
-        'Content-Type': 'application/json',
+    _http_headers = {
+        'default': {
+            'Accept': 'application/vnd.api+json; version=1',
+        },
+        'GET': {},
+        'PUT': {
+            'Content-Type': 'application/json',
+        },
+        'POST': {
+            'Content-Type': 'application/json',
+        },
     }
 
     _endpoint_client_ids = {
@@ -57,39 +60,19 @@ class Panoptes(object):
 
         self.session = requests.session()
 
-    def _headers_for_all(self):
-        headers = self._default_headers.copy()
-        token = self.get_bearer_token()
-        if self.logged_in:
-            headers.update({
-                'Authorization': 'Bearer %s' % token,
-            })
-        return headers
-
-    def _headers_for_get(self):
-        headers = self._headers_for_all()
-        headers.update(self._default_get_headers)
-        return headers
-
-    def _headers_for_put(self):
-        headers = self._headers_for_all()
-        headers.update(self._default_put_post_headers)
-        headers.update(self._default_get_headers)
-        return headers
-
-    def _headers_for_post(self):
-        headers = self._headers_for_all()
-        headers.update(self._default_headers)
-        headers.update(self._default_put_post_headers)
-        headers.update(self._default_get_headers)
-        return headers
-
-    def get_request(self, path, params={}, headers={}):
-        _headers = self._headers_for_get().copy()
+    def http_request(self, method, path, params={}, headers={}, json={}):
+        _headers = self._http_headers['default'].copy()
+        _headers.update(self._http_headers[method])
         _headers.update(headers)
         headers = _headers
         url = self.endpoint + '/api' + path
-        response = self.session.get(url, params=params,  headers=headers)
+        response = self.session.request(
+            method,
+            url,
+            params=params,
+            headers=headers,
+            json=json
+        )
         if response.status_code >= 500:
             raise PanoptesAPIException(
                 'Received HTTP status code {} from API'.format(
@@ -98,8 +81,8 @@ class Panoptes(object):
             )
         return response
 
-    def get(self, path, params={}, headers={}):
-        json_response = self.get_request(path, params, headers).json()
+    def json_request(self, method, path, params={}, headers={}, json={}):
+        json_response = self.http_request(method, path, params, headers).json()
         if 'errors' in json_response:
             raise PanoptesAPIException(', '.join(
                 map(lambda e: e.get('message', ''),
@@ -108,30 +91,29 @@ class Panoptes(object):
             ))
         return json_response
 
+    def get_request(self, path, params={}, headers={}):
+        return self.http_request('GET', path, params, headers)
+
+    def get(self, path, params={}, headers={}):
+        return self.json_request('GET', path, params, headers)
+
     def put_request(self, path, params={}, headers={}):
-        _headers = self._headers_for_put().copy()
-        _headers.update(headers)
-        headers = _headers
-        url = self.endpoint + '/api' + path
-        return self.session.put(url, params=params,  headers=headers)
+        return self.http_request('PUT', path, params,  headers)
 
     def put(self, path, params={}, headers={}):
-        return self.put_request(path, params, headers).json()
+        return self.json_request('PUT', path, params, headers)
 
     def post_request(self, path, params={}, headers={}, json={}):
-        _headers = self._headers_for_post().copy()
-        _headers.update(headers)
-        headers = _headers
-        url = self.endpoint + '/api' + path
-        return self.session.post(
-            url,
+        return self.http_request(
+            'post',
+            path,
             params=params,
             headers=headers,
             json=json
         )
 
     def post(self, path, params={}, headers={}, json={}):
-        return self.post_request(path, params, headers, json).json()
+        return self.json_request('POST', path, params, headers, json)
 
     def login(self, username=None, password=None):
         if not username:
