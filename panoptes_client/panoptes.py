@@ -200,8 +200,14 @@ class PanoptesObject(object):
         )
 
     @classmethod
+    def find(cls, _id, params={}):
+        if _id is None:
+            _id = ''
+        return cls.paginated_results(cls.get(_id, params=params))
+
+    @classmethod
     def paginated_results(cls, response):
-        return PanoptesResultPaginator(cls, response)
+        return ResultPaginator(cls, response)
 
     def __init__(self, raw=None, client=None):
         if not client:
@@ -210,6 +216,9 @@ class PanoptesObject(object):
             self.client = client
         if raw:
             self.raw = raw
+
+        if self.raw and 'links' in self.raw:
+            self.links = LinkResolver(self.raw['links'])
 
     def __getattr__(self, name):
         try:
@@ -220,7 +229,13 @@ class PanoptesObject(object):
                 name
             ))
 
-class PanoptesResultPaginator(object):
+    def __repr__(self):
+        return '<{} {}>'.format(
+            self.__class__.__name__,
+            self.id
+        )
+
+class ResultPaginator(object):
     def __init__(self, object_class, response):
         self.object_class = object_class
         self.set_page(response)
@@ -249,6 +264,24 @@ class PanoptesResultPaginator(object):
         self.object_list = response.get(self.object_class._api_slug, [])
         self.object_count = len(self.object_list)
         self.object_index = 0
+
+class LinkResolver(object):
+    types = {}
+
+    @classmethod
+    def register(cls, object_class):
+        cls.types[object_class._link_slug] = object_class
+
+    def __init__(self, raw):
+        self.raw = raw
+
+    def __getattr__(self, name):
+        object_class = LinkResolver.types.get(name)
+        linked_object = self.raw[name]
+        if type(linked_object) == list:
+            return map(lambda o: object_class.find(o).next(), linked_object)
+        else:
+            return object_class.find(linked_object).next()
 
 class PanoptesAPIException(Exception):
     pass
