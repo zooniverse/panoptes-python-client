@@ -19,12 +19,16 @@ class Project(PanoptesObject):
     )
 
     @classmethod
-    def find(cls, _id='', slug=None, display_name=None):
+    def where(cls, _id='', slug=None, display_name=None):
         params = {
             'slug': slug,
             'display_name': display_name,
         }
 
-        return super(Project, cls).find(_id, params)
+        return super(Project, cls).where(_id, params)
+
+    @classmethod
+    def find(cls, _id='', slug=None):
+        return cls.where(_id, slug).next()
 
 LinkResolver.register(Project)

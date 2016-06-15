@@ -21,7 +21,7 @@ Print all project titles:
 ```python
 from panoptes_client import Project
 
-for project in Project.find():
+for project in Project.where():
     print project.title
 ```
 
@@ -30,7 +30,7 @@ Find a project by slug and print all its workflow names:
 ```python
 from panoptes_client import Project
 
-project = Project.find(slug='zooniverse/example').next()
+project = Project.find(slug='zooniverse/example')
 for workflow in project.links.workflows:
     print workflow.display_name
 ```

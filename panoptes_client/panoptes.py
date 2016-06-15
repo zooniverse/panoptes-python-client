@@ -248,10 +248,14 @@ class PanoptesObject(object):
         )
 
     @classmethod
-    def find(cls, _id, params={}):
+    def where(cls, _id, params={}):
         if _id is None:
             _id = ''
         return cls.paginated_results(*cls.get(_id, params=params))
+
+    @classmethod
+    def find(cls, _id):
+        return cls.where(_id).next()
 
     @classmethod
     def paginated_results(cls, response, etag):
