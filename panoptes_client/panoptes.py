@@ -297,7 +297,7 @@ class PanoptesObject(object):
         self.modified_attributes = set()
 
         if 'links' in self.raw:
-            self.links = LinkResolver(self.raw['links'])
+            self.links = LinkResolver(self.raw['links'], self)
 
     def _savable_dict(
         self,
@@ -311,10 +311,15 @@ class PanoptesObject(object):
         for key in attributes:
             if type(key) == dict:
                 for subkey, subattributes in key.items():
-                    out.append((subkey, self._savable_dict(
-                        attributes=subattributes,
-                        include_none=include_none
-                    )))
+                    if subkey == 'links' and hasattr(self, 'links'):
+                        out.append(
+                            (subkey, self.links._savable_dict(subattributes))
+                        )
+                    else:
+                        out.append((subkey, self._savable_dict(
+                            attributes=subattributes,
+                            include_none=include_none
+                        )))
             elif modified_attributes and key not in modified_attributes:
                 continue
             else:
@@ -337,6 +342,9 @@ class PanoptesObject(object):
             etag=self.etag
         )
         self.raw['id'] = response[self._api_slug][0]['id']
+        self.reload()
+
+    def reload(self):
         reloaded_project = self.__class__.find(self.id).next()
         self.set_raw(
             reloaded_project.raw,
@@ -381,8 +389,9 @@ class LinkResolver(object):
     def register(cls, object_class):
         cls.types[object_class._link_slug] = object_class
 
-    def __init__(self, raw):
+    def __init__(self, raw, parent):
         self.raw = raw
+        self.parent = parent
 
     def __getattr__(self, name):
         object_class = LinkResolver.types.get(name)
@@ -391,6 +400,28 @@ class LinkResolver(object):
             return map(lambda o: object_class.find(o).next(), linked_object)
         else:
             return object_class.find(linked_object).next()
+
+    def __setattr__(self, name, value):
+        reserved_names = ('raw', 'parent')
+        if name not in reserved_names and name in self.raw:
+            if isinstance(value, PanoptesObject):
+                value = value.id
+            self.raw[name] = value
+            self.parent.modified_attributes.add('links')
+        else:
+            super(LinkResolver, self).__setattr__(name, value)
+
+    def _savable_dict(self, edit_attributes):
+        out = []
+        for key, value in self.raw.items():
+            if not key in edit_attributes:
+                continue
+            if type(key) == list:
+               out.append((key, [ o.id for o in value ]))
+            else:
+                if value:
+                    out.append((key, value))
+        return dict(out)
 
 class PanoptesAPIException(Exception):
     pass
