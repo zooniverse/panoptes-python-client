@@ -10,12 +10,6 @@ class Project(PanoptesObject):
         'introduction',
         'private',
         'primary_language',
-        {
-            'links': (
-                'workflows',
-                'subject_sets',
-            )
-        },
     )
 
     @classmethod

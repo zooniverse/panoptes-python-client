@@ -8,9 +8,7 @@ class SubjectSet(PanoptesObject):
         'display_name',
         {
             'links': (
-                'subjects',
                 'project',
-                'workflows',
             ),
             'metadata': (
                 'category',
