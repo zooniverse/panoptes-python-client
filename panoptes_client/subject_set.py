@@ -18,6 +18,17 @@ class SubjectSet(PanoptesObject):
         },
     )
 
+    def __init__(self, raw={}, etag=None):
+        r = super(SubjectSet, self).__init__(raw, etag)
+
+        if self.id:
+            self._edit_attributes[1]['links'] = (
+                'subjects',
+                'workflows',
+            )
+
+        return r
+
     def subjects(self):
         return Subject.where(subject_set_id=self.id)
 
