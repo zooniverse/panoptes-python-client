@@ -47,3 +47,29 @@ p.primary_language='en'
 p.private=True
 p.save()
 ```
+
+Create a subject set and upload a new subject to it:
+
+```python
+from panoptes_client import SubjectSet, Subject, Project, Panoptes
+
+Panoptes.connect(username='example', password='example')
+
+project = Project.find(slug='zooniverse/example')
+
+subject_set = SubjectSet()
+subject_set.links.project = project
+subject_set.display_name = 'My new subject set'
+subject_set.save()
+
+subject = Subject()
+subject.links.project = project
+subject.add_location('/path/to/local/image.jpg')
+# You can set whatever metadata you want, or none at all
+subject.metadata['image_id'] = 1234
+subject.metadata['image_title'] = 'My image'
+subject.save()
+
+# SubjectSet.add_subjects() can take a list of Subjects, or just one.
+subject_set.add_subjects(subject)
+```
