@@ -248,14 +248,24 @@ class PanoptesObject(object):
         )
 
     @classmethod
-    def where(cls, _id, params={}):
-        if _id is None:
-            _id = ''
-        return cls.paginated_results(*cls.get(_id, params=params))
+    def post(cls, path, params={}, headers={}, json={}):
+        return Panoptes.client().post(
+            cls.url(path),
+            params,
+            headers,
+            json
+        )
+
+    @classmethod
+    def where(cls, **kwargs):
+        _id = kwargs.pop('id', '')
+        return cls.paginated_results(*cls.get(_id, params=kwargs))
 
     @classmethod
     def find(cls, _id):
-        return cls.where(_id).next()
+        if not _id:
+            return None
+        return cls.where(id=_id).next()
 
     @classmethod
     def paginated_results(cls, response, etag):
@@ -347,9 +357,10 @@ class PanoptesObject(object):
         )
         self.raw['id'] = response[self._api_slug][0]['id']
         self.reload()
+        return response
 
     def reload(self):
-        reloaded_project = self.__class__.find(self.id).next()
+        reloaded_project = self.__class__.find(self.id)
         self.set_raw(
             reloaded_project.raw,
             reloaded_project.etag
@@ -401,9 +412,9 @@ class LinkResolver(object):
         object_class = LinkResolver.types.get(name)
         linked_object = self.raw[name]
         if type(linked_object) == list:
-            return map(lambda o: object_class.find(o).next(), linked_object)
+            return map(lambda o: object_class.find(o), linked_object)
         else:
-            return object_class.find(linked_object).next()
+            return object_class.find(linked_object)
 
     def __setattr__(self, name, value):
         reserved_names = ('raw', 'parent')

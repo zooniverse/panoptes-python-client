@@ -19,16 +19,9 @@ class Project(PanoptesObject):
     )
 
     @classmethod
-    def where(cls, _id='', slug=None, display_name=None):
-        params = {
-            'slug': slug,
-            'display_name': display_name,
-        }
-
-        return super(Project, cls).where(_id, params)
-
-    @classmethod
-    def find(cls, _id='', slug=None):
-        return cls.where(_id, slug).next()
+    def find(cls, id='', slug=None):
+        if not id and not slug:
+            return None
+        return cls.where(id=id, slug=slug).next()
 
 LinkResolver.register(Project)
