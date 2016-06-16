@@ -338,7 +338,7 @@ class PanoptesObject(object):
                 continue
             else:
                 value = self.raw.get(key)
-                if value or include_none:
+                if value is not None or include_none:
                     out.append((key, value))
         return dict(out)
 
