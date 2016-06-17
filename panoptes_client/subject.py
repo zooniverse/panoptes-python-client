@@ -55,7 +55,6 @@ class Subject(PanoptesObject):
                         else:
                             time.sleep(attempt * RETRY_BACKOFF_INTERVAL)
 
-
     def add_location(self, location):
         if type(location) is dict:
             self.locations.append(location)
