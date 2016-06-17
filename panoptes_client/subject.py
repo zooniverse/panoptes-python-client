@@ -1,7 +1,11 @@
 import imghdr
 import requests
+import time
 
 from panoptes_client.panoptes import PanoptesObject, LinkResolver
+
+UPLOAD_RETRY_LIMIT = 5
+RETRY_BACKOFF_INTERVAL = 5
 
 class Subject(PanoptesObject):
     _api_slug = 'subjects'
@@ -34,14 +38,23 @@ class Subject(PanoptesObject):
                 continue
 
             for image_type, url in location.items():
-                upload_response = requests.put(
-                    url,
-                    headers={
-                        'Content-Type': image_type,
-                    },
-                    data=image_file.read(),
-                )
-                upload_response.raise_for_status()
+                for attempt in range(UPLOAD_RETRY_LIMIT):
+                    try:
+                        upload_response = requests.put(
+                            url,
+                            headers={
+                                'Content-Type': image_type,
+                            },
+                            data=image_file.read(),
+                        )
+                        upload_response.raise_for_status()
+                        break
+                    except requests.exceptions.RequestException:
+                        if (attempt + 1) >= UPLOAD_RETRY_LIMIT:
+                            raise
+                        else:
+                            time.sleep(attempt * RETRY_BACKOFF_INTERVAL)
+
 
     def add_location(self, location):
         if type(location) is dict:
