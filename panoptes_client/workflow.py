@@ -14,7 +14,7 @@ class Workflow(PanoptesObject):
         return Workflow.post(
             '{}/retired_subjects'.format(self.id),
             json={
-                'subjects': subjects,
+                'subject_ids': subjects,
                 'retirement_reason': reason
             }
         )
