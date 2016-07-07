@@ -111,13 +111,19 @@ class Panoptes(object):
         etag=None
     ):
         response = self.http_request(method, path, params, headers, json, etag)
-        json_response = response.json()
-        if 'errors' in json_response:
-            raise PanoptesAPIException(', '.join(
-                map(lambda e: e.get('message', ''),
-                    json_response['errors']
-                   )
-            ))
+        if (
+            response.status_code == 204 or
+            int(response.headers.get('Content-Length', 0)) == 0
+        ):
+            json_response = None
+        else:
+            json_response = response.json()
+            if 'errors' in json_response:
+                raise PanoptesAPIException(', '.join(
+                    map(lambda e: e.get('message', ''),
+                        json_response['errors']
+                       )
+                ))
         return (json_response, response.headers.get('ETag'))
 
     def get_request(self, path, params={}, headers={}):

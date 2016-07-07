@@ -2,6 +2,7 @@
 
 - Automatically retry failed image uploads
 - New: Project classifications export
+- New: Subject retirement in Workflow
 
 ## 0.1 (2016-06-16)
 
