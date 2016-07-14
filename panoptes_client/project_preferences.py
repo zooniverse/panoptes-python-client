@@ -1,5 +1,6 @@
 from panoptes_client.panoptes import PanoptesObject, LinkResolver
 
+
 class ProjectPreferences(PanoptesObject):
     _api_slug = 'project_preferences'
     _link_slug = 'project_preferences'
