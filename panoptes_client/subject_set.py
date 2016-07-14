@@ -34,6 +34,12 @@ class SubjectSet(PanoptesObject):
             json={'subjects': _subjects}
         )
 
+    def add_subject_link(self, subject_id):
+        self.post(
+            '{}/links/subjects'.format(self.id),
+            json={'subjects': [subject_id]}
+        )
+
     def delete_subject_link(self, subject_id):
         self.delete(
             '{}/links/subjects/{}'.format(self.id, subject_id)
