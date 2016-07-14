@@ -22,6 +22,9 @@ class Panoptes(object):
         'default': (
             'f79cf5ea821bb161d8cbb52d061ab9a2321d7cb169007003af66b43f7b79ce2a'
         ),
+        'https://panoptes-staging.zooniverse.org': (
+            '535759b966935c297be11913acee7a9ca17c025f9f15520e7504728e71110a27'
+        ),
     }
 
     @classmethod
