@@ -34,4 +34,9 @@ class SubjectSet(PanoptesObject):
             json={'subjects': _subjects}
         )
 
+    def delete_subject_link(self, subject_id):
+        self.delete(
+            '{}/links/subjects/{}'.format(self.id, subject_id)
+        )
+
 LinkResolver.register(SubjectSet)

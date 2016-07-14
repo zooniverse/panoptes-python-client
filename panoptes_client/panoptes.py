@@ -16,6 +16,9 @@ class Panoptes(object):
         'POST': {
             'Content-Type': 'application/json',
         },
+        'DELETE': {
+            'Content-Type': 'application/json',
+        },
     }
 
     _endpoint_client_ids = {
@@ -168,6 +171,19 @@ class Panoptes(object):
     def post(self, path, params={}, headers={}, json={}, etag=None):
         return self.json_request('POST', path, params, headers, json, etag)
 
+    def delete_request(self, path, params={}, headers={}, json={}, etag=None):
+        return self.http_request(
+            'delete',
+            path,
+            params=params,
+            headers=headers,
+            json=json,
+            etag=etag
+        )
+
+    def delete(self, path, params={}, headers={}, json={}, etag=None):
+        return self.json_request('DELETE', path, params, headers, json, etag)
+
     def login(self, username=None, password=None):
         if not username:
             username = self.username
@@ -259,6 +275,15 @@ class PanoptesObject(object):
     @classmethod
     def post(cls, path, params={}, headers={}, json={}):
         return Panoptes.client().post(
+            cls.url(path),
+            params,
+            headers,
+            json
+        )
+
+    @classmethod
+    def delete(cls, path, params={}, headers={}, json={}):
+        return Panoptes.client().delete(
             cls.url(path),
             params,
             headers,
