@@ -9,7 +9,11 @@ class ProjectPreferences(PanoptesObject):
     )
 
     @classmethod
-    def find(cls, user_id, project_id):
-        return cls.where(user_id=user_id, project_id=project_id).next()
+    def find(cls, id='', user_id=None, project_id=None):
+        if not id:
+            if not (user_id and project_id):
+                raise ValueError('Both user_id and project_id required')
+            id = cls.where(user_id=user_id, project_id=project_id).next().id
+        return super(ProjectPreferences, cls).find(id)
 
 LinkResolver.register(ProjectPreferences)
