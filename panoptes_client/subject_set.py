@@ -19,9 +19,9 @@ class SubjectSet(PanoptesObject):
     def subjects(self):
         return Subject.where(subject_set_id=self.id)
 
-    # Add or remove subject links. 
-    # Takes a tuple or list of Subject objects 
-    # or a tuple or list of subject ids. 
+    # Add or remove subject links.
+    # Takes a tuple or list of Subject objects
+    # or a tuple or list of subject ids.
     def add(self, subjects):
         _subjects = self._build_subject_list(subjects)
 
@@ -45,7 +45,7 @@ class SubjectSet(PanoptesObject):
         _subjects = []
         for subject in subjects:
             if not (isinstance(subject, Subject)
-            or isinstance(subject, (int, str, unicode,))):
+                or isinstance(subject, (int, str, unicode,))):
                 raise TypeError
 
             if isinstance(subject, Subject):
