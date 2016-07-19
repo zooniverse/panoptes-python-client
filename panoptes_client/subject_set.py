@@ -19,19 +19,45 @@ class SubjectSet(PanoptesObject):
     def subjects(self):
         return Subject.where(subject_set_id=self.id)
 
-    def add_subjects(self, subjects):
-        if not type(subjects) in (tuple, list):
-            subjects = [subjects]
-
-        _subjects = []
-        for subject in subjects:
-            if not isinstance(subject, Subject):
-                raise TypeError
-            _subjects.append(subject.id)
+    # Add or remove subject links.
+    # Takes a tuple or list of Subject objects
+    # or a tuple or list of subject ids.
+    def add(self, subjects):
+        _subjects = self._build_subject_list(subjects)
 
         self.post(
             '{}/links/subjects'.format(self.id),
             json={'subjects': _subjects}
         )
+
+    def remove(self, subjects):
+        _subjects = self._build_subject_list(subjects)
+        _subjects_ids = ",".join(_subjects)
+
+        self.delete(
+            '{}/links/subjects/{}'.format(self.id, _subjects_ids)
+        )
+
+    def _build_subject_list(self, subjects):
+        if not type(subjects) in (tuple, list):
+            subjects = [subjects]
+
+        _subjects = []
+        for subject in subjects:
+            if not (
+                isinstance(subject, Subject)
+                or isinstance(subject, (int, str,
+            unicode,))
+            ):
+                raise TypeError
+
+            if isinstance(subject, Subject):
+                _subject_id = subject.id
+            else:
+                _subject_id = str(subject)
+
+            _subjects.append(_subject_id)
+
+        return _subjects
 
 LinkResolver.register(SubjectSet)
