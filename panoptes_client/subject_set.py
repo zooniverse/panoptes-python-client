@@ -20,7 +20,8 @@ class SubjectSet(PanoptesObject):
         return Subject.where(subject_set_id=self.id)
 
     # Add or remove subject links. 
-    # Takes a tuple or list of Subject objects or a tuple or list of subject ids. 
+    # Takes a tuple or list of Subject objects 
+    # or a tuple or list of subject ids. 
     def add(self, subjects):
         _subjects = self._build_subject_list(subjects)
 
