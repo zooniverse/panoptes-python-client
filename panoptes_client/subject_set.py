@@ -46,7 +46,7 @@ class SubjectSet(PanoptesObject):
         for subject in subjects:
             if not (
                 isinstance(subject, Subject)
-                or isinstance(subject, (int, str, 
+                or isinstance(subject, (int, str,
             unicode,))
             ):
                 raise TypeError
