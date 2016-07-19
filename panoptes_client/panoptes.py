@@ -44,6 +44,7 @@ class Panoptes(object):
         self,
         endpoint='https://panoptes.zooniverse.org',
         client_id=None,
+        client_secret=None,
         username=None,
         password=None
     ):
@@ -52,6 +53,7 @@ class Panoptes(object):
         self.endpoint = endpoint
         self.username = username
         self.password = password
+        self.client_secret = client_secret
 
         if client_id:
             self.client_id = client_id
@@ -231,9 +233,16 @@ class Panoptes(object):
 
     def get_bearer_token(self):
         if not self.bearer_token or self.bearer_expires > datetime.now():
-            if not self.logged_in:
+
+            if self.client_secret:
+                grant_type = 'client_credentials'
+            elif self.password:
+                grant_type = 'password'
+
+            if not (self.logged_in and grant_type == 'client_credentials'):
                 if not self.login():
                     return
+
             if self.bearer_token:
                 bearer_data = {
                     'grant_type': 'refresh_token',
@@ -242,9 +251,13 @@ class Panoptes(object):
                 }
             else:
                 bearer_data = {
-                    'grant_type': 'password',
+                    'grant_type': grant_type,
                     'client_id': self.client_id,
                 }
+
+            if grant_type == 'client_credentials':
+                bearer_data['client_secret'] = self.client_secret
+
             token_response = self.session.post(
                 self.endpoint + '/oauth/token',
                 bearer_data
