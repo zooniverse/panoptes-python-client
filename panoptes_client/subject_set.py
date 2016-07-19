@@ -45,7 +45,9 @@ class SubjectSet(PanoptesObject):
         _subjects = []
         for subject in subjects:
             if not (isinstance(subject, Subject)
-                or isinstance(subject, (int, str, unicode,))):
+                or isinstance(subject, (int, str,
+            unicode,))
+            ):
                 raise TypeError
 
             if isinstance(subject, Subject):
