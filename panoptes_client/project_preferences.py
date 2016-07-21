@@ -21,8 +21,8 @@ class ProjectPreferences(PanoptesObject):
                 _user_id = user.id
                 _project_id = project.id
             elif (
-                isinstance(user, (int,str,unicode,))
-                and isinstance(project, (int,str,unicode,))
+                isinstance(user, (int, str, unicode,))
+                and isinstance(project, (int, str, unicode,))
             ):
                 _user_id = user
                 _project_id = project
