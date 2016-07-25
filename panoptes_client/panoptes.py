@@ -1,4 +1,5 @@
 import requests
+import os
 
 from datetime import datetime, timedelta
 
@@ -49,12 +50,12 @@ class Panoptes(object):
     ):
         Panoptes._client = self
 
-        self.endpoint = endpoint
-        self.username = username
-        self.password = password
+        self.endpoint = endpoint or os.environ['PANOPTES_ENDPOINT']
+        self.username = username or os.environ['PANOPTES_USERNAME']
+        self.password = password or os.environ['PANOPTES_PASSWORD']
 
         if client_id:
-            self.client_id = client_id
+            self.client_id = client_id or os.environ['PANOPTES_CLIENT_ID']
         else:
             self.client_id = self._endpoint_client_ids.get(
                 self.endpoint,
