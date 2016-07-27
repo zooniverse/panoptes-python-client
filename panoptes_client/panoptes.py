@@ -1,6 +1,7 @@
 import requests
 import os
 
+
 from datetime import datetime, timedelta
 
 class Panoptes(object):
@@ -45,6 +46,8 @@ class Panoptes(object):
         self,
         endpoint='https://panoptes.zooniverse.org',
         client_id=None,
+        client_secret=None,
+        redirect_url=None,
         username=None,
         password=None
     ):
@@ -53,6 +56,8 @@ class Panoptes(object):
         self.endpoint = endpoint or os.environ.get('PANOPTES_ENDPOINT')
         self.username = username or os.environ.get('PANOPTES_USERNAME')
         self.password = password or os.environ.get('PANOPTES_PASSWORD')
+        self.redirect_url = redirect_url or os.environ.get('PANOPTES_REDIRECT_URL')
+        self.client_secret = client_secret or os.environ.get('PANOPTES_CLIENT_SECRET')
 
         if client_id:
             self.client_id = client_id
@@ -84,6 +89,7 @@ class Panoptes(object):
         headers = _headers
 
         token = self.get_bearer_token()
+
         if self.logged_in:
             headers.update({
                 'Authorization': 'Bearer %s' % token,
@@ -232,12 +238,19 @@ class Panoptes(object):
         }
         return self.session.get(url, headers=headers).headers['x-csrf-token']
 
-    def get_bearer_token(self):
+    def get_bearer_token(self):        
         if not self.bearer_token or self.bearer_expires > datetime.now():
+            grant_type = 'password'
+
+            if self.client_secret:
+                grant_type = 'client_credentials'
+
             if not self.logged_in:
-                if not self.login():
-                    return
-            if self.bearer_token:
+                if grant_type is 'password':
+                    if not self.login():
+                        return
+
+            if (self.bearer_token and self.refresh_token):
                 bearer_data = {
                     'grant_type': 'refresh_token',
                     'refresh_token': self.refresh_token,
@@ -245,17 +258,27 @@ class Panoptes(object):
                 }
             else:
                 bearer_data = {
-                    'grant_type': 'password',
+                    'grant_type': grant_type,
                     'client_id': self.client_id,
                 }
+
+            if grant_type == 'client_credentials':
+                bearer_data['client_secret'] = self.client_secret
+                bearer_data['url'] = self.redirect_url
+
             token_response = self.session.post(
                 self.endpoint + '/oauth/token',
                 bearer_data
             ).json()
+
             if 'errors' in token_response:
                 raise PanoptesAPIException(token_response['errors'])
+
             self.bearer_token = token_response['access_token']
-            self.refresh_token = token_response['refresh_token']
+            if 'refresh_token' in token_response:
+                self.refresh_token = token_response['refresh_token']
+            else:
+                self.refresh_token = None
             self.bearer_expires = (
                 datetime.now()
                 + timedelta(seconds=token_response['expires_in'])
