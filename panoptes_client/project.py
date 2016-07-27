@@ -51,10 +51,11 @@ class Project(PanoptesObject):
 
         while datetime.datetime.now() < end_time:
             export_description = self.describe_classifications_export()
-            export_metadata = export_description['media'][0]['metadata']
-            if export_metadata.get('state', '') == 'ready':
-                success = True
-                break
+            if export_description:
+                export_metadata = export_description['media'][0]['metadata']
+                if export_metadata.get('state', '') == 'ready':
+                    success = True
+                    break
             time.sleep(2)
 
         if not success:
