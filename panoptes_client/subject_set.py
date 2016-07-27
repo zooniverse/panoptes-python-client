@@ -61,3 +61,4 @@ class SubjectSet(PanoptesObject):
         return _subjects
 
 LinkResolver.register(SubjectSet)
+LinkResolver.register(SubjectSet, 'subject_set')

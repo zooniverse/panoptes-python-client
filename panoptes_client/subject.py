@@ -3,6 +3,7 @@ import requests
 import time
 
 from panoptes_client.panoptes import PanoptesObject, LinkResolver
+from panoptes_client.set_member_subject import SetMemberSubject
 
 UPLOAD_RETRY_LIMIT = 5
 RETRY_BACKOFF_INTERVAL = 5
@@ -74,4 +75,11 @@ class Subject(PanoptesObject):
         )
         self._image_files.append(f)
 
+    def subject_sets(self):
+        return [
+            sms.links.subject_set
+            for sms in SetMemberSubject.where(subject_id=self.id)
+        ]
+
 LinkResolver.register(Subject)
+LinkResolver.register(Subject, 'subject')

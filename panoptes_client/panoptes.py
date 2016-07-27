@@ -438,8 +438,10 @@ class LinkResolver(object):
     types = {}
 
     @classmethod
-    def register(cls, object_class):
-        cls.types[object_class._link_slug] = object_class
+    def register(cls, object_class, link_slug=None):
+        if not link_slug:
+            link_slug = object_class._link_slug
+        cls.types[link_slug] = object_class
 
     def __init__(self, raw, parent):
         self.raw = raw
