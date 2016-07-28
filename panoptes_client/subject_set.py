@@ -1,6 +1,7 @@
 from panoptes_client.panoptes import PanoptesObject, LinkResolver
 from panoptes_client.subject import Subject
 
+
 class SubjectSet(PanoptesObject):
     _api_slug = 'subject_sets'
     _link_slug = 'subject_sets'
@@ -22,13 +23,17 @@ class SubjectSet(PanoptesObject):
     # Add or remove subject links.
     # Takes a tuple or list of Subject objects
     # or a tuple or list of subject ids.
-    def add(self, subjects):
+    def add(self, subjects, batch_size=100):
         _subjects = self._build_subject_list(subjects)
 
-        self.post(
-            '{}/links/subjects'.format(self.id),
-            json={'subjects': _subjects}
-        )
+        for _subjects_batch in [
+            _subjects[i:i+batch_size]
+            for i in xrange(0, len(_subjects), batch_size)
+        ]:
+            self.post(
+                '{}/links/subjects'.format(self.id),
+                json={'subjects': _subjects_batch}
+            )
 
     def remove(self, subjects):
         _subjects = self._build_subject_list(subjects)
@@ -46,8 +51,7 @@ class SubjectSet(PanoptesObject):
         for subject in subjects:
             if not (
                 isinstance(subject, Subject)
-                or isinstance(subject, (int, str,
-            unicode,))
+                or isinstance(subject, (int, str, unicode,))
             ):
                 raise TypeError
 
