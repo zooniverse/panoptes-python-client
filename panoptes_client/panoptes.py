@@ -275,6 +275,8 @@ class Panoptes(object):
                 raise PanoptesAPIException(token_response['errors'])
 
             self.bearer_token = token_response['access_token']
+            if (self.bearer_token and grant_type == 'client_credentials'):
+                self.logged_in = True
             if 'refresh_token' in token_response:
                 self.refresh_token = token_response['refresh_token']
             else:
