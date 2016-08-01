@@ -56,8 +56,10 @@ class Panoptes(object):
         self.endpoint = endpoint or os.environ.get('PANOPTES_ENDPOINT')
         self.username = username or os.environ.get('PANOPTES_USERNAME')
         self.password = password or os.environ.get('PANOPTES_PASSWORD')
-        self.redirect_url = redirect_url or os.environ.get('PANOPTES_REDIRECT_URL')
-        self.client_secret = client_secret or os.environ.get('PANOPTES_CLIENT_SECRET')
+        self.redirect_url = \
+            redirect_url or os.environ.get('PANOPTES_REDIRECT_URL')
+        self.client_secret = \
+            client_secret or os.environ.get('PANOPTES_CLIENT_SECRET')
 
         if client_id:
             self.client_id = client_id
@@ -238,7 +240,7 @@ class Panoptes(object):
         }
         return self.session.get(url, headers=headers).headers['x-csrf-token']
 
-    def get_bearer_token(self):        
+    def get_bearer_token(self):
         if not self.bearer_token or self.bearer_expires > datetime.now():
             grant_type = 'password'
 
