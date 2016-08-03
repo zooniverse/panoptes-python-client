@@ -130,7 +130,8 @@ class Panoptes(object):
         response = self.http_request(method, path, params, headers, json, etag)
         if (
             response.status_code == 204 or
-            int(response.headers.get('Content-Length', 0)) == 0
+            int(response.headers.get('Content-Length', -1)) == 0 or
+            len(response.text) == 0
         ):
             json_response = None
         else:
