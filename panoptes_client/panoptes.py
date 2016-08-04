@@ -103,7 +103,11 @@ class Panoptes(object):
                 'If-Match': etag,
             })
 
-        url = (endpoint or self.endpoint) + '/api' + path
+        if endpoint:
+            url = endpoint + '/' + path
+        else:
+            url = self.endpoint + '/api' + path
+
         response = self.session.request(
             method,
             url,
@@ -138,6 +142,7 @@ class Panoptes(object):
             etag,
             endpoint
         )
+
         if (
             response.status_code == 204 or
             int(response.headers.get('Content-Length', -1)) == 0 or
@@ -152,6 +157,9 @@ class Panoptes(object):
                         json_response['errors']
                        )
                 ))
+            elif 'error' in json_response:
+                raise PanoptesAPIException(json_response['error'])
+
         return (json_response, response.headers.get('ETag'))
 
     def get_request(self, path, params={}, headers={}, endpoint=None):
@@ -600,3 +608,44 @@ class PanoptesAPIException(Exception):
 
 class ReadOnlyAttributeException(Exception):
     pass
+
+
+class Talk(object):
+    def __init__(self, endpoint='https://talk.zooniverse.org/'):
+        self.endpoint = endpoint
+
+    def get(self, *args, **kwargs):
+        kwargs['endpoint'] = self.endpoint
+        return Panoptes.client().get(*args, **kwargs)
+
+    def post(self, *args, **kwargs):
+        kwargs['endpoint'] = self.endpoint
+        return Panoptes.client().post(*args, **kwargs)
+
+    def put(self, *args, **kwargs):
+        kwargs['endpoint'] = self.endpoint
+        return Panoptes.client().put(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        kwargs['endpoint'] = self.endpoint
+        return Panoptes.client().delete(*args, **kwargs)
+
+    def get_data_request(self, section, kind):
+        return self.get(
+            'data_requests',
+            params={
+                'section': section,
+                'kind': kind,
+            }
+        )
+
+    def post_data_request(self, section, kind):
+        return self.post(
+            'data_requests',
+            json={
+                'data_requests': {
+                    'section': section,
+                    'kind': kind,
+                }
+            }
+        )
