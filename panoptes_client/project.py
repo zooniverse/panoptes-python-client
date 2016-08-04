@@ -3,13 +3,15 @@ import requests
 import time
 
 from panoptes_client.panoptes import (
-    LinkResolver, PanoptesAPIException, PanoptesObject
+    LinkResolver, PanoptesAPIException, PanoptesObject, Talk
 )
 
 TALK_EXPORT_TYPES = (
     'talk_comments',
     'talk_tags',
 )
+
+talk = Talk()
 
 
 class Project(PanoptesObject):
@@ -37,13 +39,6 @@ class Project(PanoptesObject):
         wait=False,
         wait_timeout=60
     ):
-        if export_type in TALK_EXPORT_TYPES:
-            return self._get_talk_export(
-                export_type,
-                generate,
-                wait,
-                wait_timeout
-            )
 
         if generate:
             self.generate_export(export_type)
@@ -53,15 +48,14 @@ class Project(PanoptesObject):
         else:
             export = self.describe_export(export_type)
 
-        return requests.get(
-            export['media'][0]['src'],
-            stream=True
-        )
+        if export_type in TALK_EXPORT_TYPES:
+            media_url = export['data_requests'][0]['url']
+        else:
+            media_url = export['media'][0]['src']
+
+        return requests.get(media_url, stream=True)
 
     def wait_export(self, export_type, timeout=60):
-        if export_type in TALK_EXPORT_TYPES:
-            return self._wait_talk_export(export_type, timeout)
-
         success = False
         end_time = datetime.datetime.now() + datetime.timedelta(
             seconds=timeout
@@ -69,11 +63,16 @@ class Project(PanoptesObject):
 
         while datetime.datetime.now() < end_time:
             export_description = self.describe_export(export_type)
-            if export_description:
+
+            if export_type in TALK_EXPORT_TYPES:
+                export_metadata = export_description['data_requests'][0]
+            else:
                 export_metadata = export_description['media'][0]['metadata']
-                if export_metadata.get('state', '') == 'ready':
-                    success = True
-                    break
+
+            if export_metadata.get('state', '') in ('ready', 'finished'):
+                success = True
+                break
+
             time.sleep(2)
 
         if not success:
@@ -88,7 +87,10 @@ class Project(PanoptesObject):
 
     def generate_export(self, export_type):
         if export_type in TALK_EXPORT_TYPES:
-            return self._generate_talk_export(export_type)
+            return talk.post_data_request(
+                'project-{}'.format(self.id),
+                export_type.replace('talk_', '')
+            )
 
         return Project.post(
             self._export_path(export_type),
@@ -97,29 +99,14 @@ class Project(PanoptesObject):
 
     def describe_export(self, export_type):
         if export_type in TALK_EXPORT_TYPES:
-            return self._describe_talk_export(export_type)
+            return talk.get_data_request(
+                'project-{}'.format(self.id),
+                export_type.replace('talk_', '')
+            )[0]
 
         return Project.get(self._export_path(export_type))[0]
 
-    def _get_talk_export(
-        self,
-        export_type,
-        generate,
-        wait,
-        wait_timeout
-    ):
-        raise NotImplementedError('Talk exports are not yet supported')
-
-    def _wait_talk_export(self, export_type, timeout):
-        raise NotImplementedError('Talk exports are not yet supported')
-
-    def _generate_talk_export(self, export_type):
-        raise NotImplementedError('Talk exports are not yet supported')
-
-    def _describe_talk_export(self, export_type):
-        raise NotImplementedError('Talk exports are not yet supported')
-
     def _export_path(self, export_type):
-        return '{}/{}_export'.format(export_type, self.id)
+        return '{}/{}_export'.format(self.id, export_type)
 
 LinkResolver.register(Project)
