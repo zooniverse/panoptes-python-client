@@ -83,7 +83,8 @@ class Panoptes(object):
         params={},
         headers={},
         json={},
-        etag=None
+        etag=None,
+        endpoint=None
     ):
         _headers = self._http_headers['default'].copy()
         _headers.update(self._http_headers[method])
@@ -102,7 +103,11 @@ class Panoptes(object):
                 'If-Match': etag,
             })
 
-        url = self.endpoint + '/api' + path
+        if endpoint:
+            url = endpoint + '/' + path
+        else:
+            url = self.endpoint + '/api' + path
+
         response = self.session.request(
             method,
             url,
@@ -125,9 +130,19 @@ class Panoptes(object):
         params={},
         headers={},
         json={},
-        etag=None
+        etag=None,
+        endpoint=None
     ):
-        response = self.http_request(method, path, params, headers, json, etag)
+        response = self.http_request(
+            method,
+            path,
+            params,
+            headers,
+            json,
+            etag,
+            endpoint
+        )
+
         if (
             response.status_code == 204 or
             int(response.headers.get('Content-Length', -1)) == 0 or
@@ -142,59 +157,142 @@ class Panoptes(object):
                         json_response['errors']
                        )
                 ))
+            elif 'error' in json_response:
+                raise PanoptesAPIException(json_response['error'])
+
         return (json_response, response.headers.get('ETag'))
 
-    def get_request(self, path, params={}, headers={}):
-        return self.http_request('GET', path, params, headers)
+    def get_request(self, path, params={}, headers={}, endpoint=None):
+        return self.http_request(
+            'GET',
+            path,
+            params=params,
+            headers=headers,
+            endpoint=endpoint
+        )
 
-    def get(self, path, params={}, headers={}):
-        return self.json_request('GET', path, params, headers)
+    def get(self, path, params={}, headers={}, endpoint=None):
+        return self.json_request(
+            'GET',
+            path,
+            params=params,
+            headers=headers,
+            endpoint=endpoint
+        )
 
-    def put_request(self, path, params={}, headers={}, json={}, etag=None):
+    def put_request(
+        self,
+        path,
+        params={},
+        headers={},
+        json={},
+        etag=None,
+        endpoint=None
+    ):
         return self.http_request(
             'PUT',
             path,
-            params,
-            headers,
+            params=params,
+            headers=headers,
             json=json,
-            etag=etag
+            etag=etag,
+            endpoint=None
         )
 
-    def put(self, path, params={}, headers={}, json={}, etag=None):
+    def put(
+        self,
+        path,
+        params={},
+        headers={},
+        json={},
+        etag=None,
+        endpoint=None
+    ):
         return self.json_request(
             'PUT',
             path,
-            params,
-            headers,
+            params=params,
+            headers=headers,
             json=json,
-            etag=etag
+            etag=etag,
+            endpoint=endpoint
         )
 
-    def post_request(self, path, params={}, headers={}, json={}, etag=None):
+    def post_request(
+        self,
+        path,
+        params={},
+        headers={},
+        json={},
+        etag=None,
+        endpoint=None
+    ):
         return self.http_request(
             'post',
             path,
             params=params,
             headers=headers,
             json=json,
-            etag=etag
+            etag=etag,
+            endpoint=endpoint
         )
 
-    def post(self, path, params={}, headers={}, json={}, etag=None):
-        return self.json_request('POST', path, params, headers, json, etag)
+    def post(
+        self,
+        path,
+        params={},
+        headers={},
+        json={},
+        etag=None,
+        endpoint=None
+    ):
+        return self.json_request(
+            'POST',
+            path,
+            params=params,
+            headers=headers,
+            json=json,
+            etag=etag,
+            endpoint=endpoint
+        )
 
-    def delete_request(self, path, params={}, headers={}, json={}, etag=None):
+    def delete_request(
+        self,
+        path,
+        params={},
+        headers={},
+        json={},
+        etag=None,
+        endpoint=None
+    ):
         return self.http_request(
             'delete',
             path,
             params=params,
             headers=headers,
             json=json,
-            etag=etag
+            etag=etag,
+            endpoint=None
         )
 
-    def delete(self, path, params={}, headers={}, json={}, etag=None):
-        return self.json_request('DELETE', path, params, headers, json, etag)
+    def delete(
+        self,
+        path,
+        params={},
+        headers={},
+        json={},
+        etag=None,
+        endpoint=None
+    ):
+        return self.json_request(
+            'DELETE',
+            path,
+            params=params,
+            headers=headers,
+            json=json,
+            etag=etag,
+            endpoint=endpoint
+        )
 
     def login(self, username=None, password=None):
         if not username:
@@ -510,3 +608,44 @@ class PanoptesAPIException(Exception):
 
 class ReadOnlyAttributeException(Exception):
     pass
+
+
+class Talk(object):
+    def __init__(self, endpoint='https://talk.zooniverse.org/'):
+        self.endpoint = endpoint
+
+    def get(self, *args, **kwargs):
+        kwargs['endpoint'] = self.endpoint
+        return Panoptes.client().get(*args, **kwargs)
+
+    def post(self, *args, **kwargs):
+        kwargs['endpoint'] = self.endpoint
+        return Panoptes.client().post(*args, **kwargs)
+
+    def put(self, *args, **kwargs):
+        kwargs['endpoint'] = self.endpoint
+        return Panoptes.client().put(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        kwargs['endpoint'] = self.endpoint
+        return Panoptes.client().delete(*args, **kwargs)
+
+    def get_data_request(self, section, kind):
+        return self.get(
+            'data_requests',
+            params={
+                'section': section,
+                'kind': kind,
+            }
+        )
+
+    def post_data_request(self, section, kind):
+        return self.post(
+            'data_requests',
+            json={
+                'data_requests': {
+                    'section': section,
+                    'kind': kind,
+                }
+            }
+        )
