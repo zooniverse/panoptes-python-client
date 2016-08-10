@@ -9,7 +9,7 @@ class Workflow(PanoptesObject):
     _edit_attributes = []
 
     def retire_subjects(self, subjects, reason='other'):
-        if type(subjects) not in (list, tuple):
+        if type(subjects) not in (list, tuple, set):
             subjects = [ subjects ]
         subjects = [ s.id if isinstance(s, Subject) else s for s in subjects ]
 
@@ -42,7 +42,7 @@ class Workflow(PanoptesObject):
         )
 
     def _build_subject_set_list(self, subject_sets):
-        if not type(subject_sets) in (tuple, list):
+        if not type(subject_sets) in (tuple, list, set):
             subject_sets = [subject_sets]
 
         _subject_sets = []
