@@ -488,7 +488,12 @@ class PanoptesObject(object):
         for key in attributes:
             if type(key) == dict:
                 for subkey, subattributes in key.items():
-                    if subkey == 'links' and hasattr(self, 'links'):
+                    if (
+                        subkey == 'links' and
+                        hasattr(self, 'links') and
+                        modified_attributes and
+                        'links' in modified_attributes
+                    ):
                         out.append(
                             (subkey, self.links._savable_dict(subattributes))
                         )
