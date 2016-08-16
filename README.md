@@ -73,3 +73,15 @@ subject.save()
 # SubjectSet.add() can take a list of Subjects, or just one.
 subject_set.add(subject)
 ```
+
+Project owners with client credentials can update their users' project settings (workflow_id only):
+
+```python
+from panoptes_client import Panoptes, User, Subject, ProjectPreferences
+Panoptes.connect(client_id="example",client_secret="example")
+user = User.find("1234")
+project = Project.find("1234")
+project_prefs = ProjectPreferences.find(user=user,project=project)
+settings = {"workflow_id": "1234"}
+pp.update_settings(settings)
+```

@@ -7,6 +7,7 @@ class ProjectPreferences(PanoptesObject):
     _link_slug = 'project_preferences'
     _edit_attributes = (
         'preferences',
+        'settings',
     )
 
     @classmethod
@@ -30,5 +31,21 @@ class ProjectPreferences(PanoptesObject):
                 raise TypeError
             id = cls.where(user_id=_user_id, project_id=_project_id).next().id
         return super(ProjectPreferences, cls).find(id)
+
+    def update_settings(self, settings):
+        if (isinstance(settings, dict)):
+            self.put(
+                'update_settings',
+                json={
+                    'project_preferences': {
+                        'user_id': self.links.raw['user'],
+                        'project_id': self.links.raw['project'],
+                        'settings': settings,
+                    }
+                }
+            )
+            self.reload()
+        else:
+            raise TypeError
 
 LinkResolver.register(ProjectPreferences)
