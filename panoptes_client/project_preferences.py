@@ -32,15 +32,20 @@ class ProjectPreferences(PanoptesObject):
             id = cls.where(user_id=_user_id, project_id=_project_id).next().id
         return super(ProjectPreferences, cls).find(id)
 
-    def update_settings(self, settings):
+    def save_settings(self, settings, update=True):
         if (isinstance(settings, dict)):
+            if update:
+                to_update = self.settings
+                to_update.update(settings)
+            else:
+                to_update = settings
             self.put(
                 'update_settings',
                 json={
                     'project_preferences': {
                         'user_id': self.links.raw['user'],
                         'project_id': self.links.raw['project'],
-                        'settings': settings,
+                        'settings': to_update,
                     }
                 }
             )
