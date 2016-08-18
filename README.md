@@ -83,5 +83,5 @@ user = User.find("1234")
 project = Project.find("1234")
 project_prefs = ProjectPreferences.find(user=user,project=project)
 settings = {"workflow_id": "1234"}
-pp.update_settings(settings)
+pp.save_settings(settings)
 ```
