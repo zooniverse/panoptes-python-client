@@ -1,7 +1,6 @@
 import requests
 import os
 
-
 from datetime import datetime, timedelta
 
 class Panoptes(object):
@@ -404,6 +403,15 @@ class PanoptesObject(object):
     @classmethod
     def post(cls, path, params={}, headers={}, json={}):
         return Panoptes.client().post(
+            cls.url(path),
+            params,
+            headers,
+            json
+        )
+
+    @classmethod
+    def put(cls, path, params={}, headers={}, json={}):
+        return Panoptes.client().put(
             cls.url(path),
             params,
             headers,
