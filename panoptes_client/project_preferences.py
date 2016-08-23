@@ -39,7 +39,7 @@ class ProjectPreferences(PanoptesObject):
                 to_update.update(settings)
             else:
                 to_update = settings
-            self.put(
+            self.post(
                 'update_settings',
                 json={
                     'project_preferences': {
