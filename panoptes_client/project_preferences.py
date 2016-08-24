@@ -32,24 +32,34 @@ class ProjectPreferences(PanoptesObject):
             id = cls.where(user_id=_user_id, project_id=_project_id).next().id
         return super(ProjectPreferences, cls).find(id)
 
-    def save_settings(self, settings, update=True):
+    @classmethod
+    def save_settings(cls, project=None, user=None, settings=None):
         if (isinstance(settings, dict)):
-            if update:
-                to_update = self.settings
-                to_update.update(settings)
+            _to_update = settings
+            if (
+                isinstance(user, User)
+                and isinstance(project, Project)
+            ):
+                _user_id = user.id
+                _project_id = project.id
+            elif (
+                isinstance(user, (int, str, unicode,))
+                and isinstance(project, (int, str, unicode,))
+            ):
+                _user_id = user
+                _project_id = project
             else:
-                to_update = settings
-            self.post(
+                raise TypeError
+            cls.post(
                 'update_settings',
                 json={
                     'project_preferences': {
-                        'user_id': self.links.raw['user'],
-                        'project_id': self.links.raw['project'],
-                        'settings': to_update,
+                        'user_id': _user_id,
+                        'project_id': _project_id,
+                        'settings': _to_update,
                     }
                 }
             )
-            self.reload()
         else:
             raise TypeError
 
