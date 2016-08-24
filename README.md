@@ -81,7 +81,9 @@ from panoptes_client import Panoptes, User, Subject, ProjectPreferences
 Panoptes.connect(client_id="example",client_secret="example")
 user = User.find("1234")
 project = Project.find("1234")
-project_prefs = ProjectPreferences.find(user=user,project=project)
-settings = {"workflow_id": "1234"}
-pp.save_settings(settings)
+new_settings = {"workflow_id": "1234"}
+ProjectPreferences.save_settings(project=project, user=user, settings=new_settings)
 ```
+ Alternatively, the project id and user id can be passed in directly if they are already known:
+
+ `ProjectPreferences.save_settings(project=project_id, user=user_id, settings=new_settings)`
