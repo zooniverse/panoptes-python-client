@@ -1,3 +1,12 @@
+## 0.4 (2016-09-02)
+
+- New: Support for all data exports
+- New: Project owners can update `ProjectPreference` settings
+- New: Removed `subject_sets` method and `SetMemberSubject` (now in links)
+- New: Add set to iterable types
+- Fix: Only save links if it's been modified
+- Fix: Specify minimum requests version
+
 ## 0.3 (2016-08-04)
 
 - New: Add User model
