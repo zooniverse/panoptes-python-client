@@ -339,7 +339,7 @@ class Panoptes(object):
         return self.session.get(url, headers=headers).headers['x-csrf-token']
 
     def get_bearer_token(self):
-        if not self.bearer_token or self.bearer_expires > datetime.now():
+        if not self.bearer_token or self.bearer_expires < datetime.now():
             grant_type = 'password'
 
             if self.client_secret:
