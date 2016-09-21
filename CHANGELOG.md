@@ -1,3 +1,6 @@
+## 0.4.1 (2016-09-21)
+- Fix: Bearer token checking only occurs when necessary
+
 ## 0.4 (2016-09-02)
 
 - New: Support for all data exports
