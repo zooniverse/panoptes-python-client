@@ -30,7 +30,12 @@ class Project(PanoptesObject):
     def find(cls, id='', slug=None):
         if not id and not slug:
             return None
-        return cls.where(id=id, slug=slug).next()
+        try:
+            return cls.where(id=id, slug=slug).next()
+        except StopIteration:
+            raise PanoptesAPIException(
+                "Could not find project with slug='{}'".format(slug)
+            )
 
     def get_export(
         self,
