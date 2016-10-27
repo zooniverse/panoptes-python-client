@@ -1,6 +1,7 @@
 import unittest
 
 from panoptes_client import Project
+from panoptes_client.panoptes import PanoptesAPIException
 
 
 class TestProject(unittest.TestCase):
@@ -17,5 +18,5 @@ class TestProject(unittest.TestCase):
         self.assertEqual(p, None)
 
     def test_find_unknown_slug(self):
-        with self.assertRaises(StopIteration):
+        with self.assertRaises(PanoptesAPIException):
             Project.find(slug='invalid_slug')
