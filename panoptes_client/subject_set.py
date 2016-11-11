@@ -35,13 +35,17 @@ class SubjectSet(PanoptesObject):
                 json={'subjects': _subjects_batch}
             )
 
-    def remove(self, subjects):
+    def remove(self, subjects, batch_size=100):
         _subjects = self._build_subject_list(subjects)
-        _subjects_ids = ",".join(_subjects)
 
-        self.delete(
-            '{}/links/subjects/{}'.format(self.id, _subjects_ids)
-        )
+        for _subjects_batch in [
+            _subjects[i:i+batch_size]
+            for i in xrange(0, len(_subjects), batch_size)
+        ]:
+            _subjects_ids = ",".join(_subjects_batch)
+            self.delete(
+                '{}/links/subjects/{}'.format(self.id, _subjects_ids)
+            )
 
     def _build_subject_list(self, subjects):
         if not type(subjects) in (tuple, list, set):
