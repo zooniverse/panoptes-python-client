@@ -1,6 +1,7 @@
 import imghdr
 import requests
 import time
+import gzip
 
 from panoptes_client.panoptes import PanoptesObject, LinkResolver
 
@@ -41,15 +42,18 @@ class Subject(PanoptesObject):
                 for image_type, url in location.items():
                     for attempt in range(UPLOAD_RETRY_LIMIT):
                         try:
-                            upload_response = requests.put(
-                                url,
-                                headers={
-                                    'Content-Type': image_type,
-                                },
-                                data=image_file.read(),
-                            )
-                            upload_response.raise_for_status()
-                            break
+                            with NamedTemporaryFile(delete=True) as gzfile:
+                                gzip.Gzipfile(fileobj=gzip_file,mode="wb").write(image_file.read())
+                                upload_response = requests.put(
+                                    url,
+                                    headers={
+                                        'Content-Type': image_type,
+                                        'Transfer-Encoding': 'gzip'
+                                    },
+                                    data=gzip_file.read(),
+                                )
+                                upload_response.raise_for_status()
+                                break
                         except requests.exceptions.RequestException:
                             if (attempt + 1) >= UPLOAD_RETRY_LIMIT:
                                 raise
