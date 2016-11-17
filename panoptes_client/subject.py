@@ -39,6 +39,7 @@ class Subject(PanoptesObject):
 
             try:
                 for image_type, url in location.items():
+                    image_data = image_file.read()
                     for attempt in range(UPLOAD_RETRY_LIMIT):
                         try:
                             upload_response = requests.put(
@@ -46,7 +47,7 @@ class Subject(PanoptesObject):
                                 headers={
                                     'Content-Type': image_type,
                                 },
-                                data=image_file.read(),
+                                data=image_data,
                             )
                             upload_response.raise_for_status()
                             break
