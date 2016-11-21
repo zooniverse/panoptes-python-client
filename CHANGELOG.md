@@ -1,3 +1,8 @@
+## 0.5 (2016-11-21)
+- New: Send SubjectSet.remove() requests in batches
+- Fix: Raise PanoptesAPIException instead of StopIteration in Project.find()
+- Fix: Don't read the image file on every upload attempt
+
 ## 0.4.1 (2016-09-21)
 - Fix: Bearer token checking only occurs when necessary
 
