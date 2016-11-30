@@ -74,6 +74,14 @@ subject.save()
 subject_set.add(subject)
 ```
 
+List the subjects in a subject_set:
+```python
+subject_set=SubjectSet.find(1234)
+
+for subject in subject_set.subjects():
+    print("%s," % (subject.id))
+```
+
 Project owners with client credentials can update their users' project settings (workflow_id only):
 
 ```python
