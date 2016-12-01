@@ -1,5 +1,6 @@
 from panoptes_client.panoptes import PanoptesObject, LinkResolver
 from panoptes_client.subject import Subject
+from panoptes_client.set_member_subject import SetMemberSubject
 
 
 class SubjectSet(PanoptesObject):
@@ -19,6 +20,9 @@ class SubjectSet(PanoptesObject):
 
     def subjects(self):
         return Subject.where(subject_set_id=self.id)
+
+    def set_member_subjects(self):
+        return SetMemberSubject.where(subject_set_id=self.id)
 
     # Add or remove subject links.
     # Takes a tuple or list of Subject objects
