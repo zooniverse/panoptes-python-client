@@ -48,7 +48,8 @@ class Panoptes(object):
         client_secret=None,
         redirect_url=None,
         username=None,
-        password=None
+        password=None,
+        admin=False
     ):
         Panoptes._client = self
 
@@ -72,6 +73,7 @@ class Panoptes(object):
 
         self.logged_in = False
         self.bearer_token = None
+        self.admin = admin
 
         self.session = requests.session()
 
@@ -106,6 +108,10 @@ class Panoptes(object):
             url = endpoint + '/' + path
         else:
             url = self.endpoint + '/api' + path
+
+        # Setting the parameter at all (even False) turns on admin mode
+        if self.admin:
+            params.update({'admin': self.admin})
 
         response = self.session.request(
             method,
