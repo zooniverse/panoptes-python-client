@@ -442,7 +442,12 @@ class PanoptesObject(object):
     def find(cls, _id):
         if not _id:
             return None
-        return cls.where(id=_id).next()
+        try:
+            return cls.where(id=_id).next()
+        except StopIteration:
+            raise PanoptesAPIException(
+                "Could not find {} with id='{}'".format(cls.__name__, _id)
+            )
 
     @classmethod
     def paginated_results(cls, response, etag):
