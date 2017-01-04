@@ -550,6 +550,9 @@ class PanoptesObject(object):
 
 class ResultPaginator(object):
     def __init__(self, object_class, response, etag):
+        if response is None:
+            response = {}
+
         self.object_class = object_class
         self.set_page(response)
         self.etag = etag
