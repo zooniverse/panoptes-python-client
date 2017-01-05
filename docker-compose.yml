@@ -1,0 +1,12 @@
+version: '2'
+
+services:
+  dev:
+    build:
+      context:  ./
+      dockerfile: Dockerfile.dev
+
+  stable:
+    build:
+      context: ./
+      dockerfile: Dockerfile.stable

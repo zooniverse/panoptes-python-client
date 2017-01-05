@@ -1,0 +1,7 @@
+FROM python:2.7
+
+WORKDIR /usr/src/panoptes-python-client
+
+COPY . /usr/src/panoptes-python-client
+
+RUN pip install .
