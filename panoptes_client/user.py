@@ -7,3 +7,4 @@ class User(PanoptesObject):
     _edit_attributes = ()
 
 LinkResolver.register(User)
+LinkResolver.register(User, 'owner')

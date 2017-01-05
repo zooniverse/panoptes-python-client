@@ -605,6 +605,8 @@ class LinkResolver(object):
         linked_object = self.raw[name]
         if type(linked_object) == list:
             return map(lambda o: object_class.find(o), linked_object)
+        if type(linked_object) == dict and 'id' in linked_object:
+            return object_class.find(linked_object['id'])
         else:
             return object_class.find(linked_object)
 
