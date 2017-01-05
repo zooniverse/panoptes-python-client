@@ -3,8 +3,13 @@ import requests
 import time
 
 from panoptes_client.panoptes import (
-    LinkResolver, PanoptesAPIException, PanoptesObject, Talk
+    LinkResolver,
+    PanoptesAPIException,
+    PanoptesObject,
+    Talk
 )
+
+from panoptes_client.project_role import ProjectRole
 
 TALK_EXPORT_TYPES = (
     'talk_comments',
@@ -113,5 +118,12 @@ class Project(PanoptesObject):
 
     def _export_path(self, export_type):
         return '{}/{}_export'.format(self.id, export_type)
+
+    def collaborators(self, *roles):
+        return [
+            r.links.owner for r in ProjectRole.where(project_id=self.id)
+            if len(roles) == 0 or len(set(roles) & set(r.roles)) > 0
+        ]
+
 
 LinkResolver.register(Project)
