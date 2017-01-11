@@ -1,3 +1,10 @@
+## 0.6 (2017-01-11)
+- New: Add Project.collaborators() and ProjectRole
+- New: Add admin option
+- Fix: Raise PanoptesAPIException instead of StopIteration
+- Fix: Make ResultPaginator handle None responses
+- Fix: Raise PanoptesAPIException instead of StopIteration in PanoptesObject.where()
+
 ## 0.5 (2016-11-21)
 - New: Send SubjectSet.remove() requests in batches
 - Fix: Raise PanoptesAPIException instead of StopIteration in Project.find()
