@@ -43,7 +43,7 @@ class Panoptes(object):
 
     def __init__(
         self,
-        endpoint='https://panoptes.zooniverse.org',
+        endpoint=None,
         client_id=None,
         client_secret=None,
         redirect_url=None,
@@ -53,7 +53,10 @@ class Panoptes(object):
     ):
         Panoptes._client = self
 
-        self.endpoint = endpoint or os.environ.get('PANOPTES_ENDPOINT')
+        self.endpoint = endpoint or os.environ.get(
+            'PANOPTES_ENDPOINT',
+            'https://panoptes.zooniverse.org'
+        )
         self.username = username or os.environ.get('PANOPTES_USERNAME')
         self.password = password or os.environ.get('PANOPTES_PASSWORD')
         self.redirect_url = \
