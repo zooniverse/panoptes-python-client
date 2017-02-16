@@ -50,7 +50,7 @@ class ProjectPreferences(PanoptesObject):
                 _project_id = project
             else:
                 raise TypeError
-            cls.post(
+            cls.http_post(
                 'update_settings',
                 json={
                     'project_preferences': {

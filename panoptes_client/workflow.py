@@ -13,7 +13,7 @@ class Workflow(PanoptesObject):
             subjects = [ subjects ]
         subjects = [ s.id if isinstance(s, Subject) else s for s in subjects ]
 
-        return Workflow.post(
+        return Workflow.http_post(
             '{}/retired_subjects'.format(self.id),
             json={
                 'subject_ids': subjects,
@@ -28,7 +28,7 @@ class Workflow(PanoptesObject):
             _subject_sets[i:i+batch_size]
             for i in xrange(0, len(_subject_sets), batch_size)
         ]:
-            self.post(
+            self.http_post(
                 '{}/links/subject_sets'.format(self.id),
                 json={'subject_sets': _subject_sets_batch}
             )
@@ -37,7 +37,7 @@ class Workflow(PanoptesObject):
         _subject_sets = self._build_subject_set_list(subject_sets)
         _subject_set_ids = ",".join(_subject_sets)
 
-        self.delete(
+        self.http_delete(
             '{}/links/subject_sets/{}'.format(self.id, _subject_set_ids)
         )
 

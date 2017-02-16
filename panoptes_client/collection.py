@@ -24,7 +24,7 @@ class Collection(PanoptesObject):
             _subjects[i:i+batch_size]
             for i in xrange(0, len(_subjects), batch_size)
         ]:
-            self.post(
+            self.http_post(
                 '{}/links/subjects'.format(self.id),
                 json={'subjects': _subjects_batch}
             )
@@ -37,7 +37,7 @@ class Collection(PanoptesObject):
             for i in xrange(0, len(_subjects), batch_size)
         ]:
             _subjects_ids = ",".join(_subjects_batch)
-            self.delete(
+            self.http_delete(
                 '{}/links/subjects/{}'.format(self.id, _subjects_ids)
             )
 

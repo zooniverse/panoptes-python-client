@@ -11,6 +11,6 @@ class Classification(PanoptesObject):
         scope = kwargs.pop('scope', None)
         if not scope:
             return super(Classification, cls).where(**kwargs)
-        return cls.paginated_results(*cls.get(scope, params=kwargs))
+        return cls.paginated_results(*cls.http_get(scope, params=kwargs))
 
 LinkResolver.register(Classification)
