@@ -402,7 +402,7 @@ class PanoptesObject(object):
         return '/'.join(['', cls._api_slug] + [ unicode(a) for a in args if a ])
 
     @classmethod
-    def get(cls, path, params={}, headers={}):
+    def http_get(cls, path, params={}, headers={}):
         return Panoptes.client().get(
             cls.url(path),
             params,
@@ -410,7 +410,7 @@ class PanoptesObject(object):
         )
 
     @classmethod
-    def post(cls, path, params={}, headers={}, json={}):
+    def http_post(cls, path, params={}, headers={}, json={}):
         return Panoptes.client().post(
             cls.url(path),
             params,
@@ -419,7 +419,7 @@ class PanoptesObject(object):
         )
 
     @classmethod
-    def put(cls, path, params={}, headers={}, json={}):
+    def http_put(cls, path, params={}, headers={}, json={}):
         return Panoptes.client().put(
             cls.url(path),
             params,
@@ -428,7 +428,7 @@ class PanoptesObject(object):
         )
 
     @classmethod
-    def delete(cls, path, params={}, headers={}, json={}):
+    def http_delete(cls, path, params={}, headers={}, json={}):
         return Panoptes.client().delete(
             cls.url(path),
             params,
@@ -439,7 +439,7 @@ class PanoptesObject(object):
     @classmethod
     def where(cls, **kwargs):
         _id = kwargs.pop('id', '')
-        return cls.paginated_results(*cls.get(_id, params=kwargs))
+        return cls.paginated_results(*cls.http_get(_id, params=kwargs))
 
     @classmethod
     def find(cls, _id):
@@ -646,24 +646,24 @@ class Talk(object):
     def __init__(self, endpoint='https://talk.zooniverse.org/'):
         self.endpoint = endpoint
 
-    def get(self, *args, **kwargs):
+    def http_get(self, *args, **kwargs):
         kwargs['endpoint'] = self.endpoint
         return Panoptes.client().get(*args, **kwargs)
 
-    def post(self, *args, **kwargs):
+    def http_post(self, *args, **kwargs):
         kwargs['endpoint'] = self.endpoint
         return Panoptes.client().post(*args, **kwargs)
 
-    def put(self, *args, **kwargs):
+    def http_put(self, *args, **kwargs):
         kwargs['endpoint'] = self.endpoint
         return Panoptes.client().put(*args, **kwargs)
 
-    def delete(self, *args, **kwargs):
+    def http_delete(self, *args, **kwargs):
         kwargs['endpoint'] = self.endpoint
         return Panoptes.client().delete(*args, **kwargs)
 
     def get_data_request(self, section, kind):
-        return self.get(
+        return self.http_get(
             'data_requests',
             params={
                 'section': section,
@@ -672,7 +672,7 @@ class Talk(object):
         )
 
     def post_data_request(self, section, kind):
-        return self.post(
+        return self.http_post(
             'data_requests',
             json={
                 'data_requests': {

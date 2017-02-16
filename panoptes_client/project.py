@@ -102,7 +102,7 @@ class Project(PanoptesObject):
                 export_type.replace('talk_', '')
             )
 
-        return Project.post(
+        return Project.http_post(
             self._export_path(export_type),
             json = {"media":{"content_type":"text/csv"}}
         )[0]
@@ -114,7 +114,7 @@ class Project(PanoptesObject):
                 export_type.replace('talk_', '')
             )[0]
 
-        return Project.get(self._export_path(export_type))[0]
+        return Project.http_get(self._export_path(export_type))[0]
 
     def _export_path(self, export_type):
         return '{}/{}_export'.format(self.id, export_type)
