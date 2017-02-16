@@ -6,7 +6,12 @@ from panoptes_client.subject_set import SubjectSet
 class Workflow(PanoptesObject):
     _api_slug = 'workflows'
     _link_slug = 'workflows'
-    _edit_attributes = []
+    _edit_attributes = (
+        'tasks',
+        'first_task',
+        'configuration',
+        'display_name'
+    )
 
     def retire_subjects(self, subjects, reason='other'):
         if type(subjects) not in (list, tuple, set):
