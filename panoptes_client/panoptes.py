@@ -439,7 +439,7 @@ class PanoptesObject(object):
     @classmethod
     def where(cls, **kwargs):
         _id = kwargs.pop('id', '')
-        return cls.paginated_results(*cls.http_get(_id, params=kwargs))
+        return cls.paginated_results(*cls.http_get(_id, params=kwargs), **kwargs)
 
     @classmethod
     def find(cls, _id):
@@ -453,8 +453,10 @@ class PanoptesObject(object):
             )
 
     @classmethod
-    def paginated_results(cls, response, etag):
-        return ResultPaginator(cls, response, etag)
+    def paginated_results(cls, response, etag, **params):
+        _page_size = params.pop('page_size', '')
+        _page = params.pop('page', '')
+        return ResultPaginator(cls, response, etag, **params)
 
     def __init__(self, raw={}, etag=None):
         self.set_raw(raw, etag)
@@ -557,13 +559,14 @@ class PanoptesObject(object):
         )
 
 class ResultPaginator(object):
-    def __init__(self, object_class, response, etag):
+    def __init__(self, object_class, response, etag, **params):
         if response is None:
             response = {}
 
         self.object_class = object_class
         self.set_page(response)
         self.etag = etag
+        self.params = params
 
     def __iter__(self):
         return self
@@ -571,7 +574,7 @@ class ResultPaginator(object):
     def next(self):
         if self.object_index >= self.object_count:
             if self.next_href:
-                response, _ = Panoptes.client().get(self.next_href)
+                response, _ = Panoptes.client().get(self.next_href, params=self.params)
                 self.set_page(response)
             else:
                 raise StopIteration
