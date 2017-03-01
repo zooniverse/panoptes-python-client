@@ -78,6 +78,17 @@ List the subjects in a subject_set:
 ```python
 subject_set=SubjectSet.find(1234)
 
+# via SetMemberSubject link resource
+# Fast and returns the subject id string only
+for sms in subject_set.set_member_subjects():
+    print("%s," % (sms.subject_id()))
+
+# Not as fast but returns the linked subject resource
+for sms in subject_set.set_member_subjects():
+    print("%s," % (sms.links.subject))
+
+# via the SubjectSet : Subject links
+# Slow but returns the subject resource
 for subject in subject_set.subjects():
     print("%s," % (subject.id))
 ```
