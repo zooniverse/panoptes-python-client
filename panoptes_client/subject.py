@@ -3,6 +3,7 @@ import requests
 import time
 
 from panoptes_client.panoptes import PanoptesObject, LinkResolver
+from panoptes_client.utils import batchable
 
 UPLOAD_RETRY_LIMIT = 5
 RETRY_BACKOFF_INTERVAL = 5
