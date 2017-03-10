@@ -37,9 +37,6 @@ class Collection(PanoptesObject):
         )
 
     def _build_subject_list(self, subjects):
-        if not type(subjects) in (tuple, list, set):
-            subjects = [subjects]
-
         _subjects = []
         for subject in subjects:
             if not (

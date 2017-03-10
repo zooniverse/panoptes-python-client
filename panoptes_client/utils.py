@@ -1,10 +1,27 @@
 import functools
 
 
+ITERABLE_TYPES = (
+    list,
+    set,
+    tuple,
+)
+
+try:
+    from numpy import ndarray
+    ITERABLE_TYPES = ITERABLE_TYPES + (ndarray,)
+except ImportError:
+    pass
+
+
+def isiterable(v):
+    return isinstance(v, ITERABLE_TYPES)
+
+
 def batchable(func=None, batch_size=100):
     def do_batch(*args, **kwargs):
         _batch_size = kwargs.pop('batch_size', batch_size)
-        if type(args[0]) in (list, set, tuple):
+        if isiterable(args[0]):
             _self = None
             to_batch = args[0]
             args = args[1:]
@@ -12,6 +29,8 @@ def batchable(func=None, batch_size=100):
             _self = args[0]
             to_batch = args[1]
             args = args[2:]
+            if not isiterable(to_batch):
+                to_batch = [to_batch]
 
         for _batch in [
             to_batch[i:i+_batch_size]
