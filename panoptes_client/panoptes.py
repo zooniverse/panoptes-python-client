@@ -574,7 +574,7 @@ class ResultPaginator(object):
                 response, _ = Panoptes.client().get(self.next_href)
                 self.set_page(response)
             else:
-                raise StopIteration
+                raise StopIteration('{} has no more results'.format(self.object_class))
 
         i = self.object_index
         self.object_index += 1
