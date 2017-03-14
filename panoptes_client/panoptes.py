@@ -576,10 +576,10 @@ class ResultPaginator(object):
                 return self.next()
             else:
                 raise StopIteration
-        else:
-            i = self.object_index
-            self.object_index += 1
-            return self.object_class(self.object_list[i], etag=self.etag)
+
+        i = self.object_index
+        self.object_index += 1
+        return self.object_class(self.object_list[i], etag=self.etag)
 
     def set_page(self, response):
         self.meta = response.get('meta', {})
