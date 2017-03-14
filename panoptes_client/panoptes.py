@@ -573,12 +573,13 @@ class ResultPaginator(object):
             if self.object_count and self.next_href:
                 response, _ = Panoptes.client().get(self.next_href)
                 self.set_page(response)
+                return self.next()
             else:
                 raise StopIteration
-
-        i = self.object_index
-        self.object_index += 1
-        return self.object_class(self.object_list[i], etag=self.etag)
+        else:
+            i = self.object_index
+            self.object_index += 1
+            return self.object_class(self.object_list[i], etag=self.etag)
 
     def set_page(self, response):
         self.meta = response.get('meta', {})
