@@ -11,7 +11,8 @@ class Workflow(PanoptesObject):
         'tasks',
         'first_task',
         'configuration',
-        'display_name'
+        'display_name',
+        'active',
     )
 
     @batchable
