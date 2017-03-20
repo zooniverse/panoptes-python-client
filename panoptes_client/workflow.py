@@ -1,10 +1,11 @@
+from panoptes_client.exportable import Exportable
 from panoptes_client.panoptes import PanoptesObject, LinkResolver
 from panoptes_client.subject import Subject
 from panoptes_client.subject_set import SubjectSet
 from panoptes_client.utils import batchable
 
 
-class Workflow(PanoptesObject):
+class Workflow(PanoptesObject, Exportable):
     _api_slug = 'workflows'
     _link_slug = 'workflows'
     _edit_attributes = (
@@ -62,5 +63,6 @@ class Workflow(PanoptesObject):
             _subject_sets.append(_subject_set_id)
 
         return _subject_sets
+
 
 LinkResolver.register(Workflow)
