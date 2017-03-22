@@ -1,3 +1,12 @@
+## 0.7 (2017-03-22)
+- New: Add Collection
+- New: Allow editing of workflows
+- New: Add method to get User's avatar
+- New: Add support for iterating over numpy arrays
+- New: Add per-Workflow exports
+- Fix: setting endpoint in environment variable
+- Fix: Stop iterating if there are no objects in the current page
+
 ## 0.6 (2017-01-11)
 - New: Add Project.collaborators() and ProjectRole
 - New: Add admin option
