@@ -71,7 +71,13 @@ subject.metadata['image_id'] = 1234
 subject.metadata['image_title'] = 'My image'
 subject.save()
 
-# SubjectSet.add() can take a list of Subjects, or just one.
+# SubjectSet.add() can take a list of Subjects
+saved_subjects = []
+# add more subjects here but keep the batch size reasonable (e.g. 500)
+saved_subjects.append(subject)
+subject_set.add(saved_subjects)
+# or just one at a time, note adding one per call is much slower
+# than adding a batch of subjects per call.
 subject_set.add(subject)
 ```
 
