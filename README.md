@@ -70,8 +70,11 @@ subject.metadata['image_id'] = 1234
 subject.metadata['image_title'] = 'My image'
 subject.save()
 
-# SubjectSet.add() can take a list of Subjects, or just one.
-subject_set.add(subject)
+# SubjectSet.add() can take a list of Subjects
+subject_set.add([subject1, subject2, subject3])
+# or just one at a time (but this is slower than doing several together)
+subject_set.add(subject1)
+subject_set.add(subject2)
 ```
 
 List the subjects in a subject_set:
