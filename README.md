@@ -15,6 +15,7 @@ $ pip install git+git://github.com/zooniverse/panoptes-python-client.git
 ```
 
 ## Usage Examples
+See the [wiki](https://github.com/zooniverse/panoptes-python-client/wiki) for more examples.
 
 Print all project titles:
 
