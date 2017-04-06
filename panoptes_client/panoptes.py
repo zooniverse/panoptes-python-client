@@ -402,7 +402,7 @@ class Panoptes(object):
 class PanoptesObject(object):
     @classmethod
     def url(cls, *args):
-        return '/'.join(['', cls._api_slug] + [ str(a) for a in args if a ])
+        return '/'.join(['', cls._api_slug] + [str(a) for a in args if a])
 
     @classmethod
     def http_get(cls, path, params={}, headers={}):
