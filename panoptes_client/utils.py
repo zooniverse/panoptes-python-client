@@ -1,3 +1,5 @@
+from __future__ import absolute_import, division, print_function
+
 import functools
 
 
@@ -34,7 +36,7 @@ def batchable(func=None, batch_size=100):
 
         for _batch in [
             to_batch[i:i+_batch_size]
-            for i in xrange(0, len(to_batch), _batch_size)
+            for i in range(0, len(to_batch), _batch_size)
         ]:
             if _self is None:
                 func(_batch, *args, **kwargs)

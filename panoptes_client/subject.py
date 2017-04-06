@@ -1,9 +1,11 @@
+from __future__ import absolute_import, division, print_function
+from builtins import str
+
 import imghdr
 import requests
 import time
 
 from panoptes_client.panoptes import PanoptesObject, LinkResolver
-from panoptes_client.utils import batchable
 
 UPLOAD_RETRY_LIMIT = 5
 RETRY_BACKOFF_INTERVAL = 5
@@ -65,7 +67,7 @@ class Subject(PanoptesObject):
             self.locations.append(location)
             self._image_files.append(None)
             return
-        elif type(location) in (str, unicode):
+        elif type(location) is str:
             f = open(location, 'rb')
         else:
             f = location

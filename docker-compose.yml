@@ -10,3 +10,13 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile.stable
+
+  dev2:
+    build:
+      context:  ./
+      dockerfile: Dockerfile.dev2
+
+  stable2:
+    build:
+      context: ./
+      dockerfile: Dockerfile.stable2

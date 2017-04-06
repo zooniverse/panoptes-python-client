@@ -10,5 +10,6 @@ setup(
     include_package_data=True,
     install_requires=[
         'requests>=2.4.2',
+        'future',
     ],
 )
