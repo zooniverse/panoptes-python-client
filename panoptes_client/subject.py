@@ -1,5 +1,5 @@
 from __future__ import absolute_import, division, print_function
-from builtins import str
+from builtins import range, str
 
 import imghdr
 import requests
