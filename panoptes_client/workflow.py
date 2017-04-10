@@ -32,7 +32,7 @@ class Workflow(PanoptesObject, Exportable):
     def add_subject_sets(self, subject_sets):
         _subject_sets = self._build_subject_set_list(subject_sets)
 
-        self.post(
+        return Workflow.http_post(
             '{}/links/subject_sets'.format(self.id),
             json={'subject_sets': _subject_sets}
         )
