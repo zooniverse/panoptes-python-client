@@ -1,3 +1,6 @@
+from __future__ import absolute_import, division, print_function
+from builtins import str
+
 from panoptes_client.panoptes import PanoptesObject, LinkResolver
 from panoptes_client.project import Project
 from panoptes_client.user import User
@@ -22,8 +25,8 @@ class ProjectPreferences(PanoptesObject):
                 _user_id = user.id
                 _project_id = project.id
             elif (
-                isinstance(user, (int, str, unicode,))
-                and isinstance(project, (int, str, unicode,))
+                isinstance(user, (int, str,))
+                and isinstance(project, (int, str,))
             ):
                 _user_id = user
                 _project_id = project
@@ -43,8 +46,8 @@ class ProjectPreferences(PanoptesObject):
                 _user_id = user.id
                 _project_id = project.id
             elif (
-                isinstance(user, (int, str, unicode,))
-                and isinstance(project, (int, str, unicode,))
+                isinstance(user, (int, str,))
+                and isinstance(project, (int, str,))
             ):
                 _user_id = user
                 _project_id = project

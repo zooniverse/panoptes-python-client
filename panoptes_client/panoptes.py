@@ -1,3 +1,6 @@
+from __future__ import absolute_import, division, print_function
+from builtins import str
+
 import requests
 import os
 
@@ -399,7 +402,7 @@ class Panoptes(object):
 class PanoptesObject(object):
     @classmethod
     def url(cls, *args):
-        return '/'.join(['', cls._api_slug] + [ unicode(a) for a in args if a ])
+        return '/'.join(['', cls._api_slug] + [str(a) for a in args if a])
 
     @classmethod
     def http_get(cls, path, params={}, headers={}):
@@ -568,7 +571,7 @@ class ResultPaginator(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         if self.object_index >= self.object_count:
             if self.object_count and self.next_href:
                 response, _ = Panoptes.client().get(self.next_href)
@@ -580,6 +583,7 @@ class ResultPaginator(object):
         i = self.object_index
         self.object_index += 1
         return self.object_class(self.object_list[i], etag=self.etag)
+    next = __next__
 
     def set_page(self, response):
         self.meta = response.get('meta', {})

@@ -1,3 +1,6 @@
+from __future__ import absolute_import, division, print_function
+from builtins import str
+
 from panoptes_client.exportable import Exportable
 from panoptes_client.panoptes import PanoptesObject, LinkResolver
 from panoptes_client.subject import Subject
@@ -51,7 +54,7 @@ class Workflow(PanoptesObject, Exportable):
         for subject_set in subject_sets:
             if not (
                 isinstance(subject_set, SubjectSet)
-                or isinstance(subject_set, (int, str, unicode,))
+                or isinstance(subject_set, (int, str,))
             ):
                 raise TypeError
 
