@@ -75,6 +75,10 @@ subject_set.add([subject1, subject2, subject3])
 # or just one at a time (but this is slower than doing several together)
 subject_set.add(subject1)
 subject_set.add(subject2)
+
+# add subject set to 1st workflow in project
+workflow = project.links.workflows[0]
+workflow.add_subject_sets([subject_set]) 
 ```
 
 List the subjects in a subject_set:
