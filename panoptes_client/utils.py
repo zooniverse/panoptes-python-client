@@ -32,6 +32,9 @@ def batchable(func=None, batch_size=100):
             if not isiterable(to_batch):
                 to_batch = [to_batch]
 
+        if isinstance(to_batch, set):
+            to_batch = list(to_batch)
+
         for _batch in [
             to_batch[i:i+_batch_size]
             for i in xrange(0, len(to_batch), _batch_size)
