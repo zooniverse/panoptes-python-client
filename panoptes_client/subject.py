@@ -63,6 +63,17 @@ class Subject(PanoptesObject):
                 image_file.close()
 
     def add_location(self, location):
+        """
+        Add a media location to this subject.
+
+        - *location* can be a file object, a path to a local file, or a
+          dictionary containing mime types and URLs for remote media.
+
+        Examples:
+            subject.add_location(my_file)
+            subject.add_location('/data/image.jpg')
+            subject.add_location({'image/png': 'https://example.com/image.png'})
+        """
         if type(location) is dict:
             self.locations.append(location)
             self._image_files.append(None)
