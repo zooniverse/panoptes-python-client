@@ -23,6 +23,26 @@ class Subject(PanoptesObject):
         },
     )
 
+    @classmethod
+    @batchable
+    def batch_save(cls, subjects):
+        savable_dicts = []
+        for subject in subjects:
+            if not isinstance(subject, Subject):
+                raise TypeError("Can't save non-Subjects")
+            savable_dicts.append(subject._savable_dict())
+
+        if not subjects[0].id:
+            save_method = cls.post
+        else:
+            save_method = cls.put
+
+        responses, _ = save_method.post('', json={
+            cls._api_slug: savable_dicts
+        })
+        for subject, response in zip(subjects, responses[cls._api_slug]):
+            subject.upload_media(response['locations'])
+
     def __init__(self, raw={}, etag=None):
         super(Subject, self).__init__(raw, etag)
         if not self.locations:
@@ -33,8 +53,11 @@ class Subject(PanoptesObject):
 
     def save(self):
         response = super(Subject, self).save()
+        self.upload_media(response['subjects'][0]['locations'])
+
+    def upload_media(self, locations):
         for location, image_file in zip(
-            response['subjects'][0]['locations'],
+            locations,
             self._image_files
         ):
             if not image_file:
