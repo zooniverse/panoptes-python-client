@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function
 from builtins import str
 
 from panoptes_client.panoptes import PanoptesObject, LinkResolver
+from panoptes_client.set_member_subject import SetMemberSubject
 from panoptes_client.subject import Subject
 from panoptes_client.utils import batchable
 
@@ -22,7 +23,8 @@ class SubjectSet(PanoptesObject):
     )
 
     def subjects(self):
-        return Subject.where(subject_set_id=self.id)
+        for sms in SetMemberSubject.where(subject_set_id=self.id):
+            yield sms.links.subject
 
     # Add or remove subject links.
     # Takes a tuple or list of Subject objects
@@ -62,6 +64,7 @@ class SubjectSet(PanoptesObject):
             _subjects.append(_subject_id)
 
         return _subjects
+
 
 LinkResolver.register(SubjectSet)
 LinkResolver.register(SubjectSet, 'subject_set')

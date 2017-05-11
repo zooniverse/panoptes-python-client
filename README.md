@@ -78,13 +78,13 @@ subject_set.add(subject2)
 
 # add subject set to 1st workflow in project
 workflow = project.links.workflows[0]
-workflow.add_subject_sets([subject_set]) 
+workflow.add_subject_sets([subject_set])
 ```
 
 List the subjects in a subject_set:
+
 ```python
 subject_set=SubjectSet.find(1234)
-
 for subject in subject_set.subjects():
     print("%s," % (subject.id))
 ```
@@ -99,6 +99,6 @@ project = Project.find("1234")
 new_settings = {"workflow_id": "1234"}
 ProjectPreferences.save_settings(project=project, user=user, settings=new_settings)
 ```
- Alternatively, the project id and user id can be passed in directly if they are already known:
+Alternatively, the project id and user id can be passed in directly if they are already known:
 
  `ProjectPreferences.save_settings(project=project_id, user=user_id, settings=new_settings)`
