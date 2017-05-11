@@ -1,3 +1,8 @@
+## 0.8 (2017-05-11)
+- New: Python 3 compatibility
+- Fix: Fix passing sets to batchable methods
+- Fix: `AttributeError` in `Workflow.add_subject_sets()`
+
 ## 0.7 (2017-03-22)
 - New: Add Collection
 - New: Allow editing of workflows
