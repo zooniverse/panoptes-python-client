@@ -23,10 +23,8 @@ class SubjectSet(PanoptesObject):
     )
 
     def subjects(self):
-        return Subject.where(subject_set_id=self.id)
-
-    def set_member_subjects(self):
-        return SetMemberSubject.where(subject_set_id=self.id)
+        for sms in SetMemberSubject.where(subject_set_id=self.id):
+            yield sms.links.subject
 
     # Add or remove subject links.
     # Takes a tuple or list of Subject objects
@@ -66,6 +64,7 @@ class SubjectSet(PanoptesObject):
             _subjects.append(_subject_id)
 
         return _subjects
+
 
 LinkResolver.register(SubjectSet)
 LinkResolver.register(SubjectSet, 'subject_set')
