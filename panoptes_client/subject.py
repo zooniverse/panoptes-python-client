@@ -1,9 +1,10 @@
 from __future__ import absolute_import, division, print_function
 from builtins import range, str
 
-import imghdr
 import requests
 import time
+
+import magic
 
 from panoptes_client.panoptes import PanoptesObject, LinkResolver
 
@@ -29,38 +30,34 @@ class Subject(PanoptesObject):
             self.locations = []
         if not self.metadata:
             self.metadata = {}
-        self._image_files = []
+        self._media_files = []
 
     def save(self):
         response = super(Subject, self).save()
-        for location, image_file in zip(
+        for location, media_data in zip(
             response['subjects'][0]['locations'],
-            self._image_files
+            self._media_files
         ):
-            if not image_file:
+            if not media_data:
                 continue
 
-            try:
-                for image_type, url in location.items():
-                    image_data = image_file.read()
-                    for attempt in range(UPLOAD_RETRY_LIMIT):
-                        try:
-                            upload_response = requests.put(
-                                url,
-                                headers={
-                                    'Content-Type': image_type,
-                                },
-                                data=image_data,
-                            )
-                            upload_response.raise_for_status()
-                            break
-                        except requests.exceptions.RequestException:
-                            if (attempt + 1) >= UPLOAD_RETRY_LIMIT:
-                                raise
-                            else:
-                                time.sleep(attempt * RETRY_BACKOFF_INTERVAL)
-            finally:
-                image_file.close()
+            for media_type, url in location.items():
+                for attempt in range(UPLOAD_RETRY_LIMIT):
+                    try:
+                        upload_response = requests.put(
+                            url,
+                            headers={
+                                'Content-Type': media_type,
+                            },
+                            data=media_data,
+                        )
+                        upload_response.raise_for_status()
+                        break
+                    except requests.exceptions.RequestException:
+                        if (attempt + 1) >= UPLOAD_RETRY_LIMIT:
+                            raise
+                        else:
+                            time.sleep(attempt * RETRY_BACKOFF_INTERVAL)
 
     def add_location(self, location):
         """
@@ -76,18 +73,19 @@ class Subject(PanoptesObject):
         """
         if type(location) is dict:
             self.locations.append(location)
-            self._image_files.append(None)
+            self._media_files.append(None)
             return
         elif type(location) is str:
             f = open(location, 'rb')
         else:
             f = location
 
-        image_type = imghdr.what(f)
-        self.locations.append(
-            'image/{}'.format(image_type)
-        )
-        self._image_files.append(f)
+        try:
+            media_data = f.read()
+            self.locations.append(magic.from_buffer(media_data, mime=True))
+            self._media_files.append(media_data)
+        finally:
+            f.close()
 
 LinkResolver.register(Subject)
 LinkResolver.register(Subject, 'subject')

@@ -11,5 +11,6 @@ setup(
     install_requires=[
         'requests>=2.4.2',
         'future',
+        'python-magic',
     ],
 )
