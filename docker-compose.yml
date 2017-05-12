@@ -5,18 +5,30 @@ services:
     build:
       context:  ./
       dockerfile: Dockerfile.dev
+    volumes:
+      - ${HOME}/.panoptes/:/root/.panoptes/
+      - ${HOME}:${HOME}
 
   stable:
     build:
       context: ./
       dockerfile: Dockerfile.stable
+    volumes:
+      - ${HOME}/.panoptes/:/root/.panoptes/
+      - ${HOME}:${HOME}
 
   dev2:
     build:
       context:  ./
       dockerfile: Dockerfile.dev2
+    volumes:
+      - ${HOME}/.panoptes/:/root/.panoptes/
+      - ${HOME}:${HOME}
 
   stable2:
     build:
       context: ./
       dockerfile: Dockerfile.stable2
+    volumes:
+      - ${HOME}/.panoptes/:/root/.panoptes/
+      - ${HOME}:${HOME}
