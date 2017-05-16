@@ -58,7 +58,7 @@ class Panoptes(object):
 
         self.endpoint = endpoint or os.environ.get(
             'PANOPTES_ENDPOINT',
-            'https://panoptes.zooniverse.org'
+            'https://www.zooniverse.org'
         )
         self.username = username or os.environ.get('PANOPTES_USERNAME')
         self.password = password or os.environ.get('PANOPTES_PASSWORD')
