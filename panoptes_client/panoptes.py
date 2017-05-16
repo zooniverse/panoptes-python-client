@@ -89,7 +89,7 @@ class Panoptes(object):
         path,
         params={},
         headers={},
-        json={},
+        json=None,
         etag=None,
         endpoint=None
     ):
@@ -140,7 +140,7 @@ class Panoptes(object):
         path,
         params={},
         headers={},
-        json={},
+        json=None,
         etag=None,
         endpoint=None
     ):
@@ -196,7 +196,7 @@ class Panoptes(object):
         path,
         params={},
         headers={},
-        json={},
+        json=None,
         etag=None,
         endpoint=None
     ):
@@ -215,7 +215,7 @@ class Panoptes(object):
         path,
         params={},
         headers={},
-        json={},
+        json=None,
         etag=None,
         endpoint=None
     ):
@@ -234,7 +234,7 @@ class Panoptes(object):
         path,
         params={},
         headers={},
-        json={},
+        json=None,
         etag=None,
         endpoint=None
     ):
@@ -253,7 +253,7 @@ class Panoptes(object):
         path,
         params={},
         headers={},
-        json={},
+        json=None,
         etag=None,
         endpoint=None
     ):
@@ -272,7 +272,7 @@ class Panoptes(object):
         path,
         params={},
         headers={},
-        json={},
+        json=None,
         etag=None,
         endpoint=None
     ):
@@ -291,7 +291,7 @@ class Panoptes(object):
         path,
         params={},
         headers={},
-        json={},
+        json=None,
         etag=None,
         endpoint=None
     ):
@@ -413,7 +413,7 @@ class PanoptesObject(object):
         )
 
     @classmethod
-    def http_post(cls, path, params={}, headers={}, json={}):
+    def http_post(cls, path, params={}, headers={}, json=None):
         return Panoptes.client().post(
             cls.url(path),
             params,
@@ -422,7 +422,7 @@ class PanoptesObject(object):
         )
 
     @classmethod
-    def http_put(cls, path, params={}, headers={}, json={}):
+    def http_put(cls, path, params={}, headers={}, json=None):
         return Panoptes.client().put(
             cls.url(path),
             params,
@@ -431,7 +431,7 @@ class PanoptesObject(object):
         )
 
     @classmethod
-    def http_delete(cls, path, params={}, headers={}, json={}):
+    def http_delete(cls, path, params={}, headers={}, json=None):
         return Panoptes.client().delete(
             cls.url(path),
             params,
