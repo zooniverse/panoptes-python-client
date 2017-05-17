@@ -1,4 +1,7 @@
 from __future__ import absolute_import, division, print_function
+
+_OLD_STR = str
+
 from builtins import range, str
 
 import requests
@@ -75,7 +78,7 @@ class Subject(PanoptesObject):
             self.locations.append(location)
             self._media_files.append(None)
             return
-        elif type(location) is str:
+        elif type(location) in (str, _OLD_STR):
             f = open(location, 'rb')
         else:
             f = location
