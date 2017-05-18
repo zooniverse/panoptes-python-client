@@ -10,6 +10,8 @@ ITERABLE_TYPES = (
     tuple,
 )
 
+MISSING_POSITIONAL_ERR = 'Required positional argument (pos 1) not found'
+
 try:
     from numpy import ndarray
     ITERABLE_TYPES = ITERABLE_TYPES + (ndarray,)
@@ -23,12 +25,17 @@ def isiterable(v):
 
 def batchable(func=None, batch_size=100):
     def do_batch(*args, **kwargs):
+        if len(args) == 0:
+            raise TypeError(MISSING_POSITIONAL_ERR)
         _batch_size = kwargs.pop('batch_size', batch_size)
+
         if isiterable(args[0]):
             _self = None
             to_batch = args[0]
             args = args[1:]
         else:
+            if len(args) == 1:
+                raise TypeError(MISSING_POSITIONAL_ERR)
             _self = args[0]
             to_batch = args[1]
             args = args[2:]
