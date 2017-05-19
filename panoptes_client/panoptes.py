@@ -473,6 +473,7 @@ class PanoptesObject(object):
         try:
             if name not in ('id', '_loaded') and not self._loaded:
                 self.reload()
+                return getattr(self, name)
             return self.raw[name]
         except KeyError:
             if name == 'id':
