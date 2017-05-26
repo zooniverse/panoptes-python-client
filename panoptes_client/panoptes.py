@@ -469,6 +469,7 @@ class PanoptesObject(object):
 
     def __init__(self, raw={}, etag=None):
         self._loaded = False
+        self.links = LinkResolver(self)
 
         if type(raw) == dict:
             self.set_raw(raw, etag)
@@ -523,8 +524,6 @@ class PanoptesObject(object):
         self.etag = etag
         self.modified_attributes = set()
 
-        if 'links' in self.raw:
-            self.links = LinkResolver(self.raw['links'], self)
         self._loaded = True
 
     def _savable_dict(
@@ -632,13 +631,16 @@ class LinkResolver(object):
             link_slug = object_class._link_slug
         cls.types[link_slug] = object_class
 
-    def __init__(self, raw, parent):
-        self.raw = raw
+    def __init__(self, parent):
         self.parent = parent
 
     def __getattr__(self, name):
+        if not self.parent._loaded:
+            self.parent.reload()
+
         object_class = LinkResolver.types.get(name)
-        linked_object = self.raw[name]
+        linked_object = self.parent.raw['links'][name]
+
         if type(linked_object) == list:
             return [object_class(_id) for _id in linked_object]
         if type(linked_object) == dict and 'id' in linked_object:
@@ -649,6 +651,8 @@ class LinkResolver(object):
     def __setattr__(self, name, value):
         reserved_names = ('raw', 'parent')
         if name not in reserved_names and name in self.raw:
+            if not self.parent._loaded:
+                self.parent.reload()
             if isinstance(value, PanoptesObject):
                 value = value.id
             self.raw[name] = value
