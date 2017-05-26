@@ -21,13 +21,12 @@ The first thing you should do is fork this repo and clone your fork to your
 local computer. Then create a feature branch for your changes (create a separate
 branch for each separate contribution, don't lump unrelated changes together).
 
-I'd **strongly** recommend using
-[virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/) to
-install your development version of the client:
+I'd **strongly** recommend using Docker Compose to test your development
+version:
 
 ```
-$ mkvirtualenv panoptes-dev
-(panoptes-dev)$ pip install -U .
+$ docker-compose build dev
+$ docker-compose run dev --help
 ```
 
 When you're ready, push your changes to a branch in your fork and open a pull
