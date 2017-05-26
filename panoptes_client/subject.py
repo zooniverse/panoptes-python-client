@@ -7,7 +7,12 @@ from builtins import range, str
 import requests
 import time
 
-import magic
+try:
+    import magic
+    MEDIA_TYPE_DETECTION = 'magic'
+except ImportError:
+    import imghdr
+    MEDIA_TYPE_DETECTION = 'imghdr'
 
 from panoptes_client.panoptes import PanoptesObject, LinkResolver
 
@@ -85,7 +90,11 @@ class Subject(PanoptesObject):
 
         try:
             media_data = f.read()
-            self.locations.append(magic.from_buffer(media_data, mime=True))
+            if MEDIA_TYPE_DETECTION == 'magic':
+                media_type = magic.from_buffer(media_data, mime=True)
+            else:
+                media_type = 'image/{}'.format(imghdr.what(None, media_data))
+            self.locations.append(media_type)
             self._media_files.append(media_data)
         finally:
             f.close()
