@@ -400,6 +400,14 @@ class Panoptes(object):
         return self.bearer_token
 
 class PanoptesObject(object):
+    RESERVED_ATTRIBUTES = (
+        '_loaded',
+        'etag',
+        'links',
+        'modified_attributes',
+        'raw',
+    )
+
     @classmethod
     def url(cls, *args):
         return '/'.join(['', cls._api_slug] + [str(a) for a in args if a])
@@ -471,7 +479,11 @@ class PanoptesObject(object):
 
     def __getattr__(self, name):
         try:
-            if name not in ('id', '_loaded') and not self._loaded:
+            if (
+                name not in PanoptesObject.RESERVED_ATTRIBUTES
+                and name is not 'id'
+                and not self._loaded
+            ):
                 self.reload()
                 return getattr(self, name)
             return self.raw[name]
@@ -484,14 +496,7 @@ class PanoptesObject(object):
             ))
 
     def __setattr__(self, name, value):
-        RESERVED_NAMES = (
-            '_loaded',
-            'etag',
-            'links',
-            'modified_attributes',
-            'raw',
-        )
-        if name in RESERVED_NAMES or name not in self.raw:
+        if name in PanoptesObject.RESERVED_ATTRIBUTES or name not in self.raw:
             return super(PanoptesObject, self).__setattr__(name, value)
 
         if name not in self._edit_attributes:
