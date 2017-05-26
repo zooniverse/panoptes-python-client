@@ -400,6 +400,14 @@ class Panoptes(object):
         return self.bearer_token
 
 class PanoptesObject(object):
+    RESERVED_ATTRIBUTES = (
+        '_loaded',
+        'etag',
+        'links',
+        'modified_attributes',
+        'raw',
+    )
+
     @classmethod
     def url(cls, *args):
         return '/'.join(['', cls._api_slug] + [str(a) for a in args if a])
@@ -460,10 +468,24 @@ class PanoptesObject(object):
         return ResultPaginator(cls, response, etag)
 
     def __init__(self, raw={}, etag=None):
-        self.set_raw(raw, etag)
+        self._loaded = False
+
+        if type(raw) == dict:
+            self.set_raw(raw, etag)
+            return
+
+        self.raw = {}
+        self.raw['id'] = raw
 
     def __getattr__(self, name):
         try:
+            if (
+                name not in PanoptesObject.RESERVED_ATTRIBUTES
+                and name is not 'id'
+                and not self._loaded
+            ):
+                self.reload()
+                return getattr(self, name)
             return self.raw[name]
         except KeyError:
             if name == 'id':
@@ -474,16 +496,19 @@ class PanoptesObject(object):
             ))
 
     def __setattr__(self, name, value):
-        reserved_names = ('raw', 'links')
-        if name not in reserved_names and name in self.raw:
-            if name not in self._edit_attributes:
-                raise ReadOnlyAttributeException(
-                    '{} is read-only'.format(name)
-                )
-            self.raw[name] = value
-            self.modified_attributes.add(name)
-        else:
-            super(PanoptesObject, self).__setattr__(name, value)
+        if name in PanoptesObject.RESERVED_ATTRIBUTES or name not in self.raw:
+            return super(PanoptesObject, self).__setattr__(name, value)
+
+        if name not in self._edit_attributes:
+            raise ReadOnlyAttributeException(
+                '{} is read-only'.format(name)
+            )
+
+        if not self._loaded:
+            self.reload()
+
+        self.raw[name] = value
+        self.modified_attributes.add(name)
 
     def __repr__(self):
         return '<{} {}>'.format(
@@ -500,6 +525,7 @@ class PanoptesObject(object):
 
         if 'links' in self.raw:
             self.links = LinkResolver(self.raw['links'], self)
+        self._loaded = True
 
     def _savable_dict(
         self,
@@ -553,10 +579,12 @@ class PanoptesObject(object):
         return response
 
     def reload(self):
-        reloaded_project = self.__class__.find(self.id)
+        if not self.id:
+            return
+        reloaded_object = self.__class__.find(self.id)
         self.set_raw(
-            reloaded_project.raw,
-            reloaded_project.etag
+            reloaded_object.raw,
+            reloaded_object.etag
         )
 
 class ResultPaginator(object):
@@ -612,11 +640,11 @@ class LinkResolver(object):
         object_class = LinkResolver.types.get(name)
         linked_object = self.raw[name]
         if type(linked_object) == list:
-            return [object_class.find(o) for o in linked_object]
+            return [object_class(_id) for _id in linked_object]
         if type(linked_object) == dict and 'id' in linked_object:
-            return object_class.find(linked_object['id'])
+            return object_class(linked_object['id'])
         else:
-            return object_class.find(linked_object)
+            return object_class(linked_object)
 
     def __setattr__(self, name, value):
         reserved_names = ('raw', 'parent')
