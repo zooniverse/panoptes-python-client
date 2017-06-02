@@ -87,7 +87,7 @@ class Subject(PanoptesObject):
             self.locations.append(location)
             self._media_files.append(None)
             return
-        elif type(location) in (str, _OLD_STR_TYPES):
+        elif type(location) in (str,) + _OLD_STR_TYPES:
             f = open(location, 'rb')
         else:
             f = location
