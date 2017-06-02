@@ -650,12 +650,12 @@ class LinkResolver(object):
 
     def __setattr__(self, name, value):
         reserved_names = ('raw', 'parent')
-        if name not in reserved_names and name in self.parent.raw:
+        if name not in reserved_names and name in self.parent.raw['links']:
             if not self.parent._loaded:
                 self.parent.reload()
             if isinstance(value, PanoptesObject):
                 value = value.id
-            self.parent.raw[name] = value
+            self.parent.raw['links'][name] = value
             self.parent.modified_attributes.add('links')
         else:
             super(LinkResolver, self).__setattr__(name, value)
