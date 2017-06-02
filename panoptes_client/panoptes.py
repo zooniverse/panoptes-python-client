@@ -662,7 +662,7 @@ class LinkResolver(object):
 
     def _savable_dict(self, edit_attributes):
         out = []
-        for key, value in self.parent.raw.items():
+        for key, value in self.parent.raw['links'].items():
             if not key in edit_attributes:
                 continue
             if type(key) == list:
