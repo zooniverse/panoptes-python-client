@@ -650,19 +650,19 @@ class LinkResolver(object):
 
     def __setattr__(self, name, value):
         reserved_names = ('raw', 'parent')
-        if name not in reserved_names and name in self.raw:
+        if name not in reserved_names and name in self.parent.raw:
             if not self.parent._loaded:
                 self.parent.reload()
             if isinstance(value, PanoptesObject):
                 value = value.id
-            self.raw[name] = value
+            self.parent.raw[name] = value
             self.parent.modified_attributes.add('links')
         else:
             super(LinkResolver, self).__setattr__(name, value)
 
     def _savable_dict(self, edit_attributes):
         out = []
-        for key, value in self.raw.items():
+        for key, value in self.parent.raw.items():
             if not key in edit_attributes:
                 continue
             if type(key) == list:
