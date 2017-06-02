@@ -1,6 +1,10 @@
 from __future__ import absolute_import, division, print_function
 
-_OLD_STR = str
+_OLD_STR_TYPES = (str,)
+try:
+    _OLD_STR_TYPES = _OLD_STR_TYPES + (unicode,)
+except NameError:
+    pass
 
 from builtins import range, str
 
@@ -83,7 +87,7 @@ class Subject(PanoptesObject):
             self.locations.append(location)
             self._media_files.append(None)
             return
-        elif type(location) in (str, _OLD_STR):
+        elif type(location) in (str, _OLD_STR_TYPES):
             f = open(location, 'rb')
         else:
             f = location
