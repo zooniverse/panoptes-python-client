@@ -67,5 +67,10 @@ class Workflow(PanoptesObject, Exportable):
 
         return _subject_sets
 
+    @property
+    def versions(self):
+        return WorkflowVersion.where(workflow=self)
 
 LinkResolver.register(Workflow)
+
+from panoptes_client.workflow_version import WorkflowVersion

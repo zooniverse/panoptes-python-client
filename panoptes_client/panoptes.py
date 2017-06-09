@@ -638,8 +638,15 @@ class LinkResolver(object):
         if not self.parent._loaded:
             self.parent.reload()
 
-        object_class = LinkResolver.types.get(name)
         linked_object = self.parent.raw['links'][name]
+        object_class = LinkResolver.types.get(name)
+        if (
+            not object_class and
+            type(linked_object == dict) and
+            'type' in linked_object
+        ):
+            object_class = LinkResolver.types.get(linked_object['type'])
+
 
         if type(linked_object) == list:
             return [object_class(_id) for _id in linked_object]
