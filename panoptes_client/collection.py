@@ -15,6 +15,7 @@ class Collection(PanoptesObject):
         'private'
     )
 
+    @property
     def subjects(self):
         return Subject.where(collection_id=self.id)
 
