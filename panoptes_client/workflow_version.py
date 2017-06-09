@@ -1,8 +1,12 @@
 from __future__ import absolute_import, division, print_function
-from builtins import str
 
-from panoptes_client.panoptes import Panoptes, PanoptesObject
+from panoptes_client.panoptes import (
+    Panoptes,
+    PanoptesAPIException,
+    PanoptesObject,
+)
 from panoptes_client.workflow import Workflow
+
 
 class WorkflowVersion(PanoptesObject):
     _api_slug = 'versions'
@@ -16,6 +20,15 @@ class WorkflowVersion(PanoptesObject):
             params,
             headers,
         )
+
+    @classmethod
+    def find(cls, _id, workflow):
+        try:
+            return cls.where(id=_id, workflow=workflow).next()
+        except StopIteration:
+            raise PanoptesAPIException(
+                "Could not find {} with id='{}'".format(cls.__name__, _id)
+            )
 
     def save(self):
         raise NotImplementedError(
