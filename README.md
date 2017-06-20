@@ -85,7 +85,7 @@ List the subjects in a subject_set:
 
 ```python
 subject_set=SubjectSet.find(1234)
-for subject in subject_set.subjects():
+for subject in subject_set.subjects:
     print("%s," % (subject.id))
 ```
 

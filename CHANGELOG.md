@@ -1,9 +1,24 @@
+## 0.9 (2017-06-20)
+
+- New: Add support for non-image media types (requires libmagic)
+- New: Allow lazy loading of objects
+- New: Add WorkflowVersion class and Workflow.versions property
+- Fix: Don't submit empty JSON by default for GET requests
+- Fix: Adding location paths in Python 2
+- Fix: Return a list of linked objects instead of a map in Python 3
+- Use SetMemberSubject for SubjectSet.subjects lookup to improve speed
+- Set default endpoint to www.zooniverse.org
+- Raise TypeError if positional batchable argument is missing
+- Convert Collection.subjects and SubjectSet.subjects to properties
+
 ## 0.8 (2017-05-11)
+
 - New: Python 3 compatibility
 - Fix: Fix passing sets to batchable methods
 - Fix: `AttributeError` in `Workflow.add_subject_sets()`
 
 ## 0.7 (2017-03-22)
+
 - New: Add Collection
 - New: Allow editing of workflows
 - New: Add method to get User's avatar
@@ -13,6 +28,7 @@
 - Fix: Stop iterating if there are no objects in the current page
 
 ## 0.6 (2017-01-11)
+
 - New: Add Project.collaborators() and ProjectRole
 - New: Add admin option
 - Fix: Raise PanoptesAPIException instead of StopIteration
@@ -20,11 +36,13 @@
 - Fix: Raise PanoptesAPIException instead of StopIteration in PanoptesObject.where()
 
 ## 0.5 (2016-11-21)
+
 - New: Send SubjectSet.remove() requests in batches
 - Fix: Raise PanoptesAPIException instead of StopIteration in Project.find()
 - Fix: Don't read the image file on every upload attempt
 
 ## 0.4.1 (2016-09-21)
+
 - Fix: Bearer token checking only occurs when necessary
 
 ## 0.4 (2016-09-02)
