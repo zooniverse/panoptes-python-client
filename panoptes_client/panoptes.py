@@ -563,26 +563,24 @@ class PanoptesObject(object):
     def save(self):
         if not self.id:
             save_method = Panoptes.client().post
+            force_reload = False
         else:
             save_method = Panoptes.client().put
+            force_reload = True
 
-        response, _ = save_method(
+        response, response_etag = save_method(
             self.url(self.id),
             json={self._api_slug: self._savable_dict(
                 modified_attributes=self.modified_attributes
             )},
             etag=self.etag
         )
-        self.raw['id'] = response[self._api_slug][0]['id']
-        # set the etag from the response headers (POST 201 returns etag)
-        # PUT 200 doesn't return etag?
-        # TODO: check this etag is correctly set on an update response (API response?)
-        # maybe only do this for post responses else we'll clobber
-        # the GET etag for PUT update responses
 
-        # Note: there is no gaurantee that another client hasn't updated the resource
-        # between initial save / get response and this save
-        self.etag = response.headers.get('ETag')
+        raw_resource_response = response[self._api_slug][0]
+        self.set_raw(raw_resource_response, response_etag)
+
+        if force_reload:
+            self._loaded = False
 
         return response
 
