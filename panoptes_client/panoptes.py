@@ -563,18 +563,25 @@ class PanoptesObject(object):
     def save(self):
         if not self.id:
             save_method = Panoptes.client().post
+            force_reload = False
         else:
             save_method = Panoptes.client().put
+            force_reload = True
 
-        response, _ = save_method(
+        response, response_etag = save_method(
             self.url(self.id),
             json={self._api_slug: self._savable_dict(
                 modified_attributes=self.modified_attributes
             )},
             etag=self.etag
         )
-        self.raw['id'] = response[self._api_slug][0]['id']
-        self.reload()
+
+        raw_resource_response = response[self._api_slug][0]
+        self.set_raw(raw_resource_response, response_etag)
+
+        if force_reload:
+            self._loaded = False
+
         return response
 
     def reload(self):
