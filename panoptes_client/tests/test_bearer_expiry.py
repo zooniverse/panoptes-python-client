@@ -3,7 +3,7 @@ from panoptes_client.panoptes import Panoptes
 
 import datetime
 import unittest
-from unittest.mock import patch
+from mock import patch
 
 
 class MockDate(datetime.datetime):
