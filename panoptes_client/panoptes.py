@@ -351,8 +351,7 @@ class Panoptes(object):
         return self.session.get(url, headers=headers).headers['x-csrf-token']
 
     def get_bearer_token(self):
-        check_time = datetime.now() - timedelta(minutes=1)
-        if not self.bearer_token or self.bearer_expires < check_time:
+        if not self.valid_bearer_token():
             grant_type = 'password'
 
             if self.client_secret:
@@ -399,6 +398,31 @@ class Panoptes(object):
                 + timedelta(seconds=token_response['expires_in'])
             )
         return self.bearer_token
+
+    def valid_bearer_token(self):
+        """
+        Check if the stored bearer token has expired
+        """
+        # Return invalid if there is no token
+        if not self.has_bearer_token():
+            return False
+
+        now = datetime.now()
+        expires = self.bearer_expires
+        # Buffer to allow time for requests
+        # to fire without expiring in transit
+        buffer_ = timedelta(minutes=2)
+
+        # Add time to now --> pretend time is later
+        # Effect of making token expire earlier
+        return now + buffer_ <= expires
+
+    def has_bearer_token(self):
+        """
+        Check if the client has a bearer token
+        """
+        return self.bearer_token is not None
+
 
 class PanoptesObject(object):
     RESERVED_ATTRIBUTES = (
