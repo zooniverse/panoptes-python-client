@@ -1,3 +1,9 @@
+## 0.10 (2017-08-04)
+
+- Fix: Avoid reloading resource after create actions
+- Fix: Add buffer to bearer token expiration check
+- Remove default export timeout
+
 ## 0.9 (2017-06-20)
 
 - New: Add support for non-image media types (requires libmagic)
