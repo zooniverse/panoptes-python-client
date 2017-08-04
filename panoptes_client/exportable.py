@@ -25,7 +25,7 @@ class Exportable(object):
         export_type,
         generate=False,
         wait=False,
-        wait_timeout=60,
+        wait_timeout=None,
     ):
 
         if generate:
@@ -43,13 +43,18 @@ class Exportable(object):
 
         return requests.get(media_url, stream=True)
 
-    def wait_export(self, export_type, timeout=60):
+    def wait_export(
+        self,
+        export_type,
+        timeout=None,
+    ):
         success = False
-        end_time = datetime.datetime.now() + datetime.timedelta(
-            seconds=timeout
-        )
+        if timeout:
+            end_time = datetime.datetime.now() + datetime.timedelta(
+                seconds=timeout
+            )
 
-        while datetime.datetime.now() < end_time:
+        while (not timeout) or (datetime.datetime.now() < end_time):
             export_description = self.describe_export(
                 export_type,
             )
