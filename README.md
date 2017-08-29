@@ -14,6 +14,11 @@ Install HEAD directly from GitHub:
 $ pip install git+git://github.com/zooniverse/panoptes-python-client.git
 ```
 
+Upgrade the client
+```
+$ pip install -U panoptes-client
+```
+
 ## Usage Examples
 
 Print all project titles:
