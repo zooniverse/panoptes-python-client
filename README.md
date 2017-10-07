@@ -76,7 +76,8 @@ subject.metadata['image_title'] = 'My image'
 subject.save()
 
 # SubjectSet.add() can take a list of Subjects
-subject_set.add([subject1, subject2, subject3])
+subjects_list=[subject1, subject2, subject3]
+subject_set.add(subjects_list,batch_size=len(subjects_list))
 # or just one at a time (but this is slower than doing several together)
 subject_set.add(subject1)
 subject_set.add(subject2)
