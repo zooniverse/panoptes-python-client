@@ -8,6 +8,8 @@ services:
     volumes:
       - ${HOME}/.panoptes/:/root/.panoptes/
       - ${HOME}:${HOME}
+    environment:
+      - PANOPTES_DEBUG=true
 
   stable:
     build:
@@ -24,6 +26,8 @@ services:
     volumes:
       - ${HOME}/.panoptes/:/root/.panoptes/
       - ${HOME}:${HOME}
+    environment:
+      - PANOPTES_DEBUG=true
 
   stable2:
     build:
