@@ -1,10 +1,15 @@
 from __future__ import absolute_import, division, print_function
 from builtins import str
 
-import requests
+import logging
 import os
+import requests
 
 from datetime import datetime, timedelta
+
+if os.environ.get('PANOPTES_DEBUG'):
+    logging.basicConfig(level=logging.DEBUG)
+
 
 class Panoptes(object):
     _client = None
@@ -83,6 +88,8 @@ class Panoptes(object):
 
         self.session = requests.session()
 
+        self.logger = logging.getLogger('panoptes_client')
+
     def http_request(
         self,
         method,
@@ -118,6 +125,16 @@ class Panoptes(object):
         # Setting the parameter at all (even False) turns on admin mode
         if self.admin:
             params.update({'admin': self.admin})
+
+        if params:
+            self.logger.debug(
+                "params={}".format(params)
+            )
+
+        if json:
+            self.logger.debug(
+                "json={}".format(json)
+            )
 
         response = self.session.request(
             method,
