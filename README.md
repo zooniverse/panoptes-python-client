@@ -2,22 +2,32 @@
 
 ## Installation
 
-Install latest release:
+Install latest stable release:
 
 ```
 $ pip install panoptes-client
 ```
 
-Install HEAD directly from GitHub:
+Or for development or testing, you can install the development version directly
+from GitHub:
 
 ```
 $ pip install git+git://github.com/zooniverse/panoptes-python-client.git
 ```
 
-Upgrade the client
+Upgrade an existing installation:
+
 ```
 $ pip install -U panoptes-client
 ```
+
+## Uploading non-image media types
+
+If you wish to upload subjects with non-image media (e.g. audio or video),
+you will need to make sure you have the `libmagic` library installed. If you
+don't already have `libmagic`, please see the [dependency information for
+python-magic](https://github.com/ahupp/python-magic#dependencies) for more
+details.
 
 ## Usage Examples
 
