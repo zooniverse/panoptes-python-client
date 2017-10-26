@@ -24,23 +24,17 @@ def isiterable(v):
 
 
 def batchable(func=None, batch_size=100):
+    @functools.wraps(func)
     def do_batch(*args, **kwargs):
-        if len(args) == 0:
+        if len(args) <= 1:
             raise TypeError(MISSING_POSITIONAL_ERR)
         _batch_size = kwargs.pop('batch_size', batch_size)
 
-        if isiterable(args[0]):
-            _self = None
-            to_batch = args[0]
-            args = args[1:]
-        else:
-            if len(args) == 1:
-                raise TypeError(MISSING_POSITIONAL_ERR)
-            _self = args[0]
-            to_batch = args[1]
-            args = args[2:]
-            if not isiterable(to_batch):
-                to_batch = [to_batch]
+        _self = args[0]
+        to_batch = args[1]
+        args = args[2:]
+        if not isiterable(to_batch):
+            to_batch = [to_batch]
 
         if isinstance(to_batch, set):
             to_batch = list(to_batch)
@@ -54,6 +48,19 @@ def batchable(func=None, batch_size=100):
             else:
                 func(_self, _batch, *args, **kwargs)
 
+    # This avoids us having to call batchable wherever it's used, so we can
+    # just write:
+    #   @batchable
+    #   def func(self, ...):
+    #
+    # Rather than:
+    #   @batchable()
+    #   def func(self, ...):
+    #
+    # While still allowing this:
+    #   @batchable(batch_size=10)
+    #   def func(self, ...):
     if func is None:
         return functools.partial(batchable, batch_size=batch_size)
+
     return do_batch
