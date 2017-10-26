@@ -12,6 +12,10 @@ setup(
         'requests>=2.4.2,<2.19',
         'future>=0.16,<0.17',
         'python-magic>=0.4,<0.5',
-        'mock>=2.0,<2.1',
     ],
+    extras_require={
+        'testing': [
+            'mock>=2.0,<2.1',
+        ],
+    }
 )
