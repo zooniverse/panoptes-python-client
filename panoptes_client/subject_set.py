@@ -24,14 +24,37 @@ class SubjectSet(PanoptesObject):
 
     @property
     def subjects(self):
+        """
+        A generator which yields :py:class:`.Subject` objects which are in this
+        subject set.
+
+        Examples::
+
+            for subject in subject_set.subjects:
+                print(subject.id)
+
+        """
+
         for sms in SetMemberSubject.where(subject_set_id=self.id):
             yield sms.links.subject
 
-    # Add or remove subject links.
-    # Takes a tuple or list of Subject objects
-    # or a tuple or list of subject ids.
     @batchable
     def add(self, subjects):
+        """
+        Links the given subjects to this set.
+
+        - **subjects** can be a list of :py:class:`.Subject` instances, a list
+          of subject IDs, a single :py:class:`.Subject` instance, or a single
+          subject ID.
+
+        Examples::
+
+            subject_set.add(1234)
+            subject_set.add([1,2,3,4])
+            subject_set.add(Subject(1234))
+            subject_set.add([Subject(12), Subject(34)])
+        """
+
         _subjects = self._build_subject_list(subjects)
 
         self.http_post(
@@ -41,6 +64,21 @@ class SubjectSet(PanoptesObject):
 
     @batchable
     def remove(self, subjects):
+        """
+        Unlinks the given subjects from this set.
+
+        - **subjects** can be a list of :py:class:`.Subject` instances, a list
+          of subject IDs, a single :py:class:`.Subject` instance, or a single
+          subject ID.
+
+        Examples::
+
+            subject_set.remove(1234)
+            subject_set.remove([1,2,3,4])
+            subject_set.remove(Subject(1234))
+            subject_set.remove([Subject(12), Subject(34)])
+        """
+
         _subjects = self._build_subject_list(subjects)
 
         _subjects_ids = ",".join(_subjects)

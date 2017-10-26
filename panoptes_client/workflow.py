@@ -21,6 +21,22 @@ class Workflow(PanoptesObject, Exportable):
 
     @batchable
     def retire_subjects(self, subjects, reason='other'):
+        """
+        Retires subjects in this workflow.
+
+        - **subjects** can be a list of Subject instances, a list of subject
+          IDs, a single Subject instance, or a single subject ID.
+        - **reason** gives the reason the subject has been retired. Defaults to
+          **other**.
+
+        Examples::
+
+            workflow.retire_subjects(1234)
+            workflow.retire_subjects([1,2,3,4])
+            workflow.retire_subjects(Subject(1234))
+            workflow.retire_subjects([Subject(12), Subject(34)])
+        """
+
         subjects = [ s.id if isinstance(s, Subject) else s for s in subjects ]
 
         return Workflow.http_post(
@@ -33,6 +49,21 @@ class Workflow(PanoptesObject, Exportable):
 
     @batchable
     def add_subject_sets(self, subject_sets):
+        """
+        Links the given subject sets to this workflow.
+
+        - **subject_sets** can be a list of SubjectSet instances, a list of
+          subject set IDs, a single SubjectSet instance, or a single subject
+          set ID.
+
+        Examples::
+
+            workflow.add_subject_sets(1234)
+            workflow.add_subject_sets([1,2,3,4])
+            workflow.add_subject_sets(SubjectSet(1234))
+            workflow.add_subject_sets([SubjectSet(12), SubjectSet(34)])
+        """
+
         _subject_sets = self._build_subject_set_list(subject_sets)
 
         return Workflow.http_post(
@@ -42,6 +73,21 @@ class Workflow(PanoptesObject, Exportable):
 
     @batchable
     def remove_subject_sets(self, subject_sets):
+        """
+        Unlinks the given subject sets from this workflow.
+
+        - **subject_sets** can be a list of SubjectSet instances, a list of
+          subject set IDs, a single SubjectSet instance, or a single subject
+          set ID.
+
+        Examples::
+
+            workflow.remove_subject_sets(1234)
+            workflow.remove_subject_sets([1,2,3,4])
+            workflow.remove_subject_sets(SubjectSet(1234))
+            workflow.remove_subject_sets([SubjectSet(12), SubjectSet(34)])
+        """
+
         _subject_sets = self._build_subject_set_list(subject_sets)
         _subject_set_ids = ",".join(_subject_sets)
 
@@ -69,6 +115,11 @@ class Workflow(PanoptesObject, Exportable):
 
     @property
     def versions(self):
+        """
+        A generator which yields all :py:class:`.WorkflowVersion` instances for
+        this workflow.
+        """
+
         return WorkflowVersion.where(workflow=self)
 
 LinkResolver.register(Workflow)

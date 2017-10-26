@@ -12,6 +12,12 @@ if os.environ.get('PANOPTES_DEBUG'):
 
 
 class Panoptes(object):
+    """
+    The low-level Panoptes HTTP client class. You should never need to manually
+    create an instance of this class, but you will need to import it to log in,
+    etc.
+    """
+
     _client = None
 
     _http_headers = {
@@ -41,6 +47,36 @@ class Panoptes(object):
 
     @classmethod
     def connect(cls, *args, **kwargs):
+        """
+        connect(username=None, password=None, endpoint=None, admin=False)
+
+        Configures the Panoptes client for use.
+
+        Note that there is no need to call this unless you need to pass one or
+        more of the below arguments.  By default, the client will connect to
+        the public Zooniverse.org API as an anonymous user.
+
+        Also note that this method only *stores* the given values. It does not
+        immediately perform any authentication or attempt to connect to the
+        API. If the given credentials are incorrect, the client will raise a
+        PanoptesAPIException the first time it makes a request to the API.
+
+        All arguments are optional:
+
+        - **username** is your Zooniverse.org username.
+        - **password** is your Zooniverse.org password.
+        - **endpoint** is the HTTP API endpoint you'd like to connect to.
+          Defaults to **https://www.zooniverse.org**. Should not include a
+          trailing slash.
+        - **admin** is a boolean, switching on admin mode if ``True``. Has no
+          effect if the given username is not a Zooniverse.org administrator.
+
+
+        Examples::
+
+            Panoptes.connect(username='example', password='example')
+            Panoptes.connect(endpoint='https://panoptes.example.com')
+        """
         return cls(*args, **kwargs)
 
     @classmethod
@@ -417,9 +453,6 @@ class Panoptes(object):
         return self.bearer_token
 
     def valid_bearer_token(self):
-        """
-        Check if the stored bearer token has expired
-        """
         # Return invalid if there is no token
         if not self.has_bearer_token():
             return False
@@ -435,13 +468,15 @@ class Panoptes(object):
         return now + buffer_ <= expires
 
     def has_bearer_token(self):
-        """
-        Check if the client has a bearer token
-        """
         return self.bearer_token is not None
 
-
 class PanoptesObject(object):
+    """
+    The base class of all Panoptes model classes. You should never need to
+    create instances of this class, but the methods defined here are common to
+    all the model subclasses.
+    """
+
     RESERVED_ATTRIBUTES = (
         '_loaded',
         'etag',
@@ -491,11 +526,30 @@ class PanoptesObject(object):
 
     @classmethod
     def where(cls, **kwargs):
+        """
+        Returns a generator which yields instances matching the given query
+        arguments.
+
+        For example, this would yield all :py:class:`Project`s::
+
+            Project.where()
+
+        And this would yield all launch approved :py:class:`Project`s::
+
+            Project.where(launch_approved=True)
+        """
+
         _id = kwargs.pop('id', '')
         return cls.paginated_results(*cls.http_get(_id, params=kwargs))
 
     @classmethod
     def find(cls, _id):
+        """
+        Returns the individual instance with the given ID, if it exists. Raises
+        :py:class:`PanoptesAPIException` if the object with that ID is not
+        found.
+        """
+
         if not _id:
             return None
         try:
@@ -603,6 +657,12 @@ class PanoptesObject(object):
         return dict(out)
 
     def save(self):
+        """
+        Saves the object. If the object has not been saved before (i.e. it's
+        new), then a new object is created. Otherwise, any changes are
+        submitted to the API.
+        """
+
         if not self.id:
             save_method = Panoptes.client().post
             force_reload = False
@@ -627,6 +687,11 @@ class PanoptesObject(object):
         return response
 
     def reload(self):
+        """
+        Re-fetches the object from the API, discarding any local changes.
+        Returns without doing anything if the object is new.
+        """
+
         if not self.id:
             return
         reloaded_object = self.__class__.find(self.id)
@@ -729,9 +794,18 @@ class LinkResolver(object):
         return dict(out)
 
 class PanoptesAPIException(Exception):
+    """
+    Raised whenever the API returns an error. The exception will contain the
+    raw error message from the API.
+    """
     pass
 
 class ReadOnlyAttributeException(Exception):
+    """
+    Raised if an attempt is made to modify an attribute of a
+    :py:class:`PanoptesObject` which the API does not allow to be modified.
+    """
+
     pass
 
 

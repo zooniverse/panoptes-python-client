@@ -20,6 +20,11 @@ talk = Talk()
 
 
 class Exportable(object):
+    """
+    Abstract class containing methods for generating and downloading data
+    exports.
+    """
+
     def get_export(
         self,
         export_type,
@@ -27,6 +32,27 @@ class Exportable(object):
         wait=False,
         wait_timeout=None,
     ):
+        """
+        Downloads a data export over HTTP. Returns a file-like object
+        containing the content of the export.
+
+        - **export_type** is a string specifying which type of export should be
+          downloaded.
+        - **generate** is a boolean specifying whether to generate a new export
+          and wait for it to be ready, or to just download the latest export.
+        - **wait** is a boolean specifying whether to wait for an in-progress
+          export to finish, if there is one. Has no effect if ``generate`` is
+          ``True``.
+        - **wait_timeout** is the number of seconds to wait if ``wait`` is
+          ``True``. Has no effect if ``wait`` is ``False`` or if ``generate``
+          is ``True``.
+
+        Example::
+
+            classification_export = Project(1234).get_export('classifications')
+            for row in csv.DictReader(classification_export):
+                print(row)
+        """
 
         if generate:
             self.generate_export(export_type)
@@ -48,6 +74,17 @@ class Exportable(object):
         export_type,
         timeout=None,
     ):
+        """
+        Blocks until an in-progress export is ready.
+
+        - **export_type** is a string specifying which type of export to wait
+          for.
+        - **timeout** is the maximum number of seconds to wait.
+
+        If ``timeout`` is given and the export is not ready by the time limit,
+        :py:class:`.PanoptesAPIException` is raised.
+        """
+
         success = False
         if timeout:
             end_time = datetime.datetime.now() + datetime.timedelta(
@@ -81,6 +118,14 @@ class Exportable(object):
         return export_description
 
     def generate_export(self, export_type):
+        """
+        Start a new export.
+
+        - **export_type** is a string specifying which type of export to start.
+
+        Returns a :py:class:`dict` containing metadata for the new export.
+        """
+
         if export_type in TALK_EXPORT_TYPES:
             return talk.post_data_request(
                 'project-{}'.format(self.id),
@@ -93,6 +138,14 @@ class Exportable(object):
         )[0]
 
     def describe_export(self, export_type):
+        """
+        Fetch metadata for an export.
+
+        - **export_type** is a string specifying which type of export to look
+          up.
+
+        Returns a :py:class:`dict` containing metadata for the export.
+        """
         if export_type in TALK_EXPORT_TYPES:
             return talk.get_data_request(
                 'project-{}'.format(self.id),
