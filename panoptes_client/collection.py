@@ -12,7 +12,12 @@ class Collection(PanoptesObject):
     _edit_attributes = (
         'name',
         'display_name',
-        'private'
+        'private',
+        {
+            'links': (
+                'project',
+            ),
+        },
     )
 
     @property
