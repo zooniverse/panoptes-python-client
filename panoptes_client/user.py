@@ -8,6 +8,7 @@ class User(PanoptesObject):
     _link_slug = 'users'
     _edit_attributes = ()
 
+    @property
     def avatar(self):
         return User.http_get('{}/avatar'.format(self.id))[0]
 
