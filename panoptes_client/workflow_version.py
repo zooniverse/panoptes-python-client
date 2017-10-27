@@ -23,6 +23,13 @@ class WorkflowVersion(PanoptesObject):
 
     @classmethod
     def find(cls, _id, workflow):
+        """
+        Like :py:meth:`.PanoptesObject.find` but also allows lookup by
+        workflow.
+
+        - **workflow** must be a :py:class:`.Workflow` instance.
+        """
+
         try:
             return cls.where(id=_id, workflow=workflow).next()
         except StopIteration:
@@ -31,6 +38,11 @@ class WorkflowVersion(PanoptesObject):
             )
 
     def save(self):
+        """
+        Not implemented for this class. It is not possible to modify workflow
+        versions once they are created.
+        """
+
         raise NotImplementedError(
             'It is not possible to manually create workflow versions. '
             'Modify the workflow instead.'
@@ -38,4 +50,8 @@ class WorkflowVersion(PanoptesObject):
 
     @property
     def workflow(self):
+        """
+        The :py:class:`.Workflow` to which this version refers.
+        """
+
         return self.links.item

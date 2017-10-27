@@ -45,6 +45,11 @@ class Subject(PanoptesObject):
         self._media_files = []
 
     def save(self):
+        """
+        Like :py:meth:`.PanoptesObject.save`, but also uploads any local files
+        which have previosly been added to the subject with
+        :py:meth:`add_location`. Automatically retries uploads on error.
+        """
         response = super(Subject, self).save()
         for location, media_data in zip(
             response['subjects'][0]['locations'],
@@ -75,10 +80,12 @@ class Subject(PanoptesObject):
         """
         Add a media location to this subject.
 
-        - *location* can be a file object, a path to a local file, or a
-          dictionary containing mime types and URLs for remote media.
+        - **location** can be an open :py:class:`file` object, a path to a
+          local file, or a :py:class:`dict` containing MIME types and URLs for
+          remote media.
 
-        Examples:
+        Examples::
+
             subject.add_location(my_file)
             subject.add_location('/data/image.jpg')
             subject.add_location({'image/png': 'https://example.com/image.png'})

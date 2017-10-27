@@ -4,8 +4,8 @@ WORKDIR /usr/src/panoptes-python-client
 
 COPY setup.py .
 
-RUN pip install .
+RUN pip install .[testing,docs]
 
 COPY . .
 
-RUN pip install -U .
+RUN pip install -U .[testing,docs]

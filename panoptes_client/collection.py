@@ -17,13 +17,28 @@ class Collection(PanoptesObject):
 
     @property
     def subjects(self):
+        """
+        A generator which yields each :py:class:`.Subject` in this collection.
+        """
+
         return Subject.where(collection_id=self.id)
 
-    # Add or remove subject links.
-    # Takes a tuple or list of Subject objects
-    # or a tuple or list of subject ids.
     @batchable
     def add(self, subjects):
+        """
+        Links the given subjects to this collection.
+
+        - **subjects** can be a list of :py:class:`.Subject` instances, a list
+          of subject IDs, a single :py:class:`.Subject` instance, or a single
+          subject ID.
+
+        Examples::
+
+            collection.add(1234)
+            collection.add([1,2,3,4])
+            collection.add(Subject(1234))
+            collection.add([Subject(12), Subject(34)])
+        """
         _subjects = self._build_subject_list(subjects)
 
         self.http_post(
@@ -33,6 +48,20 @@ class Collection(PanoptesObject):
 
     @batchable
     def remove(self, subjects):
+        """
+        Unlinks the given subjects from this collection.
+
+        - **subjects** can be a list of :py:class:`.Subject` instances, a list
+          of subject IDs, a single :py:class:`.Subject` instance, or a single
+          subject ID.
+
+        Examples::
+
+            collection.remove(1234)
+            collection.remove([1,2,3,4])
+            collection.remove(Subject(1234))
+            collection.remove([Subject(12), Subject(34)])
+        """
         _subjects = self._build_subject_list(subjects)
 
         _subjects_ids = ",".join(_subjects)
