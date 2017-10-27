@@ -17,5 +17,8 @@ setup(
         'testing': [
             'mock>=2.0,<2.1',
         ],
+        'docs': [
+            'sphinx',
+        ]
     }
 )
