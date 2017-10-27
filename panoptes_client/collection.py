@@ -16,6 +16,7 @@ class Collection(PanoptesObject):
         {
             'links': (
                 'project',
+                'default_subject',
             ),
         },
     )
