@@ -92,3 +92,29 @@ class Collection(PanoptesObject):
             _subjects.append(_subject_id)
 
         return _subjects
+
+    def add_default_subject(self, subject):
+        if not (
+            isinstance(subject, Subject)
+            or isinstance(subject, (int, str,))
+        ):
+            raise TypeError
+
+        _subject_id = subject.id if isinstance(subject, Subject) else str(subject)
+
+        self.http_post(
+            '{}/links/default_subject/{}'.format(self.id, _subject_id)
+        )
+
+    def link_to_project(self, project):
+        if not (
+            isinstance(project, Project)
+            or isinstance(project, (int, str))
+        ):
+            raise TypeError
+
+        _project_id = project.id if isinstance(project, Project) else str(project)
+
+        self.http_post(
+            '{}/links/project/{}'.format(self.id, _project_id)
+        )
