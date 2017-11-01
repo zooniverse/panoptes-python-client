@@ -128,3 +128,4 @@ class Project(PanoptesObject, Exportable):
         )
 
 LinkResolver.register(Project)
+LinkResolver.register(Project, 'projects')
