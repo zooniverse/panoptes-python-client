@@ -3,6 +3,7 @@ from builtins import str
 
 from panoptes_client.panoptes import PanoptesObject
 from panoptes_client.subject import Subject
+from panoptes_client.project import Project
 from panoptes_client.utils import batchable
 
 
@@ -99,8 +100,10 @@ class Collection(PanoptesObject):
             or isinstance(subject, (int, str,))
         ):
             raise TypeError
-
-        _subject_id = subject.id if isinstance(subject, Subject) else str(subject)
+        if isinstance(subject, Subject):
+            _subject_id = subject.id
+        else:
+            _subject_id = str(subject)
 
         self.http_post(
             '{}/links/default_subject/{}'.format(self.id, _subject_id)
@@ -113,7 +116,10 @@ class Collection(PanoptesObject):
         ):
             raise TypeError
 
-        _project_id = project.id if isinstance(project, Project) else str(project)
+        if isinstance(project, Project):
+            _project_id = project.id
+        else:
+            _project_id = str(project)
 
         self.http_post(
             '{}/links/project/{}'.format(self.id, _project_id)
