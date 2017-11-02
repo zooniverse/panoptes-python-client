@@ -12,7 +12,7 @@ Or for development or testing, you can install the development version directly
 from GitHub:
 
 ```
-$ pip install git+git://github.com/zooniverse/panoptes-python-client.git
+$ pip install -U git+git://github.com/zooniverse/panoptes-python-client.git
 ```
 
 Upgrade an existing installation:
