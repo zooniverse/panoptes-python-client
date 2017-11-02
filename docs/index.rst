@@ -6,11 +6,27 @@
 Welcome to Panoptes Client's documentation!
 ===========================================
 
-Contents:
+This package is the Python SDK for `Panoptes
+<https://github.com/zooniverse/Panoptes>`_, the platform behind the
+`Zooniverse <https://www.zooniverse.org/>`_. This module is intended to allow
+programmatic management of projects, providing high level access to the API for
+common project management tasks.
+
+User guide
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   user_guide
+
+Module reference
+----------------
 
 .. toctree::
    :maxdepth: 2
 
+   panoptes_client
 
 
 Indices and tables
