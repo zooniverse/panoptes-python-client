@@ -1,3 +1,12 @@
+## 1.0 (2017-11-03)
+
+- New: Add methods for adding Project links
+- New: Enable debugging if PANOPTES_DEBUG is set in env
+- Fix: Fix accessing list of linked projects
+- Move testing dependencies to extras
+- Change User.avatar to be a property
+- Specify dependency versions
+
 ## 0.10 (2017-08-04)
 
 - Fix: Avoid reloading resource after create actions
@@ -8,14 +17,14 @@
 
 - New: Add support for non-image media types (requires libmagic)
 - New: Allow lazy loading of objects
-- New: Add WorkflowVersion class and Workflow.versions property
+- New: Add `WorkflowVersion` class and `Workflow.versions` property
 - Fix: Don't submit empty JSON by default for GET requests
 - Fix: Adding location paths in Python 2
 - Fix: Return a list of linked objects instead of a map in Python 3
-- Use SetMemberSubject for SubjectSet.subjects lookup to improve speed
+- Use `SetMemberSubject` for `SubjectSet.subjects` lookup to improve speed
 - Set default endpoint to www.zooniverse.org
 - Raise TypeError if positional batchable argument is missing
-- Convert Collection.subjects and SubjectSet.subjects to properties
+- Convert `Collection.subjects` and `SubjectSet.subjects` to properties
 
 ## 0.8 (2017-05-11)
 
