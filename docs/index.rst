@@ -12,6 +12,10 @@ This package is the Python SDK for `Panoptes
 programmatic management of projects, providing high level access to the API for
 common project management tasks.
 
+You can find the `source code for this package on GitHub
+<https://github.com/zooniverse/panoptes-python-client>`_. We welcome bug
+reports, feature requests, and pull requests.
+
 User guide
 ----------
 
