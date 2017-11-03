@@ -4,6 +4,7 @@ from builtins import str
 import logging
 import os
 import requests
+import getpass
 
 from datetime import datetime, timedelta
 
@@ -394,6 +395,11 @@ class Panoptes(object):
             )
         self.logged_in = True
         return response
+
+    def interactive_login(self):
+        user = input('Username: ')
+        password = getpass.getpass()
+        self.login(user, password)
 
     def get_csrf_token(self):
         url = self.endpoint + '/users/sign_in'
