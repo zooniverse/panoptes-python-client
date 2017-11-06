@@ -14,12 +14,6 @@ class Collection(PanoptesObject):
         'name',
         'display_name',
         'private',
-        {
-            'links': (
-                'project',
-                'default_subject',
-            ),
-        },
     )
 
     @property
@@ -95,6 +89,17 @@ class Collection(PanoptesObject):
         return _subjects
 
     def add_default_subject(self, subject):
+        """
+        Adds the subject's location media URL as a link. It displays as the default subject on PFE.
+
+        - **subject** can be a single :py:class:`.Subject` instance or a single
+          subject ID.
+
+        Examples::
+
+            collection.add_default_subject(1234)
+            collection.add_default_subject(Subject(1234))
+        """
         if not (
             isinstance(subject, Subject)
             or isinstance(subject, (int, str,))
@@ -106,10 +111,22 @@ class Collection(PanoptesObject):
             _subject_id = str(subject)
 
         self.http_post(
-            '{}/links/default_subject/{}'.format(self.id, _subject_id)
+            '{}/links/default_subject'.format(self.id),
+            json={'default_subject': _subject_id},
         )
 
     def link_to_project(self, project):
+        """
+        Links the collection to a project.
+
+        - **project** can be a single :py:class:`.Project` instance or a single
+          project ID.
+
+        Examples::
+
+            collection.link_to_project(5678)
+            collection.link_to_project(Project(5678))
+        """
         if not (
             isinstance(project, Project)
             or isinstance(project, (int, str))
@@ -122,5 +139,6 @@ class Collection(PanoptesObject):
             _project_id = str(project)
 
         self.http_post(
-            '{}/links/project/{}'.format(self.id, _project_id)
+            '{}/links/project'.format(self.id),
+            json={'project': _project_id},
         )
