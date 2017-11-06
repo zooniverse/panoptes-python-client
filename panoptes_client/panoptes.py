@@ -94,6 +94,7 @@ class Panoptes(object):
         redirect_url=None,
         username=None,
         password=None,
+        login=None,
         admin=False
     ):
         Panoptes._client = self
@@ -102,8 +103,10 @@ class Panoptes(object):
             'PANOPTES_ENDPOINT',
             'https://www.zooniverse.org'
         )
-        self.username = username or os.environ.get('PANOPTES_USERNAME')
-        self.password = password or os.environ.get('PANOPTES_PASSWORD')
+        self.username = None
+        self.password = None
+        self._auth(username, password, login)
+
         self.redirect_url = \
             redirect_url or os.environ.get('PANOPTES_REDIRECT_URL')
         self.client_secret = \
@@ -359,6 +362,23 @@ class Panoptes(object):
             endpoint=endpoint
         )
 
+    def _auth(self, auth_type, username, password):
+        if username is None or password is None:
+            if auth_type == 'interactive':
+                username, password = self.interactive_login()
+
+            elif auth_type == 'keyring':
+                # Get credentials from python keyring
+                pass
+
+            else:
+                username = os.environ.get('PANOPTES_USERNAME')
+                password = os.environ.get('PANOPTES_PASSWORD')
+
+        self.username = username
+        self.password = password
+
+
     def login(self, username=None, password=None):
         if not username:
             username = self.username
@@ -397,9 +417,10 @@ class Panoptes(object):
         return response
 
     def interactive_login(self):
-        user = input('Username: ')
+        username = input('Username: ')
         password = getpass.getpass()
-        self.login(user, password)
+
+        return username, password
 
     def get_csrf_token(self):
         url = self.endpoint + '/users/sign_in'
