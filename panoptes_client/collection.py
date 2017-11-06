@@ -90,7 +90,8 @@ class Collection(PanoptesObject):
 
     def add_default_subject(self, subject):
         """
-        Adds the subject's location media URL as a link. It displays as the default subject on PFE.
+        Adds the subject's location media URL as a link.
+        It displays as the default subject on PFE.
 
         - **subject** can be a single :py:class:`.Subject` instance or a single
           subject ID.
