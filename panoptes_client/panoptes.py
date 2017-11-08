@@ -105,7 +105,7 @@ class Panoptes(object):
         )
         self.username = None
         self.password = None
-        self._auth(username, password, login)
+        self._auth(login, username, password)
 
         self.redirect_url = \
             redirect_url or os.environ.get('PANOPTES_REDIRECT_URL')
