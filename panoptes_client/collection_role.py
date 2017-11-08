@@ -8,4 +8,5 @@ class CollectionRole(PanoptesObject):
     _link_slug = 'collection_roles'
     _edit_attributes = ()
 
+
 LinkResolver.register(CollectionRole)
