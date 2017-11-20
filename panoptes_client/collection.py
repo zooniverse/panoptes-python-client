@@ -14,6 +14,11 @@ class Collection(PanoptesObject):
         'name',
         'display_name',
         'private',
+        {
+            'links': (
+                'project',
+            ),
+        },
     )
 
     @property
@@ -114,32 +119,4 @@ class Collection(PanoptesObject):
         self.http_post(
             '{}/links/default_subject'.format(self.id),
             json={'default_subject': _subject_id},
-        )
-
-    def link_to_project(self, project):
-        """
-        Links the collection to a project.
-
-        - **project** can be a single :py:class:`.Project` instance or a single
-          project ID.
-
-        Examples::
-
-            collection.link_to_project(5678)
-            collection.link_to_project(Project(5678))
-        """
-        if not (
-            isinstance(project, Project)
-            or isinstance(project, (int, str))
-        ):
-            raise TypeError
-
-        if isinstance(project, Project):
-            _project_id = project.id
-        else:
-            _project_id = str(project)
-
-        self.http_post(
-            '{}/links/projects'.format(self.id),
-            json={'project': _project_id},
         )
