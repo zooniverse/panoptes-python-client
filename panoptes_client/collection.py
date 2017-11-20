@@ -3,7 +3,6 @@ from builtins import str
 
 from panoptes_client.panoptes import PanoptesObject
 from panoptes_client.subject import Subject
-from panoptes_client.project import Project
 from panoptes_client.utils import batchable
 
 
