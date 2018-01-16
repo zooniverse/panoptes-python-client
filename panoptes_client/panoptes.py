@@ -417,6 +417,7 @@ class Panoptes(object):
         return response
 
     def interactive_login(self):
+        print('Enter your Zooniverse credentials...')
         username = input('Username: ')
         password = getpass.getpass()
 
