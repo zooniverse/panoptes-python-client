@@ -12,7 +12,12 @@ class Collection(PanoptesObject):
     _edit_attributes = (
         'name',
         'display_name',
-        'private'
+        'private',
+        {
+            'links': (
+                'project',
+            ),
+        },
     )
 
     @property
@@ -86,3 +91,31 @@ class Collection(PanoptesObject):
             _subjects.append(_subject_id)
 
         return _subjects
+
+    def set_default_subject(self, subject):
+        """
+        Sets the subject's location media URL as a link.
+        It displays as the default subject on PFE.
+
+        - **subject** can be a single :py:class:`.Subject` instance or a single
+          subject ID.
+
+        Examples::
+
+            collection.set_default_subject(1234)
+            collection.set_default_subject(Subject(1234))
+        """
+        if not (
+            isinstance(subject, Subject)
+            or isinstance(subject, (int, str,))
+        ):
+            raise TypeError
+        if isinstance(subject, Subject):
+            _subject_id = subject.id
+        else:
+            _subject_id = str(subject)
+
+        self.http_post(
+            '{}/links/default_subject'.format(self.id),
+            json={'default_subject': _subject_id},
+        )

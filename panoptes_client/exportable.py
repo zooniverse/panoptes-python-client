@@ -1,6 +1,8 @@
 from __future__ import absolute_import, division, print_function
 
+import csv
 import datetime
+import functools
 import time
 
 import requests
@@ -33,8 +35,9 @@ class Exportable(object):
         wait_timeout=None,
     ):
         """
-        Downloads a data export over HTTP. Returns a file-like object
-        containing the content of the export.
+        Downloads a data export over HTTP. Returns a `Requests Response
+        <http://docs.python-requests.org/en/master/api/#requests.Response>`_
+        object containing the content of the export.
 
         - **export_type** is a string specifying which type of export should be
           downloaded.
@@ -47,10 +50,20 @@ class Exportable(object):
           ``True``. Has no effect if ``wait`` is ``False`` or if ``generate``
           is ``True``.
 
+        The returned :py:class:`.Response` object has two additional attributes
+        as a convenience for working with the CSV content; **csv_reader** and
+        **csv_dictreader**, which are wrappers for :py:meth:`.csv.reader`
+        and :py:class:`csv.DictReader` respectively. These wrappers take care
+        of correctly decoding the export content for the CSV parser.
+
         Example::
 
             classification_export = Project(1234).get_export('classifications')
-            for row in csv.DictReader(classification_export):
+            for row in classification_export.csv_reader():
+                print(row)
+
+            classification_export = Project(1234).get_export('classifications')
+            for row in classification_export.csv_dictreader():
                 print(row)
         """
 
@@ -67,7 +80,16 @@ class Exportable(object):
         else:
             media_url = export['media'][0]['src']
 
-        return requests.get(media_url, stream=True)
+        response = requests.get(media_url, stream=True)
+        response.csv_reader = functools.partial(
+            csv.reader,
+            response.iter_lines(decode_unicode=True),
+        )
+        response.csv_dictreader = functools.partial(
+            csv.DictReader,
+            response.iter_lines(decode_unicode=True),
+        )
+        return response
 
     def wait_export(
         self,
