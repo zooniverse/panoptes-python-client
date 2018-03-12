@@ -1,10 +1,11 @@
 from __future__ import absolute_import, division, print_function
 from builtins import str
 
+import getpass
 import logging
 import os
 import requests
-import getpass
+import threading
 
 from datetime import datetime, timedelta
 
@@ -18,8 +19,6 @@ class Panoptes(object):
     create an instance of this class, but you will need to import it to log in,
     etc.
     """
-
-    _client = None
 
     _http_headers = {
         'default': {
@@ -78,13 +77,16 @@ class Panoptes(object):
             Panoptes.connect(username='example', password='example')
             Panoptes.connect(endpoint='https://panoptes.example.com')
         """
-        return cls(*args, **kwargs)
+        thread_local = threading.local()
+        thread_local.panoptes_client = cls(*args, **kwargs)
+        return thread_local.panoptes_client
 
     @classmethod
-    def client(cls):
-        if not cls._client:
-            cls._client = cls()
-        return cls._client
+    def client(cls, *args, **kwargs):
+        local_client = getattr(threading.local(), "panoptes_client", None)
+        if not local_client:
+            return cls(*args, **kwargs)
+        return local_client
 
     def __init__(
         self,
@@ -97,8 +99,6 @@ class Panoptes(object):
         login=None,
         admin=False
     ):
-        Panoptes._client = self
-
         self.endpoint = endpoint or os.environ.get(
             'PANOPTES_ENDPOINT',
             'https://www.zooniverse.org'
@@ -129,6 +129,13 @@ class Panoptes(object):
         self.session = requests.session()
 
         self.logger = logging.getLogger('panoptes_client')
+
+    def __enter__(self):
+        threading.local().panoptes_client = self
+        return self
+
+    def __exit__(self, *exc):
+        threading.local().panoptes_client = None
 
     def http_request(
         self,
