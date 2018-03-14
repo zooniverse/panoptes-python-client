@@ -23,6 +23,14 @@ def isiterable(v):
     return isinstance(v, ITERABLE_TYPES)
 
 
+def split(to_batch, batch_size):
+    for batch in [
+        to_batch[i:i + batch_size]
+        for i in range(0, len(to_batch), batch_size)
+    ]:
+        yield batch
+
+
 def batchable(func=None, batch_size=100):
     @functools.wraps(func)
     def do_batch(*args, **kwargs):
@@ -39,14 +47,11 @@ def batchable(func=None, batch_size=100):
         if isinstance(to_batch, set):
             to_batch = list(to_batch)
 
-        for _batch in [
-            to_batch[i:i+_batch_size]
-            for i in range(0, len(to_batch), _batch_size)
-        ]:
+        for batch in split(to_batch, _batch_size):
             if _self is None:
-                func(_batch, *args, **kwargs)
+                func(batch, *args, **kwargs)
             else:
-                func(_self, _batch, *args, **kwargs)
+                func(_self, batch, *args, **kwargs)
 
     # This avoids us having to call batchable wherever it's used, so we can
     # just write:
