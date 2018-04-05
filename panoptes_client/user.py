@@ -7,7 +7,9 @@ from panoptes_client.utils import isiterable, split
 class User(PanoptesObject):
     _api_slug = 'users'
     _link_slug = 'users'
-    _edit_attributes = ()
+    _edit_attributes = (
+      'valid_email',
+    )
 
     @classmethod
     def where(cls, **kwargs):
