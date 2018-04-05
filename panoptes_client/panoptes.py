@@ -581,7 +581,7 @@ class PanoptesObject(object):
         if not _id:
             return None
         try:
-            return cls.where(id=_id).next()
+            return next(cls.where(id=_id))
         except StopIteration:
             raise PanoptesAPIException(
                 "Could not find {} with id='{}'".format(cls.__name__, _id)
@@ -745,7 +745,7 @@ class ResultPaginator(object):
             if self.object_count and self.next_href:
                 response, _ = Panoptes.client().get(self.next_href)
                 self.set_page(response)
-                return self.next()
+                return next(self)
             else:
                 raise StopIteration
 
