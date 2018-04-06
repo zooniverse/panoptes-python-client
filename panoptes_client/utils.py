@@ -24,6 +24,8 @@ def isiterable(v):
 
 
 def split(to_batch, batch_size):
+    if type(to_batch) == set:
+        to_batch = tuple(to_batch)
     for batch in [
         to_batch[i:i + batch_size]
         for i in range(0, len(to_batch), batch_size)
