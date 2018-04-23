@@ -12,11 +12,17 @@ class Workflow(PanoptesObject, Exportable):
     _api_slug = 'workflows'
     _link_slug = 'workflows'
     _edit_attributes = (
-        'tasks',
-        'first_task',
+        'active',
         'configuration',
         'display_name',
-        'active',
+        'first_task',
+        'primary_language',
+        'tasks',
+        {
+            'links': (
+                'project',
+            ),
+        }
     )
 
     @batchable
