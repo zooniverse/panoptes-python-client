@@ -16,7 +16,9 @@ class Workflow(PanoptesObject, Exportable):
         'configuration',
         'display_name',
         'first_task',
+        'mobile_friendly',
         'primary_language',
+        'retirement',
         'tasks',
         {
             'links': (
