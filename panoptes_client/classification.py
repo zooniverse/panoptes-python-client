@@ -22,7 +22,7 @@ class Classification(PanoptesObject):
 
         Examples::
 
-            my_classifications = Classifiction.where()
+            my_classifications = Classification.where()
             my_proj_123_classifications = Classification.where(project_id=123)
 
             all_proj_123_classifications = Classification.where(
