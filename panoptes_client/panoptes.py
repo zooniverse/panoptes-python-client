@@ -597,10 +597,9 @@ class PanoptesObject(object):
 
         if type(raw) == dict:
             self.set_raw(raw, etag)
-            return
-
-        self.raw = {}
-        self.raw['id'] = raw
+        else:
+            self.set_raw({}, loaded=False)
+            self.raw['id'] = raw
 
     def __getattr__(self, name):
         try:
@@ -621,16 +620,19 @@ class PanoptesObject(object):
             ))
 
     def __setattr__(self, name, value):
-        if name in PanoptesObject.RESERVED_ATTRIBUTES or name not in self.raw:
+        if name in PanoptesObject.RESERVED_ATTRIBUTES:
+            return super(PanoptesObject, self).__setattr__(name, value)
+
+        if not self._loaded:
+            self.reload()
+
+        if name not in self.raw:
             return super(PanoptesObject, self).__setattr__(name, value)
 
         if name not in self._edit_attributes:
             raise ReadOnlyAttributeException(
                 '{} is read-only'.format(name)
             )
-
-        if not self._loaded:
-            self.reload()
 
         self.raw[name] = value
         self.modified_attributes.add(name)
@@ -641,14 +643,14 @@ class PanoptesObject(object):
             self.id
         )
 
-    def set_raw(self, raw, etag=None):
+    def set_raw(self, raw, etag=None, loaded=True):
         self.raw = {}
         self.raw.update(self._savable_dict(include_none=True))
         self.raw.update(raw)
         self.etag = etag
         self.modified_attributes = set()
 
-        self._loaded = True
+        self._loaded = loaded
 
     def _savable_dict(
         self,
@@ -695,6 +697,10 @@ class PanoptesObject(object):
             save_method = Panoptes.client().post
             force_reload = False
         else:
+            if not self.modified_attributes:
+                return
+            if not self._loaded:
+                self.reload()
             save_method = Panoptes.client().put
             force_reload = True
 
