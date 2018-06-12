@@ -96,9 +96,8 @@ class SubjectSet(PanoptesObject):
         Returns a boolean indicating if the subject is linked to the subject_set
 
         Examples::
-
-            subject_set.contains_subject(1234)
-            subject_set.contains_subject(Subject(1234))
+            1234 in subject_set
+            Subject(1234) in subject_set
         """
         if isinstance(subject, Subject):
             _subject_id = subject.id
