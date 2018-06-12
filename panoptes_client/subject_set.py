@@ -86,6 +86,31 @@ class SubjectSet(PanoptesObject):
             '{}/links/subjects/{}'.format(self.id, _subjects_ids)
         )
 
+    @batchable
+    def contains_subject(self, subject):
+        """
+        Tests if the subject_id is linked to the subject_set
+
+        - **subject** a single :py:class:`.Subject` instance, or a single
+          subject ID.
+
+        Returns a boolean indicating if the subject is linked to the subject_set
+
+        Examples::
+
+            subject_set.contains_subject(1234)
+            subject_set.contains_subject(Subject(1234))
+        """
+        _subject_id = self._build_subject_list(subject)
+
+        linked_subject_count = SetMemberSubject.where(
+            subject_set_id=self.id,
+            subject_id=_subject_id
+        ).object_count
+
+        return linked_subject_count == 1
+
+
     def _build_subject_list(self, subjects):
         _subjects = []
         for subject in subjects:
