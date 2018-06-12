@@ -86,7 +86,6 @@ class SubjectSet(PanoptesObject):
             '{}/links/subjects/{}'.format(self.id, _subjects_ids)
         )
 
-    @batchable
     def contains_subject(self, subject):
         """
         Tests if the subject_id is linked to the subject_set
@@ -101,7 +100,10 @@ class SubjectSet(PanoptesObject):
             subject_set.contains_subject(1234)
             subject_set.contains_subject(Subject(1234))
         """
-        _subject_id = self._build_subject_list(subject)
+        if isinstance(subject, Subject):
+            _subject_id = subject.id
+        else:
+            _subject_id = str(subject)
 
         linked_subject_count = SetMemberSubject.where(
             subject_set_id=self.id,
