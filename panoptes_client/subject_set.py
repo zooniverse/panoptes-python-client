@@ -86,7 +86,7 @@ class SubjectSet(PanoptesObject):
             '{}/links/subjects/{}'.format(self.id, _subjects_ids)
         )
 
-    def contains_subject(self, subject):
+    def __contains__(self, subject):
         """
         Tests if the subject_id is linked to the subject_set
 
@@ -111,7 +111,6 @@ class SubjectSet(PanoptesObject):
         ).object_count
 
         return linked_subject_count == 1
-
 
     def _build_subject_list(self, subjects):
         _subjects = []
