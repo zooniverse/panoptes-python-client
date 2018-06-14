@@ -1,3 +1,10 @@
+## 1.0.1 (2018-06-14)
+
+- Fix: Exports are not automatically decompressed on download
+- Fix: Unable to `save` a Workflow
+- Fix: Fix typo in documentation for Classification
+- Fix: Fix saving objects initialised from object links
+
 ## 1.0 (2017-11-03)
 
 - New: Add methods for adding Project links
