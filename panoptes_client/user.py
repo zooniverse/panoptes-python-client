@@ -14,16 +14,32 @@ class User(PanoptesObject):
     @classmethod
     def where(cls, **kwargs):
         email = kwargs.get('email')
-        if not email:
-            for user in super(User, cls).where(**kwargs):
-                yield user
-            return
+        login = kwargs.get('login')
 
-        if not isiterable(email):
-            email = [email]
+        if email and login:
+            raise ValueError(
+                'Queries are supported on at most ONE of email and login'
+            )
 
-        for batch in split(email, 50):
-            kwargs['email'] = ",".join(batch)
+        if email:
+            if not isiterable(email):
+                email = [email]
+
+            for batch in split(email, 50):
+                kwargs['email'] = ",".join(batch)
+                for user in super(User, cls).where(**kwargs):
+                    yield user
+
+        elif login:
+            if not isiterable(login):
+                login = [login]
+
+            for batch in split(login, 50):
+                kwargs['login'] = ",".join(batch)
+                for user in super(User, cls).where(**kwargs):
+                    yield user
+
+        else:
             for user in super(User, cls).where(**kwargs):
                 yield user
 
