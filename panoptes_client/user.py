@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function
 from panoptes_client.panoptes import PanoptesObject, LinkResolver
 from panoptes_client.utils import isiterable, split
 
+BATCH_SIZE = 50
 
 class User(PanoptesObject):
     _api_slug = 'users'
@@ -21,11 +22,15 @@ class User(PanoptesObject):
                 'Queries are supported on at most ONE of email and login'
             )
 
+        # This is a workaround for
+        # https://github.com/zooniverse/Panoptes/issues/2733
+        kwargs['page_size'] = BATCH_SIZE
+
         if email:
             if not isiterable(email):
                 email = [email]
 
-            for batch in split(email, 50):
+            for batch in split(email, BATCH_SIZE):
                 kwargs['email'] = ",".join(batch)
                 for user in super(User, cls).where(**kwargs):
                     yield user
@@ -34,7 +39,7 @@ class User(PanoptesObject):
             if not isiterable(login):
                 login = [login]
 
-            for batch in split(login, 50):
+            for batch in split(login, BATCH_SIZE):
                 kwargs['login'] = ",".join(batch)
                 for user in super(User, cls).where(**kwargs):
                     yield user
