@@ -81,12 +81,6 @@ class Panoptes(object):
         more of the below arguments.  By default, the client will connect to
         the public Zooniverse.org API as an anonymous user.
 
-        Also note that this method only *stores* the given values. It does not
-        immediately perform any authentication or attempt to connect to the
-        API. If the given credentials are incorrect, the client will raise a
-        :py:class:`PanoptesAPIException` the first time it makes a request to
-        the API.
-
         All arguments are optional:
 
         - **username** is your Zooniverse.org username.
@@ -104,6 +98,7 @@ class Panoptes(object):
             Panoptes.connect(endpoint='https://panoptes.example.com')
         """
         cls._local.panoptes_client = cls(*args, **kwargs)
+        cls._local.panoptes_client.login()
         return cls._local.panoptes_client
 
     @classmethod
@@ -124,13 +119,17 @@ class Panoptes(object):
         login=None,
         admin=False
     ):
+        self.session = requests.session()
+
         self.endpoint = endpoint or os.environ.get(
             'PANOPTES_ENDPOINT',
             'https://www.zooniverse.org'
         )
+        self.logged_in = False
         self.username = None
         self.password = None
         self._auth(login, username, password)
+        self.login()
 
         self.redirect_url = \
             redirect_url or os.environ.get('PANOPTES_REDIRECT_URL')
@@ -150,8 +149,6 @@ class Panoptes(object):
         self.logged_in = False
         self.bearer_token = None
         self.admin = admin
-
-        self.session = requests.session()
 
         self.logger = logging.getLogger('panoptes_client')
 
@@ -412,6 +409,9 @@ class Panoptes(object):
 
 
     def login(self, username=None, password=None):
+        if self.logged_in:
+            return
+
         if not username:
             username = self.username
         else:
