@@ -28,6 +28,11 @@ should familiarise yourself with the methods that Panoptes object classes all
 have, in particular :py:meth:`.PanoptesObject.save` and
 :py:meth:`.PanoptesObject.where`.
 
+You might also want to refer to the `Panoptes API documentation
+<https://panoptes.docs.apiary.io/>`_ as this lists the full options and allowed
+values for many of the methods in this module -- many method arguments are
+simply passed to the API as-is, with the API performing server-side validation.
+
 Installation
 ------------
 
