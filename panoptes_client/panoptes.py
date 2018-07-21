@@ -1,10 +1,11 @@
 from __future__ import absolute_import, division, print_function
 from builtins import str
 
+import getpass
 import logging
 import os
 import requests
-import getpass
+import threading
 
 from datetime import datetime, timedelta
 
@@ -14,12 +15,33 @@ if os.environ.get('PANOPTES_DEBUG'):
 
 class Panoptes(object):
     """
-    The low-level Panoptes HTTP client class. You should never need to manually
-    create an instance of this class, but you will need to import it to log in,
-    etc.
-    """
+    The low-level Panoptes HTTP client class. Use this class to log into the
+    API. In most cases you can just call :py:meth:`.Panoptes.connect` once and
+    all subsequent API requests will be authenticated.
 
-    _client = None
+    If you want to configure multiple clients, e.g. to perform operations as
+    multiple users, you should initialise the client as a context manager,
+    using the `with` statement instead of using :py:meth:`.Panoptes.connect`.
+    In this example, we modify a project by authenticating as the project
+    owner, then log in as a regular user to add a subject to a collection,
+    then switch back to the project owner's account to retire some subjects::
+
+        owner_client = Panoptes(username='example-project-owner', password='')
+
+        with owner_client:
+            project = Project(1234)
+            project.display_name = 'New name'
+            project.save()
+
+        with Panoptes(username='example-user', password=''):
+            Collection(1234).add(Subject(1234))
+
+        with owner_client:
+            Workflow(1234).retire_subjects([1234, 5678, 9012])
+
+    Using the `with` statement in this way ensures it is clear which user will
+    be used for each action.
+    """
 
     _http_headers = {
         'default': {
@@ -46,6 +68,8 @@ class Panoptes(object):
         ),
     }
 
+    _local = threading.local()
+
     @classmethod
     def connect(cls, *args, **kwargs):
         """
@@ -56,11 +80,6 @@ class Panoptes(object):
         Note that there is no need to call this unless you need to pass one or
         more of the below arguments.  By default, the client will connect to
         the public Zooniverse.org API as an anonymous user.
-
-        Also note that this method only *stores* the given values. It does not
-        immediately perform any authentication or attempt to connect to the
-        API. If the given credentials are incorrect, the client will raise a
-        PanoptesAPIException the first time it makes a request to the API.
 
         All arguments are optional:
 
@@ -78,13 +97,16 @@ class Panoptes(object):
             Panoptes.connect(username='example', password='example')
             Panoptes.connect(endpoint='https://panoptes.example.com')
         """
-        return cls(*args, **kwargs)
+        cls._local.panoptes_client = cls(*args, **kwargs)
+        cls._local.panoptes_client.login()
+        return cls._local.panoptes_client
 
     @classmethod
-    def client(cls):
-        if not cls._client:
-            cls._client = cls()
-        return cls._client
+    def client(cls, *args, **kwargs):
+        local_client = getattr(cls._local, "panoptes_client", None)
+        if not local_client:
+            return cls(*args, **kwargs)
+        return local_client
 
     def __init__(
         self,
@@ -97,15 +119,17 @@ class Panoptes(object):
         login=None,
         admin=False
     ):
-        Panoptes._client = self
+        self.session = requests.session()
 
         self.endpoint = endpoint or os.environ.get(
             'PANOPTES_ENDPOINT',
             'https://www.zooniverse.org'
         )
+        self.logged_in = False
         self.username = None
         self.password = None
         self._auth(login, username, password)
+        self.login()
 
         self.redirect_url = \
             redirect_url or os.environ.get('PANOPTES_REDIRECT_URL')
@@ -126,9 +150,14 @@ class Panoptes(object):
         self.bearer_token = None
         self.admin = admin
 
-        self.session = requests.session()
-
         self.logger = logging.getLogger('panoptes_client')
+
+    def __enter__(self):
+        self._local.panoptes_client = self
+        return self
+
+    def __exit__(self, *exc):
+        self._local.panoptes_client = None
 
     def http_request(
         self,
@@ -380,6 +409,9 @@ class Panoptes(object):
 
 
     def login(self, username=None, password=None):
+        if self.logged_in:
+            return
+
         if not username:
             username = self.username
         else:
