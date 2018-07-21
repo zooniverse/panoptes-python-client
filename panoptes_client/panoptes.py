@@ -68,6 +68,8 @@ class Panoptes(object):
         ),
     }
 
+    _local = threading.local()
+
     @classmethod
     def connect(cls, *args, **kwargs):
         """
@@ -101,13 +103,12 @@ class Panoptes(object):
             Panoptes.connect(username='example', password='example')
             Panoptes.connect(endpoint='https://panoptes.example.com')
         """
-        thread_local = threading.local()
-        thread_local.panoptes_client = cls(*args, **kwargs)
-        return thread_local.panoptes_client
+        cls._local.panoptes_client = cls(*args, **kwargs)
+        return cls._local.panoptes_client
 
     @classmethod
     def client(cls, *args, **kwargs):
-        local_client = getattr(threading.local(), "panoptes_client", None)
+        local_client = getattr(cls._local, "panoptes_client", None)
         if not local_client:
             return cls(*args, **kwargs)
         return local_client
@@ -155,11 +156,11 @@ class Panoptes(object):
         self.logger = logging.getLogger('panoptes_client')
 
     def __enter__(self):
-        threading.local().panoptes_client = self
+        self._local.panoptes_client = self
         return self
 
     def __exit__(self, *exc):
-        threading.local().panoptes_client = None
+        self._local.panoptes_client = None
 
     def http_request(
         self,
