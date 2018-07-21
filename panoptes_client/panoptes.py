@@ -15,9 +15,32 @@ if os.environ.get('PANOPTES_DEBUG'):
 
 class Panoptes(object):
     """
-    The low-level Panoptes HTTP client class. You should never need to manually
-    create an instance of this class, but you will need to import it to log in,
-    etc.
+    The low-level Panoptes HTTP client class. Use this class to log into the
+    API. In most cases you can just call :py:meth:`.Panoptes.connect` once and
+    all subsequent API requests will be authenticated.
+
+    If you want to configure multiple clients, e.g. to perform operations as
+    multiple users, you should initialise the client as a context manager,
+    using the `with` statement instead of using :py:meth:`.Panoptes.connect`.
+    In this example, we modify a project by authenticating as the project
+    owner, then log in as a regular user to add a subject to a collection,
+    then switch back to the project owner's account to retire some subjects::
+
+        owner_client = Panoptes(username='example-project-owner', password='')
+
+        with owner_client:
+            project = Project(1234)
+            project.display_name = 'New name'
+            project.save()
+
+        with Panoptes(username='example-user', password=''):
+            Collection(1234).add(Subject(1234))
+
+        with owner_client:
+            Workflow(1234).retire_subjects([1234, 5678, 9012])
+
+    Using the `with` statement in this way ensures it is clear which user will
+    be used for each action.
     """
 
     _http_headers = {
@@ -59,7 +82,8 @@ class Panoptes(object):
         Also note that this method only *stores* the given values. It does not
         immediately perform any authentication or attempt to connect to the
         API. If the given credentials are incorrect, the client will raise a
-        PanoptesAPIException the first time it makes a request to the API.
+        :py:class:`PanoptesAPIException` the first time it makes a request to
+        the API.
 
         All arguments are optional:
 
