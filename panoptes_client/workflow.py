@@ -32,10 +32,11 @@ class Workflow(PanoptesObject, Exportable):
         """
         Retires subjects in this workflow.
 
-        - **subjects** can be a list of Subject instances, a list of subject
-          IDs, a single Subject instance, or a single subject ID.
-        - **reason** gives the reason the subject has been retired. Defaults to
-          **other**.
+        - **subjects** can be a list of :py:class:`Subject` instances, a list
+          of subject IDs, a single :py:class:`Subject` instance, or a single
+          subject ID.
+        - **reason** gives the reason the :py:class:`Subject` has been retired.
+          Defaults to **other**.
 
         Examples::
 
@@ -60,9 +61,9 @@ class Workflow(PanoptesObject, Exportable):
         """
         Links the given subject sets to this workflow.
 
-        - **subject_sets** can be a list of SubjectSet instances, a list of
-          subject set IDs, a single SubjectSet instance, or a single subject
-          set ID.
+        - **subject_sets** can be a list of :py:class:`SubjectSet` instances, a
+          list of subject set IDs, a single :py:class:`SubjectSet` instance, or
+          a single subject set ID.
 
         Examples::
 
@@ -84,9 +85,9 @@ class Workflow(PanoptesObject, Exportable):
         """
         Unlinks the given subject sets from this workflow.
 
-        - **subject_sets** can be a list of SubjectSet instances, a list of
-          subject set IDs, a single SubjectSet instance, or a single subject
-          set ID.
+        - **subject_sets** can be a list of :py:class:`SubjectSet` instances, a
+          list of subject set IDs, a single :py:class:`SubjectSet` instance, or
+          a single subject set ID.
 
         Examples::
 
