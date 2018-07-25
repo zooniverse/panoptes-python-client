@@ -42,6 +42,7 @@ class Subject(PanoptesObject):
             self.locations = []
         if not self.metadata:
             self.metadata = {}
+            self._original_metadata = {}
         self._media_files = []
 
     def save(self):
@@ -50,7 +51,14 @@ class Subject(PanoptesObject):
         which have previosly been added to the subject with
         :py:meth:`add_location`. Automatically retries uploads on error.
         """
+        if not self.metadata == self._original_metadata:
+            self.modified_attributes.add('metadata')
+
         response = super(Subject, self).save()
+
+        if not response:
+            return
+
         for location, media_data in zip(
             response['subjects'][0]['locations'],
             self._media_files
@@ -75,6 +83,11 @@ class Subject(PanoptesObject):
                             raise
                         else:
                             time.sleep(attempt * RETRY_BACKOFF_INTERVAL)
+
+    def set_raw(self, raw, etag=None, loaded=True):
+        super(Subject, self).set_raw(raw, etag, loaded)
+        if loaded:
+            self._original_metadata = dict(self.metadata)
 
     def add_location(self, location):
         """
