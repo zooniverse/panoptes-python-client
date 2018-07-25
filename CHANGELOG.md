@@ -1,3 +1,8 @@
+## 1.0.2 (2018-07-25)
+
+- Fix: Fix saving subjects with updated metadata
+- Fix: Fix calling `Subject.save()` when nothing has changed
+
 ## 1.0.1 (2018-06-14)
 
 - Fix: Exports are not automatically decompressed on download
