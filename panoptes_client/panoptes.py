@@ -38,10 +38,10 @@ class Panoptes(object):
 
     _endpoint_client_ids = {
         'default': (
-            'f79cf5ea821bb161d8cbb52d061ab9a2321d7cb169007003af66b43f7b79ce2a'
+            'ce310d45f951de68c4cc8ef46ca38cc0a008f607a2026680295757bfef99f43c'
         ),
         'https://panoptes-staging.zooniverse.org': (
-            '535759b966935c297be11913acee7a9ca17c025f9f15520e7504728e71110a27'
+            'e094b63362fdef0548e0bbcc6e6cb5996c422d3a770074ef972432d57d41049c'
         ),
     }
 
