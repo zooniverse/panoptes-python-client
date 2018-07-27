@@ -18,7 +18,12 @@ except ImportError:
     import imghdr
     MEDIA_TYPE_DETECTION = 'imghdr'
 
-from panoptes_client.panoptes import PanoptesObject, LinkResolver
+from panoptes_client.panoptes import (
+    LinkResolver,
+    PanoptesAPIException,
+    PanoptesObject,
+)
+from redo import retry
 
 UPLOAD_RETRY_LIMIT = 5
 RETRY_BACKOFF_INTERVAL = 5
@@ -54,7 +59,12 @@ class Subject(PanoptesObject):
         if not self.metadata == self._original_metadata:
             self.modified_attributes.add('metadata')
 
-        response = super(Subject, self).save()
+        response = retry(
+            super(Subject, self).save,
+            attempts=UPLOAD_RETRY_LIMIT,
+            sleeptime=RETRY_BACKOFF_INTERVAL,
+            retry_exceptions=(PanoptesAPIException,),
+        )
 
         if not response:
             return
@@ -67,22 +77,24 @@ class Subject(PanoptesObject):
                 continue
 
             for media_type, url in location.items():
-                for attempt in range(UPLOAD_RETRY_LIMIT):
-                    try:
-                        upload_response = requests.put(
-                            url,
-                            headers={
-                                'Content-Type': media_type,
-                            },
-                            data=media_data,
-                        )
-                        upload_response.raise_for_status()
-                        break
-                    except requests.exceptions.RequestException:
-                        if (attempt + 1) >= UPLOAD_RETRY_LIMIT:
-                            raise
-                        else:
-                            time.sleep(attempt * RETRY_BACKOFF_INTERVAL)
+                retry(
+                    self._upload_media,
+                    args=(url, media_data, media_type),
+                    attempts=UPLOAD_RETRY_LIMIT,
+                    sleeptime=RETRY_BACKOFF_INTERVAL,
+                    retry_exceptions=(requests.exceptions.RequestException,),
+                )
+
+    def _upload_media(self, url, media_data, media_type):
+        upload_response = requests.put(
+            url,
+            headers={
+                'Content-Type': media_type,
+            },
+            data=media_data,
+        )
+        upload_response.raise_for_status()
+        return upload_response
 
     def set_raw(self, raw, etag=None, loaded=True):
         super(Subject, self).set_raw(raw, etag, loaded)

@@ -12,6 +12,7 @@ setup(
         'requests>=2.4.2,<2.20',
         'future>=0.16,<0.17',
         'python-magic>=0.4,<0.5',
+        'redo>=1.6,<1.7',
     ],
     extras_require={
         'testing': [
