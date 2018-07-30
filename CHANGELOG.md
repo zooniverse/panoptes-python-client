@@ -1,3 +1,8 @@
+## 1.0.3 (2018-07-30)
+
+- Fix: TypeError when creating subjects
+- Update default client IDs
+
 ## 1.0.2 (2018-07-25)
 
 - Fix: Fix saving subjects with updated metadata
