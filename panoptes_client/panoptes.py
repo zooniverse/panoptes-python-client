@@ -550,38 +550,42 @@ class PanoptesObject(object):
         return '/'.join(['', cls._api_slug] + [str(a) for a in args if a])
 
     @classmethod
-    def http_get(cls, path, params={}, headers={}):
+    def http_get(cls, path, params={}, headers={}, **kwargs):
         return Panoptes.client().get(
             cls.url(path),
             params,
-            headers
+            headers,
+            **kwargs
         )
 
     @classmethod
-    def http_post(cls, path, params={}, headers={}, json=None):
+    def http_post(cls, path, params={}, headers={}, json=None, **kwargs):
         return Panoptes.client().post(
             cls.url(path),
             params,
             headers,
-            json
+            json,
+            **kwargs
         )
 
     @classmethod
-    def http_put(cls, path, params={}, headers={}, json=None):
+    def http_put(cls, path, params={}, headers={}, json=None, **kwargs):
         return Panoptes.client().put(
             cls.url(path),
             params,
             headers,
-            json
+            json,
+            **kwargs
         )
 
     @classmethod
-    def http_delete(cls, path, params={}, headers={}, json=None):
+    def http_delete(cls, path, params={}, headers={}, json=None, **kwargs):
         return Panoptes.client().delete(
             cls.url(path),
             params,
             headers,
-            json
+            json,
+            **kwargs
         )
 
     @classmethod
@@ -765,6 +769,18 @@ class PanoptesObject(object):
             reloaded_object.raw,
             reloaded_object.etag
         )
+
+    def delete(self):
+        """
+        Deletes the object. Returns without doing anything if the object is
+        new.
+        """
+
+        if not self.id:
+            return
+        if not self._loaded:
+            self.reload()
+        return self.http_delete(self.id, etag=self.etag)
 
 class ResultPaginator(object):
     def __init__(self, object_class, response, etag):
