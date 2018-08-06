@@ -64,6 +64,7 @@ class Subject(PanoptesObject):
             attempts=UPLOAD_RETRY_LIMIT,
             sleeptime=RETRY_BACKOFF_INTERVAL,
             retry_exceptions=(PanoptesAPIException,),
+            log_args=False,
         )
 
         if not response:
@@ -83,6 +84,7 @@ class Subject(PanoptesObject):
                     attempts=UPLOAD_RETRY_LIMIT,
                     sleeptime=RETRY_BACKOFF_INTERVAL,
                     retry_exceptions=(requests.exceptions.RequestException,),
+                    log_args=False,
                 )
 
     def _upload_media(self, url, media_data, media_type):
