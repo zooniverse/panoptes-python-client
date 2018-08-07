@@ -11,6 +11,8 @@ from builtins import range, str
 import requests
 import time
 
+from concurrent.futures import ThreadPoolExecutor
+
 try:
     import magic
     MEDIA_TYPE_DETECTION = 'magic'
@@ -27,6 +29,7 @@ from redo import retry
 
 UPLOAD_RETRY_LIMIT = 5
 RETRY_BACKOFF_INTERVAL = 5
+MAX_ASYNC_UPLOADS = 5
 
 class Subject(PanoptesObject):
     _api_slug = 'subjects'
@@ -70,22 +73,26 @@ class Subject(PanoptesObject):
         if not response:
             return
 
-        for location, media_data in zip(
-            response['subjects'][0]['locations'],
-            self._media_files
-        ):
-            if not media_data:
-                continue
+        with ThreadPoolExecutor(max_workers=MAX_ASYNC_UPLOADS) as upload_exec:
+            for location, media_data in zip(
+                response['subjects'][0]['locations'],
+                self._media_files
+            ):
+                if not media_data:
+                    continue
 
-            for media_type, url in location.items():
-                retry(
-                    self._upload_media,
-                    args=(url, media_data, media_type),
-                    attempts=UPLOAD_RETRY_LIMIT,
-                    sleeptime=RETRY_BACKOFF_INTERVAL,
-                    retry_exceptions=(requests.exceptions.RequestException,),
-                    log_args=False,
-                )
+                for media_type, url in location.items():
+                    upload_exec.submit(
+                        retry,
+                        self._upload_media,
+                        args=(url, media_data, media_type),
+                        attempts=UPLOAD_RETRY_LIMIT,
+                        sleeptime=RETRY_BACKOFF_INTERVAL,
+                        retry_exceptions=(
+                            requests.exceptions.RequestException,
+                        ),
+                        log_args=False,
+                    )
 
     def _upload_media(self, url, media_data, media_type):
         upload_response = requests.put(

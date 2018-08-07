@@ -20,6 +20,7 @@ setup(
         ],
         'docs': [
             'sphinx',
-        ]
+        ],
+        ':python_version == "2.7"': ['futures'],
     }
 )
