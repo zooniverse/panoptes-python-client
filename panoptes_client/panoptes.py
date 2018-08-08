@@ -154,11 +154,16 @@ class Panoptes(object):
         self.logger = logging.getLogger('panoptes_client')
 
     def __enter__(self):
+        self._local.previous_client = getattr(
+            self._local,
+            'panoptes_client',
+            None,
+        )
         self._local.panoptes_client = self
         return self
 
     def __exit__(self, *exc):
-        self._local.panoptes_client = None
+        self._local.panoptes_client = self._local.previous_client
 
     def http_request(
         self,

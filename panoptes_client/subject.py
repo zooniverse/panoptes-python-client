@@ -9,6 +9,7 @@ except NameError:
 from builtins import range, str
 
 import requests
+import threading
 import time
 
 from concurrent.futures import ThreadPoolExecutor
@@ -22,6 +23,7 @@ except ImportError:
 
 from panoptes_client.panoptes import (
     LinkResolver,
+    Panoptes,
     PanoptesAPIException,
     PanoptesObject,
 )
@@ -29,7 +31,7 @@ from redo import retry
 
 UPLOAD_RETRY_LIMIT = 5
 RETRY_BACKOFF_INTERVAL = 5
-MAX_ASYNC_UPLOADS = 5
+ASYNC_SAVE_THREADS = 5
 
 class Subject(PanoptesObject):
     _api_slug = 'subjects'
@@ -43,6 +45,43 @@ class Subject(PanoptesObject):
             ),
         },
     )
+    _local = threading.local()
+
+    @classmethod
+    def async_saves(cls):
+        """
+        Returns a context manager to allow asynchronously creating subjects.
+        Using this context manager will create a pool of threads which will
+        create multiple subjects at once and upload any local files
+        simultaneously.
+
+        The recommended way to use this is with the `with` statement::
+
+            with Subject.async_saves():
+                local_files = [...]
+                for filename in local_files:
+                    s = Subject()
+                    s.links.project = 1234
+                    s.add_location(filename)
+                    s.save()
+
+        Alternatively, you can manually shut down the thread pool::
+
+            pool = Subject.async_saves()
+            local_files = [...]
+            try:
+                for filename in local_files:
+                    s = Subject()
+                    s.links.project = 1234
+                    s.add_location(filename)
+                    s.save()
+            finally:
+                pool.shutdown()
+        """
+        cls._local.save_exec = ThreadPoolExecutor(
+            max_workers=ASYNC_SAVE_THREADS
+        )
+        return cls._local.save_exec
 
     def __init__(self, raw={}, etag=None):
         super(Subject, self).__init__(raw, etag)
@@ -53,46 +92,78 @@ class Subject(PanoptesObject):
             self._original_metadata = {}
         self._media_files = []
 
-    def save(self):
+    def save(self, client=None):
         """
         Like :py:meth:`.PanoptesObject.save`, but also uploads any local files
         which have previosly been added to the subject with
         :py:meth:`add_location`. Automatically retries uploads on error.
+
+        If multiple local files are to be uploaded, several files will be
+        uploaded simultaneously to save time.
         """
-        if not self.metadata == self._original_metadata:
-            self.modified_attributes.add('metadata')
+        if not client:
+            client = Panoptes.client()
 
-        response = retry(
-            super(Subject, self).save,
-            attempts=UPLOAD_RETRY_LIMIT,
-            sleeptime=RETRY_BACKOFF_INTERVAL,
-            retry_exceptions=(PanoptesAPIException,),
-            log_args=False,
-        )
+        async_save = hasattr(self._local, 'save_exec')
 
-        if not response:
-            return
-
-        with ThreadPoolExecutor(max_workers=MAX_ASYNC_UPLOADS) as upload_exec:
-            for location, media_data in zip(
-                response['subjects'][0]['locations'],
-                self._media_files
-            ):
-                if not media_data:
-                    continue
-
-                for media_type, url in location.items():
-                    upload_exec.submit(
-                        retry,
-                        self._upload_media,
-                        args=(url, media_data, media_type),
-                        attempts=UPLOAD_RETRY_LIMIT,
-                        sleeptime=RETRY_BACKOFF_INTERVAL,
-                        retry_exceptions=(
-                            requests.exceptions.RequestException,
-                        ),
-                        log_args=False,
+        with client:
+            if async_save:
+                try:
+                    # The recursive call will exec in a new thread, so
+                    # self._local.save_exec will be undefined above
+                    self._local.save_exec.submit(
+                        self.save,
+                        client=client,
                     )
+                    return
+                except RuntimeError:
+                    del self._local.save_exec
+                    async_save = False
+
+            if not self.metadata == self._original_metadata:
+                self.modified_attributes.add('metadata')
+
+            response = retry(
+                super(Subject, self).save,
+                attempts=UPLOAD_RETRY_LIMIT,
+                sleeptime=RETRY_BACKOFF_INTERVAL,
+                retry_exceptions=(PanoptesAPIException,),
+                log_args=False,
+            )
+
+            if not response:
+                return
+
+            try:
+                if async_save:
+                    upload_exec = self._local.save_exec
+                else:
+                    upload_exec = ThreadPoolExecutor(
+                        max_workers=ASYNC_SAVE_THREADS,
+                    )
+
+                for location, media_data in zip(
+                    response['subjects'][0]['locations'],
+                    self._media_files
+                ):
+                    if not media_data:
+                        continue
+
+                    for media_type, url in location.items():
+                        upload_exec.submit(
+                            retry,
+                            self._upload_media,
+                            args=(url, media_data, media_type),
+                            attempts=UPLOAD_RETRY_LIMIT,
+                            sleeptime=RETRY_BACKOFF_INTERVAL,
+                            retry_exceptions=(
+                                requests.exceptions.RequestException,
+                            ),
+                            log_args=False,
+                        )
+            finally:
+                if not async_save:
+                    upload_exec.shutdown()
 
     def _upload_media(self, url, media_data, media_type):
         upload_response = requests.put(
