@@ -8,6 +8,7 @@ import requests
 import threading
 
 from datetime import datetime, timedelta
+from panoptes_client.utils import isiterable
 
 if os.environ.get('PANOPTES_DEBUG'):
     logging.basicConfig(level=logging.DEBUG)
@@ -868,8 +869,8 @@ class LinkResolver(object):
         for key, value in self.parent.raw['links'].items():
             if not key in edit_attributes:
                 continue
-            if type(key) == list:
-               out.append((key, [ o.id for o in value ]))
+            if isiterable(value):
+                out.append((key, [getattr(o, 'id', o) for o in value]))
             else:
                 if value:
                     out.append((key, value))
