@@ -111,7 +111,7 @@ class Subject(PanoptesObject):
                 try:
                     # The recursive call will exec in a new thread, so
                     # self._local.save_exec will be undefined above
-                    self._local.save_exec.submit(
+                    self._async_future = self._local.save_exec.submit(
                         self.save,
                         client=client,
                     )
@@ -175,6 +175,23 @@ class Subject(PanoptesObject):
         )
         upload_response.raise_for_status()
         return upload_response
+
+    @property
+    def async_save_result(self):
+        """
+        Retrieves the result of this subject's asynchronous save.
+
+        - Returns `True` if the subject was saved successfully.
+        - Raises `concurrent.futures.CancelledError` if the save was cancelled.
+        - If the save failed, raises the relevant exception.
+        - Returns `False` if the subject hasn't finished saving or if the
+          subject has not been queued for asynchronous save.
+        """
+        if hasattr(self, "_async_future") and self._async_future.done():
+            self._async_future.result()
+            return True
+        else:
+            return False
 
     def set_raw(self, raw, etag=None, loaded=True):
         super(Subject, self).set_raw(raw, etag, loaded)
