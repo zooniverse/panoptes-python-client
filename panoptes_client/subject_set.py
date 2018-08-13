@@ -88,19 +88,20 @@ class SubjectSet(PanoptesObject):
 
     def __contains__(self, subject):
         """
-        Tests if the subject_id is linked to the subject_set
+        Tests if the subject is linked to the subject_set.
 
         - **subject** a single :py:class:`.Subject` instance, or a single
           subject ID.
 
-        Returns a boolean indicating if the subject is linked to the subject_set
+        Returns a boolean indicating if the subject is linked to the
+        subject_set.
 
         Examples::
             1234 in subject_set
             Subject(1234) in subject_set
         """
         if isinstance(subject, Subject):
-            _subject_id = subject.id
+            _subject_id = str(subject.id)
         else:
             _subject_id = str(subject)
 
@@ -121,7 +122,7 @@ class SubjectSet(PanoptesObject):
                 raise TypeError
 
             if isinstance(subject, Subject):
-                _subject_id = subject.id
+                _subject_id = str(subject.id)
             else:
                 _subject_id = str(subject)
 
