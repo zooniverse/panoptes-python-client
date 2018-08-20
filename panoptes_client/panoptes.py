@@ -913,6 +913,26 @@ class LinkResolver(object):
 
 
 class LinkCollection(object):
+    """
+    A collection of :py:class:`.PanoptesObject`s of one class which are linked
+    to a parent :py:class:`.PanoptesObject`.
+
+    Allows indexing, iteration, and membership testing::
+
+        project = Project(1234)
+
+        print(project.links.workflows[2].display_name)
+
+        for workflow in project.links.workflows:
+            print(workflow.id)
+
+        if Workflow(5678) in project.links.workflows:
+            print('Workflow found')
+
+        # Integers, strings, and PanoptesObjects are all OK
+        if 9012 not in project.links.workflows:
+            print('Workflow not found')
+    """
     def __init__(self, cls, slug, parent, linked_objects):
         self._linked_object_ids = list(linked_objects)
         self._cls = cls
@@ -920,19 +940,6 @@ class LinkCollection(object):
         self._parent = parent
 
     def __contains__(self, obj):
-        """
-        Tests if the `obj` is in this LinkCollection.
-
-        - **obj** a single :py:class:`.PanoptesObject` instance, or a single
-          object ID.
-
-        Returns `True` if the project is linked to the organization, and
-        `False` otherwise.
-
-        Examples::
-            1234 in project.links.workflows
-            Workflow(1234) in project.links.workflows
-        """
         if isinstance(obj, self._cls):
             obj_id = str(obj.id)
         else:
