@@ -921,13 +921,13 @@ class LinkCollection(object):
 
     def __contains__(self, obj):
         """
-        Tests if the obj is in this LinkCollection
+        Tests if the `obj` is in this LinkCollection.
 
         - **obj** a single :py:class:`.PanoptesObject` instance, or a single
           object ID.
 
-        Returns a boolean indicating if the project is linked to the
-        organization.
+        Returns `True` if the project is linked to the organization, and
+        `False` otherwise.
 
         Examples::
             1234 in project.links.workflows
@@ -947,18 +947,18 @@ class LinkCollection(object):
     @batchable
     def add(self, objs):
         """
-        Links the given projects to this organization.
+        Adds the given `objs` to this `LinkCollection`.
 
-        - **projects** can be a list of :py:class:`.Project` instances, a list
-          of project IDs, a single :py:class:`.Project` instance, or a single
-          project ID.
+        - **objs** can be a list of :py:class:`.PanoptesObject` instances, a
+          list of object IDs, a single :py:class:`.PanoptesObject` instance, or
+          a single object ID.
 
         Examples::
 
-            organization.add(1234)
-            organization.add([1,2,3,4])
-            organization.add(Project(1234))
-            organization.add([Project(12), Project(34)])
+            organization.links.projects.add(1234)
+            organization.links.projects.add(Project(1234))
+            workflow.links.subject_sets.add([1,2,3,4])
+            workflow.links.subject_sets.add([Project(12), Project(34)])
         """
 
         _objs = self._build_obj_list(objs)
@@ -972,18 +972,18 @@ class LinkCollection(object):
     @batchable
     def remove(self, objs):
         """
-        Unlinks the given projects from this organization.
+        Removes the given `objs` from this `LinkCollection`.
 
-        - **projects** can be a list of :py:class:`.Project` instances, a list
-          of project IDs, a single :py:class:`.Project` instance, or a single
-          project ID.
+        - **objs** can be a list of :py:class:`.PanoptesObject` instances, a
+          list of object IDs, a single :py:class:`.PanoptesObject` instance, or
+          a single object ID.
 
         Examples::
 
-            organization.remove(1234)
-            organization.remove([1,2,3,4])
-            organization.remove(Project(1234))
-            organization.remove([Project(12), Project(34)])
+            organization.links.projects.remove(1234)
+            organization.links.projects.remove(Project(1234))
+            workflow.links.subject_sets.remove([1,2,3,4])
+            workflow.links.subject_sets.remove([Project(12), Project(34)])
         """
 
         _objs = self._build_obj_list(objs)
