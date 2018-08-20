@@ -954,6 +954,12 @@ class LinkCollection(object):
         for obj_id in self._linked_object_ids:
             yield self._cls(obj_id)
 
+    def __repr__(self):
+        return "[{}]".format(", ".join([
+            "<{} {}>".format(self._cls.__name__, obj)
+            for obj in self._linked_object_ids
+        ]))
+
     @batchable
     def add(self, objs):
         """
