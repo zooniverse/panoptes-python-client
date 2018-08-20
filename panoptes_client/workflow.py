@@ -56,71 +56,23 @@ class Workflow(PanoptesObject, Exportable):
             }
         )
 
-    @batchable
     def add_subject_sets(self, subject_sets):
         """
-        Links the given subject sets to this workflow.
+        A wrapper around :py:meth:`.LinkCollection.add`. Equivalent to::
 
-        - **subject_sets** can be a list of :py:class:`SubjectSet` instances, a
-          list of subject set IDs, a single :py:class:`SubjectSet` instance, or
-          a single subject set ID.
-
-        Examples::
-
-            workflow.add_subject_sets(1234)
-            workflow.add_subject_sets([1,2,3,4])
-            workflow.add_subject_sets(SubjectSet(1234))
-            workflow.add_subject_sets([SubjectSet(12), SubjectSet(34)])
+            workflow.links.subject_sets.add(subject_sets)
         """
 
-        _subject_sets = self._build_subject_set_list(subject_sets)
+        return self.links.subject_sets.add(subject_sets)
 
-        return Workflow.http_post(
-            '{}/links/subject_sets'.format(self.id),
-            json={'subject_sets': _subject_sets}
-        )
-
-    @batchable
     def remove_subject_sets(self, subject_sets):
         """
-        Unlinks the given subject sets from this workflow.
+        A wrapper around :py:meth:`.LinkCollection.remove`. Equivalent to::
 
-        - **subject_sets** can be a list of :py:class:`SubjectSet` instances, a
-          list of subject set IDs, a single :py:class:`SubjectSet` instance, or
-          a single subject set ID.
-
-        Examples::
-
-            workflow.remove_subject_sets(1234)
-            workflow.remove_subject_sets([1,2,3,4])
-            workflow.remove_subject_sets(SubjectSet(1234))
-            workflow.remove_subject_sets([SubjectSet(12), SubjectSet(34)])
+            workflow.links.subject_sets.remove(subject_sets)
         """
 
-        _subject_sets = self._build_subject_set_list(subject_sets)
-        _subject_set_ids = ",".join(_subject_sets)
-
-        self.http_delete(
-            '{}/links/subject_sets/{}'.format(self.id, _subject_set_ids)
-        )
-
-    def _build_subject_set_list(self, subject_sets):
-        _subject_sets = []
-        for subject_set in subject_sets:
-            if not (
-                isinstance(subject_set, SubjectSet)
-                or isinstance(subject_set, (int, str,))
-            ):
-                raise TypeError
-
-            if isinstance(subject_set, SubjectSet):
-                _subject_set_id = subject_set.id
-            else:
-                _subject_set_id = str(subject_set)
-
-            _subject_sets.append(_subject_set_id)
-
-        return _subject_sets
+        return self.links.subject_sets.remove(subject_sets)
 
     @property
     def versions(self):

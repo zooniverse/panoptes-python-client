@@ -19,95 +19,33 @@ class Organization(PanoptesObject):
         'primary_language',
     )
 
-    @batchable
     def add(self, projects):
         """
-        Links the given projects to this organization.
+        A wrapper around :py:meth:`.LinkCollection.add`. Equivalent to::
 
-        - **projects** can be a list of :py:class:`.Project` instances, a list
-          of project IDs, a single :py:class:`.Project` instance, or a single
-          project ID.
-
-        Examples::
-
-            organization.add(1234)
-            organization.add([1,2,3,4])
-            organization.add(Project(1234))
-            organization.add([Project(12), Project(34)])
+            organization.links.add(projects)
         """
 
-        _projects = self._build_project_list(projects)
+        return self.links.projects.add(projects)
 
-        self.http_post(
-            '{}/links/projects'.format(self.id),
-            json={'projects': _projects}
-        )
-
-    @batchable
     def remove(self, projects):
         """
-        Unlinks the given projects from this organization.
+        A wrapper around :py:meth:`.LinkCollection.remove`. Equivalent to::
 
-        - **projects** can be a list of :py:class:`.Project` instances, a list
-          of project IDs, a single :py:class:`.Project` instance, or a single
-          project ID.
-
-        Examples::
-
-            organization.remove(1234)
-            organization.remove([1,2,3,4])
-            organization.remove(Project(1234))
-            organization.remove([Project(12), Project(34)])
+            organization.links.remove(projects)
         """
 
-        _projects = self._build_project_list(projects)
-
-        _project_ids = ",".join(_projects)
-        self.http_delete(
-            '{}/links/projects/{}'.format(self.id, _project_ids)
-        )
+        return self.links.projects.remove(projects)
 
     def __contains__(self, project):
         """
-        Tests if the project is linked to this organization.
+        A wrapper around :py:meth:`.LinkCollection.__contains__`. Equivalent
+        to::
 
-        - **project** a single :py:class:`.Project` instance, or a single
-          project ID.
-
-        Returns a boolean indicating if the project is linked to the
-        organization.
-
-        Examples::
-            1234 in organization
-            Project(1234) in organization
+            project in organization.links.project
         """
-        if not self._loaded:
-            self.reload()
 
-        if isinstance(project, Project):
-            project_id = str(project.id)
-        else:
-            project_id = str(project)
-
-        return project_id in self.raw.get('links', {}).get('projects', [])
-
-    def _build_project_list(self, projects):
-        _projects = []
-        for project in projects:
-            if not (
-                isinstance(project, Project)
-                or isinstance(project, (int, str,))
-            ):
-                raise TypeError
-
-            if isinstance(project, Project):
-                _project_id = str(project.id)
-            else:
-                _project_id = str(project)
-
-            _projects.append(_project_id)
-
-        return _projects
+        return project in self
 
 
 LinkResolver.register(Organization)
