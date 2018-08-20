@@ -914,7 +914,7 @@ class LinkResolver(object):
 
 class LinkCollection(object):
     def __init__(self, cls, slug, parent, linked_objects):
-        self._linked_object_ids = set(linked_objects)
+        self._linked_object_ids = list(linked_objects)
         self._cls = cls
         self._slug = slug
         self._parent = parent
@@ -940,6 +940,9 @@ class LinkCollection(object):
 
         return obj_id in self._linked_object_ids
 
+    def __getitem__(self, i):
+        return self._cls(self._linked_object_ids[i])
+
     def __iter__(self):
         for obj_id in self._linked_object_ids:
             yield self._cls(obj_id)
@@ -961,13 +964,15 @@ class LinkCollection(object):
             workflow.links.subject_sets.add([Project(12), Project(34)])
         """
 
-        _objs = self._build_obj_list(objs)
+        _objs = [obj for obj in self._build_obj_list(objs) if obj not in self]
+        if not _objs:
+            return
 
         self._parent.http_post(
             '{}/links/{}'.format(self._parent.id, self._slug),
             json={self._slug: _objs}
         )
-        self._linked_object_ids.update(_objs)
+        self._linked_object_ids.extend(_objs)
 
     @batchable
     def remove(self, objs):
@@ -986,13 +991,17 @@ class LinkCollection(object):
             workflow.links.subject_sets.remove([Project(12), Project(34)])
         """
 
-        _objs = self._build_obj_list(objs)
+        _objs = [obj for obj in self._build_obj_list(objs) if obj in self]
+        if not _objs:
+            return
 
         _obj_ids = ",".join(_objs)
         self._parent.http_delete(
             '{}/links/{}/{}'.format(self._parent.id, self._slug, _obj_ids)
         )
-        self._linked_object_ids.difference_update(_objs)
+        self._linked_object_ids = [
+            obj for obj in self._linked_object_ids if obj not in _objs
+        ]
 
     def _build_obj_list(self, objs):
         _objs = []
