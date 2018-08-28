@@ -32,6 +32,8 @@ You might also want to refer to the `Panoptes API documentation
 <https://panoptes.docs.apiary.io/>`_ as this lists the full options and allowed
 values for many of the methods in this module -- many method arguments are
 simply passed to the API as-is, with the API performing server-side validation.
+The API documentation also lists the full attributes for each class; these are
+not included in this documentation.
 
 Installation
 ------------
@@ -48,6 +50,9 @@ from GitHub::
 Upgrade an existing installation::
 
     $ pip install -U panoptes-client
+
+The Panoptes Client is supported on all versions of Python 2 and 3, from Python
+2.7 onwards.
 
 Uploading non-image media types
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -30,6 +30,9 @@ Upgrade an existing installation:
 $ pip install -U panoptes-client
 ```
 
+The Panoptes Client is supported on all versions of Python 2 and 3, from Python
+2.7 onwards.
+
 ## Usage Examples
 
 Create a project:
@@ -49,3 +52,9 @@ new_project.save()
 
 See the documentation for [additional
 examples](http://panoptes-python-client.readthedocs.io/en/latest/user_guide.html#usage-examples).
+
+## Contributing
+
+We welcome bug reports and code contributions. Please see
+[CONTRIBUTING.md](https://github.com/zooniverse/panoptes-python-client/blob/master/CONTRIBUTING.md)
+for information about how you can get involved.
