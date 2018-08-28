@@ -541,6 +541,15 @@ class PanoptesObject(object):
     The base class of all Panoptes model classes. You should never need to
     create instances of this class, but the methods defined here are common to
     all the model subclasses.
+
+    `PanoptesObject`s support lazy loading of attributes, where data is loaded
+    from the API only when it is first accessed. You can do this by passing an
+    object ID to the contructor::
+
+        project = Project(1234)
+        print(project.display_name)
+
+    This will not make any HTTP requests until the `print` statement.
     """
 
     RESERVED_ATTRIBUTES = (
