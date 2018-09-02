@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function
 from builtins import str
 
 from panoptes_client.panoptes import (
+    LinkResolver,
     PanoptesAPIException,
     PanoptesObject,
 )
@@ -144,3 +145,6 @@ class Collection(PanoptesObject):
             '{}/links/default_subject'.format(self.id),
             json={'default_subject': _subject_id},
         )
+
+
+LinkResolver.register(Collection)
