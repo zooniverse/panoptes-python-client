@@ -1,7 +1,10 @@
 from __future__ import absolute_import, division, print_function
 from builtins import str
 
-from panoptes_client.panoptes import PanoptesObject
+from panoptes_client.panoptes import (
+    PanoptesAPIException,
+    PanoptesObject,
+)
 from panoptes_client.subject import Subject
 from panoptes_client.utils import batchable
 
@@ -11,6 +14,7 @@ class Collection(PanoptesObject):
     _link_slug = 'collections'
     _edit_attributes = (
         'name',
+        'description',
         'display_name',
         'private',
         {
@@ -19,6 +23,27 @@ class Collection(PanoptesObject):
             ),
         },
     )
+
+    @classmethod
+    def find(cls, id='', slug=None):
+        """
+        Similar to :py:meth:`.PanoptesObject.find`, but allows lookup by slug
+        as well as ID.
+
+        Examples::
+
+            collection_1234 = Collection.find(1234)
+            my_collection = Collection.find(slug="example/my-collection")
+        """
+
+        if not id and not slug:
+            return None
+        try:
+            return cls.where(id=id, slug=slug).next()
+        except StopIteration:
+            raise PanoptesAPIException(
+                "Could not find collection with slug='{}'".format(slug)
+            )
 
     @property
     def subjects(self):
