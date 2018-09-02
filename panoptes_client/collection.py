@@ -14,6 +14,7 @@ class Collection(PanoptesObject):
     _link_slug = 'collections'
     _edit_attributes = (
         'name',
+        'description',
         'display_name',
         'private',
         {
