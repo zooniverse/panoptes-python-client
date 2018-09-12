@@ -127,5 +127,16 @@ class Project(PanoptesObject, Exportable):
             'workflows',
         )
 
+    @property
+    def avatar(self):
+        """
+        A generator which yields the :py:class:`.avatar` instance for
+        this project.
+        """
+
+        return Avatar.where(project=self)
+
 LinkResolver.register(Project)
 LinkResolver.register(Project, 'projects')
+
+from panoptes_client.avatar import Avatar
