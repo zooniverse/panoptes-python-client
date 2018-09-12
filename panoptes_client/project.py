@@ -130,11 +130,10 @@ class Project(PanoptesObject, Exportable):
     @property
     def avatar(self):
         """
-        A generator which yields the :py:class:`.avatar` instance for
-        this project.
+        A dict containing metadata about the user's avatar.
         """
 
-        return Avatar.where(project=self)
+        return Project.http_get('{}/avatar'.format(self.id))[0]
 
 LinkResolver.register(Project)
 LinkResolver.register(Project, 'projects')
