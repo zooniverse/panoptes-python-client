@@ -23,7 +23,7 @@ class Avatar(PanoptesObject):
             params,
             headers,
         )
-        print avatar_response.raw
+        print(avatar_response.raw)
         return avatar_response
 
 LinkResolver.register(Avatar)
