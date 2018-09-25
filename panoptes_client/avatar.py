@@ -1,6 +1,5 @@
 from panoptes_client.panoptes import (
     Panoptes,
-    PanoptesAPIException,
     PanoptesObject,
     LinkResolver,
 )
