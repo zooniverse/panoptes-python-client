@@ -6,6 +6,7 @@ from panoptes_client.panoptes import (
 )
 from panoptes_client.project import Project
 
+
 class Avatar(PanoptesObject):
     _api_slug = 'avatar'
     _link_slug = 'avatars'
@@ -25,6 +26,7 @@ class Avatar(PanoptesObject):
         )
         print(avatar_response.raw)
         return avatar_response
+
 
 LinkResolver.register(Avatar)
 LinkResolver.register(Avatar, 'avatar')
