@@ -12,7 +12,7 @@ class ProjectAvatar(PanoptesObject):
     _edit_attributes = ()
 
     @classmethod
-    def http_get(cls, path, params={}, headers={}):
+    def avatar_get(cls, path, params={}, headers={}):
         project = params.pop('project')
 
         avatar_response = Panoptes.client().get(
