@@ -228,11 +228,23 @@ class Subject(PanoptesObject):
             if MEDIA_TYPE_DETECTION == 'magic':
                 media_type = magic.from_buffer(media_data, mime=True)
             else:
-                media_type = 'image/{}'.format(imghdr.what(None, media_data))
+                media_type = imghdr.what(None, media_data)
+                if not media_type:
+                    raise UnknownMediaException(
+                        'Could not detect file type. Please try installing '
+                        'libmagic: https://panoptes-python-client.readthedocs.'
+                        'io/en/latest/user_guide.html#uploading-non-image-'
+                        'media-types'
+                    )
+                media_type = 'image/{}'.format(media_type)
             self.locations.append(media_type)
             self._media_files.append(media_data)
         finally:
             f.close()
+
+class UnknownMediaException(Exception):
+    pass
+
 
 LinkResolver.register(Subject)
 LinkResolver.register(Subject, 'subject')
