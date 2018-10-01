@@ -14,16 +14,12 @@ class ProjectAvatar(PanoptesObject):
     @classmethod
     def http_get(cls, path, params={}, headers={}):
         project = params.pop('project')
-        # print()
-        # print(Project.url(project.id))
-        # print()
 
         avatar_response = Panoptes.client().get(
             Project.url(project.id) + cls.url(path),
             params,
             headers,
         )
-        print(avatar_response.raw)
         return avatar_response
 
 
