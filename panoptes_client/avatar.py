@@ -6,7 +6,7 @@ from panoptes_client.panoptes import (
 from panoptes_client.project import Project
 
 
-class Avatar(PanoptesObject):
+class ProjectAvatar(PanoptesObject):
     _api_slug = 'avatar'
     _link_slug = 'avatars'
     _edit_attributes = ()
