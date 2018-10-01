@@ -23,5 +23,5 @@ class ProjectAvatar(PanoptesObject):
         return avatar_response
 
 
-LinkResolver.register(Avatar)
-LinkResolver.register(Avatar, 'avatar')
+LinkResolver.register(ProjectAvatar)
+LinkResolver.register(ProjectAvatar, 'avatar')
