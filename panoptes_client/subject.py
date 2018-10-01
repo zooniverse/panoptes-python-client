@@ -8,6 +8,7 @@ except NameError:
 
 from builtins import range, str
 
+import logging
 import requests
 import threading
 import time
@@ -18,6 +19,17 @@ try:
     import magic
     MEDIA_TYPE_DETECTION = 'magic'
 except ImportError:
+    import pkg_resources
+    try:
+        pkg_resources.require("python-magic")
+        logging.getLogger('panoptes_client').warn(
+            'Broken libmagic installation detected. The python-magic module is'
+            ' installed but can\'t be imported. Please check that both '
+            'python-magic and the libmagic shared library are installed '
+            'correctly. Uploading media other than images may not work.'
+        )
+    except pkg_resources.DistributionNotFound:
+        pass
     import imghdr
     MEDIA_TYPE_DETECTION = 'imghdr'
 
