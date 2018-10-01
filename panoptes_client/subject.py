@@ -8,6 +8,7 @@ except NameError:
 
 from builtins import range, str
 
+import logging
 import requests
 import threading
 import time
@@ -18,6 +19,17 @@ try:
     import magic
     MEDIA_TYPE_DETECTION = 'magic'
 except ImportError:
+    import pkg_resources
+    try:
+        pkg_resources.require("python-magic")
+        logging.getLogger('panoptes_client').warn(
+            'Broken libmagic installation detected. The python-magic module is'
+            ' installed but can\'t be imported. Please check that both '
+            'python-magic and the libmagic shared library are installed '
+            'correctly. Uploading media other than images may not work.'
+        )
+    except pkg_resources.DistributionNotFound:
+        pass
     import imghdr
     MEDIA_TYPE_DETECTION = 'imghdr'
 
@@ -228,11 +240,24 @@ class Subject(PanoptesObject):
             if MEDIA_TYPE_DETECTION == 'magic':
                 media_type = magic.from_buffer(media_data, mime=True)
             else:
-                media_type = 'image/{}'.format(imghdr.what(None, media_data))
+                media_type = imghdr.what(None, media_data)
+                if not media_type:
+                    raise UnknownMediaException(
+                        'Could not detect file type. Please try installing '
+                        'libmagic: https://panoptes-python-client.readthedocs.'
+                        'io/en/latest/user_guide.html#uploading-non-image-'
+                        'media-types'
+                    )
+                media_type = 'image/{}'.format(media_type)
             self.locations.append(media_type)
             self._media_files.append(media_data)
         finally:
             f.close()
+
+
+class UnknownMediaException(Exception):
+    pass
+
 
 LinkResolver.register(Subject)
 LinkResolver.register(Subject, 'subject')
