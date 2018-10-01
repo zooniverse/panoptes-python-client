@@ -254,6 +254,7 @@ class Subject(PanoptesObject):
         finally:
             f.close()
 
+
 class UnknownMediaException(Exception):
     pass
 
