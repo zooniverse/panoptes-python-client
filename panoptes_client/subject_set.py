@@ -1,10 +1,19 @@
 from __future__ import absolute_import, division, print_function
 from builtins import str
 
-from panoptes_client.panoptes import PanoptesObject, LinkResolver
+from panoptes_client.panoptes import (
+    LinkResolver,
+    PanoptesAPIException,
+    PanoptesObject,
+)
 from panoptes_client.set_member_subject import SetMemberSubject
 from panoptes_client.subject import Subject
 from panoptes_client.utils import batchable
+
+from redo import retry
+
+LINKING_RETRY_LIMIT = 5
+RETRY_BACKOFF_INTERVAL = 5
 
 
 class SubjectSet(PanoptesObject):
@@ -57,9 +66,14 @@ class SubjectSet(PanoptesObject):
 
         _subjects = self._build_subject_list(subjects)
 
-        self.http_post(
-            '{}/links/subjects'.format(self.id),
-            json={'subjects': _subjects}
+        retry(
+            self.http_post,
+            args=('{}/links/subjects'.format(self.id),),
+            kwargs={'json': {'subjects': _subjects}},
+            attempts=LINKING_RETRY_LIMIT,
+            sleeptime=RETRY_BACKOFF_INTERVAL,
+            retry_exceptions=(PanoptesAPIException,),
+            log_args=False,
         )
 
     @batchable
@@ -82,8 +96,13 @@ class SubjectSet(PanoptesObject):
         _subjects = self._build_subject_list(subjects)
 
         _subjects_ids = ",".join(_subjects)
-        self.http_delete(
-            '{}/links/subjects/{}'.format(self.id, _subjects_ids)
+        retry(
+            self.http_delete,
+            args=('{}/links/subjects/{}'.format(self.id, _subjects_ids),),
+            attempts=LINKING_RETRY_LIMIT,
+            sleeptime=RETRY_BACKOFF_INTERVAL,
+            retry_exceptions=(PanoptesAPIException,),
+            log_args=False,
         )
 
     def __contains__(self, subject):
