@@ -127,5 +127,12 @@ class Project(PanoptesObject, Exportable):
             'workflows',
         )
 
+    @property
+    def avatar(self):
+        """
+        A dict containing metadata about the project's avatar.
+        """
+        return self.http_get('{}/avatar'.format(self.id))[0]
+
 LinkResolver.register(Project)
 LinkResolver.register(Project, 'projects')
