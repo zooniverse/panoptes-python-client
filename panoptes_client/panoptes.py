@@ -8,7 +8,12 @@ import requests
 import threading
 
 from datetime import datetime, timedelta
+from redo import retry
+
 from panoptes_client.utils import isiterable
+
+GET_RETRY_LIMIT = 5
+RETRY_BACKOFF_INTERVAL = 5
 
 if os.environ.get('PANOPTES_DEBUG'):
     logging.basicConfig(level=logging.DEBUG)
@@ -566,11 +571,18 @@ class PanoptesObject(object):
 
     @classmethod
     def http_get(cls, path, params={}, headers={}, **kwargs):
-        return Panoptes.client().get(
-            cls.url(path),
-            params,
-            headers,
-            **kwargs
+        return retry(
+            Panoptes.client().get,
+            attempts=GET_RETRY_LIMIT,
+            sleeptime=RETRY_BACKOFF_INTERVAL,
+            retry_exceptions=(PanoptesAPIException,),
+            args=(
+                cls.url(path),
+                params,
+                headers,
+            ),
+            kwargs=kwargs,
+            log_args=False,
         )
 
     @classmethod
