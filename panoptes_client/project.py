@@ -130,9 +130,9 @@ class Project(PanoptesObject, Exportable):
     @property
     def avatar(self):
         """
-        A dict containing metadata about the user's avatar.
+        A dict containing metadata about the project's avatar.
         """
-        return Project.avatar_get('{}/avatar'.format(self.id))[0]
+        return self.http_get('{}/avatar'.format(self.id))[0]
 
 LinkResolver.register(Project)
 LinkResolver.register(Project, 'projects')
