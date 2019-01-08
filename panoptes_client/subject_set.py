@@ -12,9 +12,6 @@ from panoptes_client.utils import batchable
 
 from redo import retry
 
-LINKING_RETRY_LIMIT = 5
-RETRY_BACKOFF_INTERVAL = 5
-
 
 class SubjectSet(PanoptesObject):
     _api_slug = 'subject_sets'

@@ -8,11 +8,11 @@ import requests
 import threading
 
 from datetime import datetime, timedelta
-from redo import retry
+from redo import retrier
 
 from panoptes_client.utils import isiterable, batchable
 
-GET_RETRY_LIMIT = 5
+HTTP_RETRY_LIMIT = 5
 RETRY_BACKOFF_INTERVAL = 5
 
 if os.environ.get('PANOPTES_DEBUG'):
@@ -178,7 +178,8 @@ class Panoptes(object):
         headers={},
         json=None,
         etag=None,
-        endpoint=None
+        endpoint=None,
+        retry=False,
     ):
         _headers = self._http_headers['default'].copy()
         _headers.update(self._http_headers[method])
@@ -216,14 +217,25 @@ class Panoptes(object):
                 "json={}".format(json)
             )
 
-        response = self.session.request(
-            method,
-            url,
-            params=params,
-            headers=headers,
-            json=json
-        )
-        if response.status_code >= 500:
+        if retry:
+            retry_attempts = HTTP_RETRY_LIMIT
+        else:
+            retry_attempts = 1
+
+        for _ in retrier(
+            attempts=retry_attempts,
+            sleeptime=RETRY_BACKOFF_INTERVAL,
+        ):
+            response = self.session.request(
+                method,
+                url,
+                params=params,
+                headers=headers,
+                json=json,
+            )
+            if response.status_code < 500:
+                break
+        else:
             raise PanoptesAPIException(
                 'Received HTTP status code {} from API'.format(
                     response.status_code
@@ -239,7 +251,8 @@ class Panoptes(object):
         headers={},
         json=None,
         etag=None,
-        endpoint=None
+        endpoint=None,
+        retry=False,
     ):
         response = self.http_request(
             method,
@@ -248,7 +261,8 @@ class Panoptes(object):
             headers,
             json,
             etag,
-            endpoint
+            endpoint,
+            retry,
         )
 
         if (
@@ -270,22 +284,38 @@ class Panoptes(object):
 
         return (json_response, response.headers.get('ETag'))
 
-    def get_request(self, path, params={}, headers={}, endpoint=None):
+    def get_request(
+        self,
+        path,
+        params={},
+        headers={},
+        endpoint=None,
+        retry=False,
+    ):
         return self.http_request(
             'GET',
             path,
             params=params,
             headers=headers,
-            endpoint=endpoint
+            endpoint=endpoint,
+            retry=retry,
         )
 
-    def get(self, path, params={}, headers={}, endpoint=None):
+    def get(
+        self,
+        path,
+        params={},
+        headers={},
+        endpoint=None,
+        retry=False,
+    ):
         return self.json_request(
             'GET',
             path,
             params=params,
             headers=headers,
-            endpoint=endpoint
+            endpoint=endpoint,
+            retry=retry,
         )
 
     def put_request(
@@ -295,7 +325,8 @@ class Panoptes(object):
         headers={},
         json=None,
         etag=None,
-        endpoint=None
+        endpoint=None,
+        retry=False,
     ):
         return self.http_request(
             'PUT',
@@ -304,7 +335,8 @@ class Panoptes(object):
             headers=headers,
             json=json,
             etag=etag,
-            endpoint=None
+            endpoint=None,
+            retry=retry,
         )
 
     def put(
@@ -314,7 +346,8 @@ class Panoptes(object):
         headers={},
         json=None,
         etag=None,
-        endpoint=None
+        endpoint=None,
+        retry=False,
     ):
         return self.json_request(
             'PUT',
@@ -323,7 +356,8 @@ class Panoptes(object):
             headers=headers,
             json=json,
             etag=etag,
-            endpoint=endpoint
+            endpoint=endpoint,
+            retry=retry,
         )
 
     def post_request(
@@ -333,7 +367,8 @@ class Panoptes(object):
         headers={},
         json=None,
         etag=None,
-        endpoint=None
+        endpoint=None,
+        retry=False,
     ):
         return self.http_request(
             'post',
@@ -342,7 +377,8 @@ class Panoptes(object):
             headers=headers,
             json=json,
             etag=etag,
-            endpoint=endpoint
+            endpoint=endpoint,
+            retry=retry,
         )
 
     def post(
@@ -352,7 +388,8 @@ class Panoptes(object):
         headers={},
         json=None,
         etag=None,
-        endpoint=None
+        endpoint=None,
+        retry=False,
     ):
         return self.json_request(
             'POST',
@@ -361,7 +398,8 @@ class Panoptes(object):
             headers=headers,
             json=json,
             etag=etag,
-            endpoint=endpoint
+            endpoint=endpoint,
+            retry=retry,
         )
 
     def delete_request(
@@ -371,7 +409,8 @@ class Panoptes(object):
         headers={},
         json=None,
         etag=None,
-        endpoint=None
+        endpoint=None,
+        retry=False,
     ):
         return self.http_request(
             'delete',
@@ -380,7 +419,8 @@ class Panoptes(object):
             headers=headers,
             json=json,
             etag=etag,
-            endpoint=None
+            endpoint=None,
+            retry=retry,
         )
 
     def delete(
@@ -390,7 +430,8 @@ class Panoptes(object):
         headers={},
         json=None,
         etag=None,
-        endpoint=None
+        endpoint=None,
+        retry=False,
     ):
         return self.json_request(
             'DELETE',
@@ -399,7 +440,8 @@ class Panoptes(object):
             headers=headers,
             json=json,
             etag=etag,
-            endpoint=endpoint
+            endpoint=endpoint,
+            retry=retry,
         )
 
     def _auth(self, auth_type, username, password):
@@ -570,19 +612,13 @@ class PanoptesObject(object):
         return '/'.join(['', cls._api_slug] + [str(a) for a in args if a])
 
     @classmethod
-    def http_get(cls, path, params={}, headers={}, **kwargs):
-        return retry(
-            Panoptes.client().get,
-            attempts=GET_RETRY_LIMIT,
-            sleeptime=RETRY_BACKOFF_INTERVAL,
-            retry_exceptions=(PanoptesAPIException,),
-            args=(
-                cls.url(path),
-                params,
-                headers,
-            ),
-            kwargs=kwargs,
-            log_args=False,
+    def http_get(cls, path, params={}, headers={}, retry=True, **kwargs):
+        return Panoptes.client().get(
+            cls.url(path),
+            params,
+            headers,
+            retry,
+            **kwargs
         )
 
     @classmethod
@@ -983,7 +1019,8 @@ class LinkCollection(object):
 
         self._parent.http_post(
             '{}/links/{}'.format(self._parent.id, self._slug),
-            json={self._slug: _objs}
+            json={self._slug: _objs},
+            retry=True,
         )
         self._linked_object_ids.extend(_objs)
 
@@ -1010,7 +1047,8 @@ class LinkCollection(object):
 
         _obj_ids = ",".join(_objs)
         self._parent.http_delete(
-            '{}/links/{}/{}'.format(self._parent.id, self._slug, _obj_ids)
+            '{}/links/{}/{}'.format(self._parent.id, self._slug, _obj_ids),
+            retry=True,
         )
         self._linked_object_ids = [
             obj for obj in self._linked_object_ids if obj not in _objs
