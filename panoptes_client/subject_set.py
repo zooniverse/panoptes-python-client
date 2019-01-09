@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function
 from builtins import str
 
 from panoptes_client.panoptes import (
+    LinkCollection,
     LinkResolver,
     PanoptesAPIException,
     PanoptesObject,
@@ -11,6 +12,26 @@ from panoptes_client.subject import Subject
 from panoptes_client.utils import batchable
 
 from redo import retry
+
+
+class SubjectSetLinkCollection(LinkCollection):
+    def add(self, objs):
+        from panoptes_client.workflow import Workflow
+        if self._cls == Workflow:
+            raise NotImplementedError(
+                'Workflows and SubjectSets can only be linked via '
+                'Workflow.links'
+            )
+        return super(SubjectSetLinkCollection, self).add(objs)
+
+    def remove(self, objs):
+        from panoptes_client.workflow import Workflow
+        if self._cls == Workflow:
+            raise NotImplementedError(
+                'Workflows and SubjectSets can only be unlinked via '
+                'Workflow.links'
+            )
+        return super(SubjectSetLinkCollection, self).remove(objs)
 
 
 class SubjectSet(PanoptesObject):
@@ -27,6 +48,7 @@ class SubjectSet(PanoptesObject):
             )
         },
     )
+    _link_collection = SubjectSetLinkCollection
 
     @property
     def subjects(self):

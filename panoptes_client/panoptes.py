@@ -617,7 +617,7 @@ class PanoptesObject(object):
             cls.url(path),
             params,
             headers,
-            retry,
+            retry=retry,
             **kwargs
         )
 
@@ -883,12 +883,19 @@ class ResultPaginator(object):
 
 class LinkResolver(object):
     types = {}
+    readonly = set()
 
     @classmethod
-    def register(cls, object_class, link_slug=None):
+    def register(cls, object_class, link_slug=None, readonly=False):
         if not link_slug:
             link_slug = object_class._link_slug
         cls.types[link_slug] = object_class
+        if readonly:
+            cls.readonly.add(link_slug)
+
+    @classmethod
+    def isreadonly(cls, link_slug):
+        return link_slug in cls.readonly
 
     def __init__(self, parent):
         self.parent = parent
@@ -906,11 +913,10 @@ class LinkResolver(object):
         ):
             object_class = LinkResolver.types.get(linked_object['type'])
 
-        linked_object_type = type(linked_object)
-        if linked_object_type == LinkCollection:
+        if isinstance(linked_object, LinkCollection):
             return linked_object
-        if linked_object_type == list:
-            lc = LinkCollection(
+        if isinstance(linked_object, list):
+            lc = getattr(self.parent, '_link_collection', LinkCollection)(
                 object_class,
                 name,
                 self.parent,
@@ -918,7 +924,7 @@ class LinkResolver(object):
             )
             self.parent.raw['links'][name] = lc
             return lc
-        if linked_object_type == dict and 'id' in linked_object:
+        if isinstance(linked_object, dict) and 'id' in linked_object:
             return object_class(linked_object['id'])
         else:
             return object_class(linked_object)
@@ -974,6 +980,7 @@ class LinkCollection(object):
         self._cls = cls
         self._slug = slug
         self._parent = parent
+        self.readonly = LinkResolver.isreadonly(slug)
 
     def __contains__(self, obj):
         if isinstance(obj, self._cls):
@@ -1013,6 +1020,11 @@ class LinkCollection(object):
             workflow.links.subject_sets.add([Project(12), Project(34)])
         """
 
+        if self.readonly:
+            raise NotImplementedError(
+                '{} links can\'t be modified'.format(self._slug)
+            )
+
         _objs = [obj for obj in self._build_obj_list(objs) if obj not in self]
         if not _objs:
             return
@@ -1040,6 +1052,11 @@ class LinkCollection(object):
             workflow.links.subject_sets.remove([1,2,3,4])
             workflow.links.subject_sets.remove([Project(12), Project(34)])
         """
+
+        if self.readonly:
+            raise NotImplementedError(
+                '{} links can\'t be modified'.format(self._slug)
+            )
 
         _objs = [obj for obj in self._build_obj_list(objs) if obj in self]
         if not _objs:
