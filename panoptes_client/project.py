@@ -16,7 +16,7 @@ class ProjectLinkCollection(LinkCollection):
         from panoptes_client.workflow import Workflow
         from panoptes_client.subject_set import SubjectSet
 
-        result = super(SubjectSetLinkCollection, self).add(objs)
+        result = super(ProjectLinkCollection, self).add(objs)
 
         # Some classes are copied into the project as new objects
         # So we reload to pick those up.
