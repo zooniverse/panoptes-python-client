@@ -10,6 +10,21 @@ from panoptes_client.exportable import Exportable
 from panoptes_client.utils import batchable
 
 
+class ProjectLinkCollection(LinkCollection):
+    def add(self, objs):
+        from panoptes_client.workflow import Workflow
+        from panoptes_client.subject_set import SubjectSet
+
+        result = super(SubjectSetLinkCollection, self).add(objs)
+
+        # Some classes are copied into the project as new objects
+        # So we reload to pick those up.
+        if self._cls in (SubjectSet, Workflow):
+            self._parent.reload()
+
+        return result
+
+
 class Project(PanoptesObject, Exportable):
     _api_slug = 'projects'
     _link_slug = 'project'
@@ -21,6 +36,7 @@ class Project(PanoptesObject, Exportable):
         'private',
         'primary_language',
     )
+    _link_collection = ProjectLinkCollection
 
     @classmethod
     def find(cls, id='', slug=None):
