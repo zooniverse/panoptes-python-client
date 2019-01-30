@@ -10,6 +10,8 @@ import threading
 from datetime import datetime, timedelta
 from redo import retrier
 
+import six
+
 from panoptes_client.utils import isiterable, batchable
 
 HTTP_RETRY_LIMIT = 5
@@ -1076,7 +1078,7 @@ class LinkCollection(object):
         for obj in objs:
             if not (
                 isinstance(obj, self._cls)
-                or isinstance(obj, (int, str,))
+                or isinstance(obj, (int, six.string_types,))
             ):
                 raise TypeError
 
