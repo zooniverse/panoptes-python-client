@@ -11,7 +11,7 @@ else:
 from panoptes_client.panoptes import LinkCollection
 
 
-LINKED_OBJECT_IDS = ('1','2','3','4')
+LINKED_OBJECT_IDS = ('1', '2', '3', '4')
 
 
 class MockPanoptesObject(Mock):
