@@ -15,6 +15,21 @@ from redo import retry
 
 
 class SubjectSetLinkCollection(LinkCollection):
+    def __contains__(self, obj):
+        if self._cls == Subject:
+            if isinstance(obj, Subject):
+                _subject_id = str(obj.id)
+            else:
+                _subject_id = str(obj)
+
+            linked_subject_count = SetMemberSubject.where(
+                subject_set_id=self._parent.id,
+                subject_id=_subject_id
+            ).object_count
+
+            return linked_subject_count == 1
+        return super(SubjectSetLinkCollection, self).__contains__(obj)
+
     def add(self, objs):
         from panoptes_client.workflow import Workflow
         if self._cls == Workflow:
@@ -66,11 +81,15 @@ class SubjectSet(PanoptesObject):
         for sms in SetMemberSubject.where(subject_set_id=self.id):
             yield sms.links.subject
 
+    def set_raw(self, raw, etag=None, loaded=True):
+        raw.setdefault('links', {}).setdefault('subjects', [])
+        return super(SubjectSet, self).set_raw(raw, etag, loaded)
+
     def add(self, subjects):
         """
         A wrapper around :py:meth:`.LinkCollection.add`. Equivalent to::
 
-            subject.links.add(subjects)
+            subject_set.links.add(subjects)
         """
 
         return self.links.subjects.add(subjects)
@@ -79,36 +98,19 @@ class SubjectSet(PanoptesObject):
         """
         A wrapper around :py:meth:`.LinkCollection.remove`. Equivalent to::
 
-            subject.links.remove(subjects)
+            subject_set.links.remove(subjects)
         """
 
         return self.links.subjects.remove(subjects)
 
     def __contains__(self, subject):
         """
-        Tests if the subject is linked to the subject_set.
+        A wrapper around :py:meth:`.LinkCollection.__contains__`. Equivalent
+        to::
 
-        - **subject** a single :py:class:`.Subject` instance, or a single
-          subject ID.
-
-        Returns a boolean indicating if the subject is linked to the
-        subject_set.
-
-        Examples::
-            1234 in subject_set
-            Subject(1234) in subject_set
+            subject in subject_set.links.subjects
         """
-        if isinstance(subject, Subject):
-            _subject_id = str(subject.id)
-        else:
-            _subject_id = str(subject)
-
-        linked_subject_count = SetMemberSubject.where(
-            subject_set_id=self.id,
-            subject_id=_subject_id
-        ).object_count
-
-        return linked_subject_count == 1
+        return subject in self.links.subjects
 
 
 LinkResolver.register(SubjectSet)
