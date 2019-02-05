@@ -1027,6 +1027,11 @@ class LinkCollection(object):
                 '{} links can\'t be modified'.format(self._slug)
             )
 
+        if not self._parent.id:
+            raise ObjectNotSavedException(
+                "Links can not be modified before the object has been saved."
+            )
+
         _objs = [obj for obj in self._build_obj_list(objs) if obj not in self]
         if not _objs:
             return
@@ -1058,6 +1063,11 @@ class LinkCollection(object):
         if self.readonly:
             raise NotImplementedError(
                 '{} links can\'t be modified'.format(self._slug)
+            )
+
+        if not self._parent.id:
+            raise ObjectNotSavedException(
+                "Links can not be modified before the object has been saved."
             )
 
         _objs = [obj for obj in self._build_obj_list(objs) if obj in self]
@@ -1097,12 +1107,23 @@ class PanoptesAPIException(Exception):
     Raised whenever the API returns an error. The exception will contain the
     raw error message from the API.
     """
+
     pass
+
 
 class ReadOnlyAttributeException(Exception):
     """
     Raised if an attempt is made to modify an attribute of a
     :py:class:`PanoptesObject` which the API does not allow to be modified.
+    """
+
+    pass
+
+
+class ObjectNotSavedException(Exception):
+    """
+    Raised if an attempt is made to perform an operation on an unsaved
+    :py:class:`PanoptesObject` which requires the object to be saved first.
     """
 
     pass
