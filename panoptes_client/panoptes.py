@@ -775,10 +775,12 @@ class PanoptesObject(object):
                             (subkey, self.links._savable_dict(subattributes))
                         )
                     else:
-                        out.append((subkey, self._savable_dict(
+                        links_out = (subkey, self._savable_dict(
                             attributes=subattributes,
                             include_none=include_none
-                        )))
+                        ))
+                        if links_out[1]:
+                            out.append(links_out)
             elif modified_attributes and key not in modified_attributes:
                 continue
             else:
