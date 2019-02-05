@@ -9,7 +9,7 @@ if sys.version_info <= (3, 0):
 else:
     from unittest.mock import Mock, patch
 
-from panoptes_client.panoptes import LinkCollection
+from panoptes_client.panoptes import LinkCollection, ObjectNotSavedException
 
 
 LINKED_OBJECT_IDS = ('1', '2', '3', '4')
@@ -23,8 +23,12 @@ class MockPanoptesObject(Mock):
 
 
 class TestLinkCollection(unittest.TestCase):
-    def link_collection(self, ids=LINKED_OBJECT_IDS):
-        mock_parent = Mock()
+    def link_collection(self, ids=LINKED_OBJECT_IDS, parent=None):
+        if parent:
+            mock_parent = parent
+        else:
+            mock_parent = Mock()
+
         mock_slug = Mock()
         lc = LinkCollection(
             cls=MockPanoptesObject,
@@ -147,6 +151,13 @@ class TestLinkCollection(unittest.TestCase):
             with self.assertRaises(NotImplementedError):
                 lc.add(1)
 
+    def test_add_not_saved(self):
+        parent = MockPanoptesObject()
+        parent.id = None
+        lc = self.link_collection(parent=parent)[0]
+        with self.assertRaises(ObjectNotSavedException):
+            lc.add(1)
+
     def test_remove_empty_noop(self):
         m = Mock()
         lc, parent, slug = self.link_collection()
@@ -225,3 +236,10 @@ class TestLinkCollection(unittest.TestCase):
             lc = self.link_collection()[0]
             with self.assertRaises(NotImplementedError):
                 lc.remove(1)
+
+    def test_remove_not_saved(self):
+        parent = MockPanoptesObject()
+        parent.id = None
+        lc = self.link_collection(parent=parent)[0]
+        with self.assertRaises(ObjectNotSavedException):
+            lc.remove(1)
