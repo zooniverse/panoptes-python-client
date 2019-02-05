@@ -8,11 +8,13 @@ import requests
 import threading
 
 from datetime import datetime, timedelta
-from redo import retry
+from redo import retrier
 
-from panoptes_client.utils import isiterable
+import six
 
-GET_RETRY_LIMIT = 5
+from panoptes_client.utils import isiterable, batchable
+
+HTTP_RETRY_LIMIT = 5
 RETRY_BACKOFF_INTERVAL = 5
 
 if os.environ.get('PANOPTES_DEBUG'):
@@ -178,7 +180,8 @@ class Panoptes(object):
         headers={},
         json=None,
         etag=None,
-        endpoint=None
+        endpoint=None,
+        retry=False,
     ):
         _headers = self._http_headers['default'].copy()
         _headers.update(self._http_headers[method])
@@ -216,14 +219,25 @@ class Panoptes(object):
                 "json={}".format(json)
             )
 
-        response = self.session.request(
-            method,
-            url,
-            params=params,
-            headers=headers,
-            json=json
-        )
-        if response.status_code >= 500:
+        if retry:
+            retry_attempts = HTTP_RETRY_LIMIT
+        else:
+            retry_attempts = 1
+
+        for _ in retrier(
+            attempts=retry_attempts,
+            sleeptime=RETRY_BACKOFF_INTERVAL,
+        ):
+            response = self.session.request(
+                method,
+                url,
+                params=params,
+                headers=headers,
+                json=json,
+            )
+            if response.status_code < 500:
+                break
+        else:
             raise PanoptesAPIException(
                 'Received HTTP status code {} from API'.format(
                     response.status_code
@@ -239,7 +253,8 @@ class Panoptes(object):
         headers={},
         json=None,
         etag=None,
-        endpoint=None
+        endpoint=None,
+        retry=False,
     ):
         response = self.http_request(
             method,
@@ -248,7 +263,8 @@ class Panoptes(object):
             headers,
             json,
             etag,
-            endpoint
+            endpoint,
+            retry,
         )
 
         if (
@@ -270,22 +286,38 @@ class Panoptes(object):
 
         return (json_response, response.headers.get('ETag'))
 
-    def get_request(self, path, params={}, headers={}, endpoint=None):
+    def get_request(
+        self,
+        path,
+        params={},
+        headers={},
+        endpoint=None,
+        retry=False,
+    ):
         return self.http_request(
             'GET',
             path,
             params=params,
             headers=headers,
-            endpoint=endpoint
+            endpoint=endpoint,
+            retry=retry,
         )
 
-    def get(self, path, params={}, headers={}, endpoint=None):
+    def get(
+        self,
+        path,
+        params={},
+        headers={},
+        endpoint=None,
+        retry=False,
+    ):
         return self.json_request(
             'GET',
             path,
             params=params,
             headers=headers,
-            endpoint=endpoint
+            endpoint=endpoint,
+            retry=retry,
         )
 
     def put_request(
@@ -295,7 +327,8 @@ class Panoptes(object):
         headers={},
         json=None,
         etag=None,
-        endpoint=None
+        endpoint=None,
+        retry=False,
     ):
         return self.http_request(
             'PUT',
@@ -304,7 +337,8 @@ class Panoptes(object):
             headers=headers,
             json=json,
             etag=etag,
-            endpoint=None
+            endpoint=None,
+            retry=retry,
         )
 
     def put(
@@ -314,7 +348,8 @@ class Panoptes(object):
         headers={},
         json=None,
         etag=None,
-        endpoint=None
+        endpoint=None,
+        retry=False,
     ):
         return self.json_request(
             'PUT',
@@ -323,7 +358,8 @@ class Panoptes(object):
             headers=headers,
             json=json,
             etag=etag,
-            endpoint=endpoint
+            endpoint=endpoint,
+            retry=retry,
         )
 
     def post_request(
@@ -333,7 +369,8 @@ class Panoptes(object):
         headers={},
         json=None,
         etag=None,
-        endpoint=None
+        endpoint=None,
+        retry=False,
     ):
         return self.http_request(
             'post',
@@ -342,7 +379,8 @@ class Panoptes(object):
             headers=headers,
             json=json,
             etag=etag,
-            endpoint=endpoint
+            endpoint=endpoint,
+            retry=retry,
         )
 
     def post(
@@ -352,7 +390,8 @@ class Panoptes(object):
         headers={},
         json=None,
         etag=None,
-        endpoint=None
+        endpoint=None,
+        retry=False,
     ):
         return self.json_request(
             'POST',
@@ -361,7 +400,8 @@ class Panoptes(object):
             headers=headers,
             json=json,
             etag=etag,
-            endpoint=endpoint
+            endpoint=endpoint,
+            retry=retry,
         )
 
     def delete_request(
@@ -371,7 +411,8 @@ class Panoptes(object):
         headers={},
         json=None,
         etag=None,
-        endpoint=None
+        endpoint=None,
+        retry=False,
     ):
         return self.http_request(
             'delete',
@@ -380,7 +421,8 @@ class Panoptes(object):
             headers=headers,
             json=json,
             etag=etag,
-            endpoint=None
+            endpoint=None,
+            retry=retry,
         )
 
     def delete(
@@ -390,7 +432,8 @@ class Panoptes(object):
         headers={},
         json=None,
         etag=None,
-        endpoint=None
+        endpoint=None,
+        retry=False,
     ):
         return self.json_request(
             'DELETE',
@@ -399,7 +442,8 @@ class Panoptes(object):
             headers=headers,
             json=json,
             etag=etag,
-            endpoint=endpoint
+            endpoint=endpoint,
+            retry=retry,
         )
 
     def _auth(self, auth_type, username, password):
@@ -570,19 +614,13 @@ class PanoptesObject(object):
         return '/'.join(['', cls._api_slug] + [str(a) for a in args if a])
 
     @classmethod
-    def http_get(cls, path, params={}, headers={}, **kwargs):
-        return retry(
-            Panoptes.client().get,
-            attempts=GET_RETRY_LIMIT,
-            sleeptime=RETRY_BACKOFF_INTERVAL,
-            retry_exceptions=(PanoptesAPIException,),
-            args=(
-                cls.url(path),
-                params,
-                headers,
-            ),
-            kwargs=kwargs,
-            log_args=False,
+    def http_get(cls, path, params={}, headers={}, retry=True, **kwargs):
+        return Panoptes.client().get(
+            cls.url(path),
+            params,
+            headers,
+            retry=retry,
+            **kwargs
         )
 
     @classmethod
@@ -847,12 +885,19 @@ class ResultPaginator(object):
 
 class LinkResolver(object):
     types = {}
+    readonly = set()
 
     @classmethod
-    def register(cls, object_class, link_slug=None):
+    def register(cls, object_class, link_slug=None, readonly=False):
         if not link_slug:
             link_slug = object_class._link_slug
         cls.types[link_slug] = object_class
+        if readonly:
+            cls.readonly.add(link_slug)
+
+    @classmethod
+    def isreadonly(cls, link_slug):
+        return link_slug in cls.readonly
 
     def __init__(self, parent):
         self.parent = parent
@@ -870,10 +915,18 @@ class LinkResolver(object):
         ):
             object_class = LinkResolver.types.get(linked_object['type'])
 
-
-        if type(linked_object) == list:
-            return [object_class(_id) for _id in linked_object]
-        if type(linked_object) == dict and 'id' in linked_object:
+        if isinstance(linked_object, LinkCollection):
+            return linked_object
+        if isinstance(linked_object, list):
+            lc = getattr(self.parent, '_link_collection', LinkCollection)(
+                object_class,
+                name,
+                self.parent,
+                linked_object
+            )
+            self.parent.raw['links'][name] = lc
+            return lc
+        if isinstance(linked_object, dict) and 'id' in linked_object:
             return object_class(linked_object['id'])
         else:
             return object_class(linked_object)
@@ -901,6 +954,143 @@ class LinkResolver(object):
                 if value:
                     out.append((key, value))
         return dict(out)
+
+
+class LinkCollection(object):
+    """
+    A collection of :py:class:`.PanoptesObject`s of one class which are linked
+    to a parent :py:class:`.PanoptesObject`.
+
+    Allows indexing, iteration, and membership testing::
+
+        project = Project(1234)
+
+        print(project.links.workflows[2].display_name)
+
+        for workflow in project.links.workflows:
+            print(workflow.id)
+
+        if Workflow(5678) in project.links.workflows:
+            print('Workflow found')
+
+        # Integers, strings, and PanoptesObjects are all OK
+        if 9012 not in project.links.workflows:
+            print('Workflow not found')
+    """
+    def __init__(self, cls, slug, parent, linked_objects):
+        self._linked_object_ids = list(linked_objects)
+        self._cls = cls
+        self._slug = slug
+        self._parent = parent
+        self.readonly = LinkResolver.isreadonly(slug)
+
+    def __contains__(self, obj):
+        if isinstance(obj, self._cls):
+            obj_id = str(obj.id)
+        else:
+            obj_id = str(obj)
+
+        return obj_id in self._linked_object_ids
+
+    def __getitem__(self, i):
+        return self._cls(self._linked_object_ids[i])
+
+    def __iter__(self):
+        for obj_id in self._linked_object_ids:
+            yield self._cls(obj_id)
+
+    def __repr__(self):
+        return "[{}]".format(", ".join([
+            "<{} {}>".format(self._cls.__name__, obj)
+            for obj in self._linked_object_ids
+        ]))
+
+    @batchable
+    def add(self, objs):
+        """
+        Adds the given `objs` to this `LinkCollection`.
+
+        - **objs** can be a list of :py:class:`.PanoptesObject` instances, a
+          list of object IDs, a single :py:class:`.PanoptesObject` instance, or
+          a single object ID.
+
+        Examples::
+
+            organization.links.projects.add(1234)
+            organization.links.projects.add(Project(1234))
+            workflow.links.subject_sets.add([1,2,3,4])
+            workflow.links.subject_sets.add([Project(12), Project(34)])
+        """
+
+        if self.readonly:
+            raise NotImplementedError(
+                '{} links can\'t be modified'.format(self._slug)
+            )
+
+        _objs = [obj for obj in self._build_obj_list(objs) if obj not in self]
+        if not _objs:
+            return
+
+        self._parent.http_post(
+            '{}/links/{}'.format(self._parent.id, self._slug),
+            json={self._slug: _objs},
+            retry=True,
+        )
+        self._linked_object_ids.extend(_objs)
+
+    @batchable
+    def remove(self, objs):
+        """
+        Removes the given `objs` from this `LinkCollection`.
+
+        - **objs** can be a list of :py:class:`.PanoptesObject` instances, a
+          list of object IDs, a single :py:class:`.PanoptesObject` instance, or
+          a single object ID.
+
+        Examples::
+
+            organization.links.projects.remove(1234)
+            organization.links.projects.remove(Project(1234))
+            workflow.links.subject_sets.remove([1,2,3,4])
+            workflow.links.subject_sets.remove([Project(12), Project(34)])
+        """
+
+        if self.readonly:
+            raise NotImplementedError(
+                '{} links can\'t be modified'.format(self._slug)
+            )
+
+        _objs = [obj for obj in self._build_obj_list(objs) if obj in self]
+        if not _objs:
+            return
+
+        _obj_ids = ",".join(_objs)
+        self._parent.http_delete(
+            '{}/links/{}/{}'.format(self._parent.id, self._slug, _obj_ids),
+            retry=True,
+        )
+        self._linked_object_ids = [
+            obj for obj in self._linked_object_ids if obj not in _objs
+        ]
+
+    def _build_obj_list(self, objs):
+        _objs = []
+        for obj in objs:
+            if not (
+                isinstance(obj, self._cls)
+                or isinstance(obj, (int, six.string_types,))
+            ):
+                raise TypeError
+
+            if isinstance(obj, self._cls):
+                _obj_id = str(obj.id)
+            else:
+                _obj_id = str(obj)
+
+            _objs.append(_obj_id)
+
+        return _objs
+
 
 class PanoptesAPIException(Exception):
     """

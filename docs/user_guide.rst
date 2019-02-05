@@ -215,10 +215,10 @@ List the subjects in a subject_set::
     for subject in subject_set.subjects:
         print(subject.id)
 
-Add subject set to 1st workflow in project::
+Add subject set to first workflow in project::
 
     workflow = project.links.workflows[0]
-    workflow.add_subject_sets(subject_set)
+    workflow.links.subject_sets.add(subject_set)
 
 Project owners with client credentials can update their users' project settings
 (workflow_id only)::

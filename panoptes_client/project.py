@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from panoptes_client.panoptes import (
+    LinkCollection,
     LinkResolver,
     PanoptesAPIException,
     PanoptesObject,
@@ -8,6 +9,21 @@ from panoptes_client.panoptes import (
 from panoptes_client.project_role import ProjectRole
 from panoptes_client.exportable import Exportable
 from panoptes_client.utils import batchable
+
+
+class ProjectLinkCollection(LinkCollection):
+    def add(self, objs):
+        from panoptes_client.workflow import Workflow
+        from panoptes_client.subject_set import SubjectSet
+
+        result = super(ProjectLinkCollection, self).add(objs)
+
+        # Some classes are copied into the project as new objects
+        # So we reload to pick those up.
+        if self._cls in (SubjectSet, Workflow):
+            self._parent.reload()
+
+        return result
 
 
 class Project(PanoptesObject, Exportable):
@@ -21,6 +37,7 @@ class Project(PanoptesObject, Exportable):
         'private',
         'primary_language',
     )
+    _link_collection = ProjectLinkCollection
 
     @classmethod
     def find(cls, id='', slug=None):

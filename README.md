@@ -58,3 +58,19 @@ examples](http://panoptes-python-client.readthedocs.io/en/latest/user_guide.html
 We welcome bug reports and code contributions. Please see
 [CONTRIBUTING.md](https://github.com/zooniverse/panoptes-python-client/blob/master/CONTRIBUTING.md)
 for information about how you can get involved.
+
+### Running the Tests
+
+You can run the tests with Docker. This will run them under Python 3 and Python
+2:
+
+```
+docker-compose build test && docker-compose run test
+docker-compose build test2 && docker-compose run test2
+```
+
+Or you can run them directly in Python with:
+
+```python
+python -m unittest discover
+```

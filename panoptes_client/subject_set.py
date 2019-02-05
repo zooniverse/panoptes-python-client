@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function
 from builtins import str
 
 from panoptes_client.panoptes import (
+    LinkCollection,
     LinkResolver,
     PanoptesAPIException,
     PanoptesObject,
@@ -12,8 +13,40 @@ from panoptes_client.utils import batchable
 
 from redo import retry
 
-LINKING_RETRY_LIMIT = 5
-RETRY_BACKOFF_INTERVAL = 5
+
+class SubjectSetLinkCollection(LinkCollection):
+    def __contains__(self, obj):
+        if self._cls == Subject:
+            if isinstance(obj, Subject):
+                _subject_id = str(obj.id)
+            else:
+                _subject_id = str(obj)
+
+            linked_subject_count = SetMemberSubject.where(
+                subject_set_id=self._parent.id,
+                subject_id=_subject_id
+            ).object_count
+
+            return linked_subject_count == 1
+        return super(SubjectSetLinkCollection, self).__contains__(obj)
+
+    def add(self, objs):
+        from panoptes_client.workflow import Workflow
+        if self._cls == Workflow:
+            raise NotImplementedError(
+                'Workflows and SubjectSets can only be linked via '
+                'Workflow.links'
+            )
+        return super(SubjectSetLinkCollection, self).add(objs)
+
+    def remove(self, objs):
+        from panoptes_client.workflow import Workflow
+        if self._cls == Workflow:
+            raise NotImplementedError(
+                'Workflows and SubjectSets can only be unlinked via '
+                'Workflow.links'
+            )
+        return super(SubjectSetLinkCollection, self).remove(objs)
 
 
 class SubjectSet(PanoptesObject):
@@ -30,6 +63,7 @@ class SubjectSet(PanoptesObject):
             )
         },
     )
+    _link_collection = SubjectSetLinkCollection
 
     @property
     def subjects(self):
@@ -47,107 +81,36 @@ class SubjectSet(PanoptesObject):
         for sms in SetMemberSubject.where(subject_set_id=self.id):
             yield sms.links.subject
 
-    @batchable
+    def set_raw(self, raw, etag=None, loaded=True):
+        raw.setdefault('links', {}).setdefault('subjects', [])
+        return super(SubjectSet, self).set_raw(raw, etag, loaded)
+
     def add(self, subjects):
         """
-        Links the given subjects to this set.
+        A wrapper around :py:meth:`.LinkCollection.add`. Equivalent to::
 
-        - **subjects** can be a list of :py:class:`.Subject` instances, a list
-          of subject IDs, a single :py:class:`.Subject` instance, or a single
-          subject ID.
-
-        Examples::
-
-            subject_set.add(1234)
-            subject_set.add([1,2,3,4])
-            subject_set.add(Subject(1234))
-            subject_set.add([Subject(12), Subject(34)])
+            subject_set.links.add(subjects)
         """
 
-        _subjects = self._build_subject_list(subjects)
+        return self.links.subjects.add(subjects)
 
-        retry(
-            self.http_post,
-            args=('{}/links/subjects'.format(self.id),),
-            kwargs={'json': {'subjects': _subjects}},
-            attempts=LINKING_RETRY_LIMIT,
-            sleeptime=RETRY_BACKOFF_INTERVAL,
-            retry_exceptions=(PanoptesAPIException,),
-            log_args=False,
-        )
-
-    @batchable
     def remove(self, subjects):
         """
-        Unlinks the given subjects from this set.
+        A wrapper around :py:meth:`.LinkCollection.remove`. Equivalent to::
 
-        - **subjects** can be a list of :py:class:`.Subject` instances, a list
-          of subject IDs, a single :py:class:`.Subject` instance, or a single
-          subject ID.
-
-        Examples::
-
-            subject_set.remove(1234)
-            subject_set.remove([1,2,3,4])
-            subject_set.remove(Subject(1234))
-            subject_set.remove([Subject(12), Subject(34)])
+            subject_set.links.remove(subjects)
         """
 
-        _subjects = self._build_subject_list(subjects)
-
-        _subjects_ids = ",".join(_subjects)
-        retry(
-            self.http_delete,
-            args=('{}/links/subjects/{}'.format(self.id, _subjects_ids),),
-            attempts=LINKING_RETRY_LIMIT,
-            sleeptime=RETRY_BACKOFF_INTERVAL,
-            retry_exceptions=(PanoptesAPIException,),
-            log_args=False,
-        )
+        return self.links.subjects.remove(subjects)
 
     def __contains__(self, subject):
         """
-        Tests if the subject is linked to the subject_set.
+        A wrapper around :py:meth:`.LinkCollection.__contains__`. Equivalent
+        to::
 
-        - **subject** a single :py:class:`.Subject` instance, or a single
-          subject ID.
-
-        Returns a boolean indicating if the subject is linked to the
-        subject_set.
-
-        Examples::
-            1234 in subject_set
-            Subject(1234) in subject_set
+            subject in subject_set.links.subjects
         """
-        if isinstance(subject, Subject):
-            _subject_id = str(subject.id)
-        else:
-            _subject_id = str(subject)
-
-        linked_subject_count = SetMemberSubject.where(
-            subject_set_id=self.id,
-            subject_id=_subject_id
-        ).object_count
-
-        return linked_subject_count == 1
-
-    def _build_subject_list(self, subjects):
-        _subjects = []
-        for subject in subjects:
-            if not (
-                isinstance(subject, Subject)
-                or isinstance(subject, (int, str,))
-            ):
-                raise TypeError
-
-            if isinstance(subject, Subject):
-                _subject_id = str(subject.id)
-            else:
-                _subject_id = str(subject)
-
-            _subjects.append(_subject_id)
-
-        return _subjects
+        return subject in self.links.subjects
 
 
 LinkResolver.register(SubjectSet)

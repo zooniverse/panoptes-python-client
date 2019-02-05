@@ -19,6 +19,15 @@ services:
       - ${HOME}/.panoptes/:/root/.panoptes/
       - ${HOME}:${HOME}
 
+  tests:
+    build:
+      context: ./
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ${HOME}/.panoptes/:/root/.panoptes/
+      - ${HOME}:${HOME}
+    command: python -m unittest discover
+
   dev2:
     build:
       context:  ./
@@ -28,6 +37,15 @@ services:
       - ${HOME}:${HOME}
     environment:
       - PANOPTES_DEBUG=true
+
+  tests2:
+    build:
+      context: ./
+      dockerfile: Dockerfile.dev2
+    volumes:
+      - ${HOME}/.panoptes/:/root/.panoptes/
+      - ${HOME}:${HOME}
+    command: python -m unittest discover
 
   stable2:
     build:
