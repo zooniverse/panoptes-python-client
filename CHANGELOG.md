@@ -2,6 +2,7 @@
 
 - New: Add asynchronous subject creation
 - New: Add `LinkCollection` for managing links to multiple objects
+- New: Allow `Panoptes` class to act as a context manager
 - New: Add `Panoptes.interactive_login` method
 - New: Add authentication method selection (via `Panoptes.connect(login=...)`)
 - New: Add `CollectionRole` class
