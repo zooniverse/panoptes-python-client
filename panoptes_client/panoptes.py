@@ -257,14 +257,14 @@ class Panoptes(object):
         retry=False,
     ):
         response = self.http_request(
-            method,
-            path,
-            params,
-            headers,
-            json,
-            etag,
-            endpoint,
-            retry,
+            method=method,
+            path=path,
+            params=params,
+            headers=headers,
+            json=json,
+            etag=etag,
+            endpoint=endpoint,
+            retry=retry,
         )
 
         if (
