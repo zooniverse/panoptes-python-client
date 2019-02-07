@@ -1,6 +1,6 @@
 ## 1.1 (2019-02-08)
 
-- New: Add asynchronous subject creation
+- New: Add asynchronous multi-threaded subject creation
 - New: Add `LinkCollection` for managing links to multiple objects
 - New: Allow `Panoptes` class to act as a context manager
 - New: Add `Panoptes.interactive_login` method
