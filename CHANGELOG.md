@@ -1,3 +1,37 @@
+## 1.1 (2019-02-08)
+
+- New: Add asynchronous multi-threaded subject creation
+- New: Add `LinkCollection` for managing links to multiple objects
+- New: Allow `Panoptes` class to act as a context manager
+- New: Add `Panoptes.interactive_login` method
+- New: Add authentication method selection (via `Panoptes.connect(login=...)`)
+- New: Add `CollectionRole` class
+- New: Add `Collection.set_default_subject()`
+- New: Add `SubjectSet.__contains__()`
+- New: Add `PanoptesObject.delete()` method
+- New: Add `Organization` class
+- New: Add `Project.avatar`
+- New: Allow finding `Collection`s by slug
+- New: Allow finding `User`s from a list of email addresses
+- New: Allow batched `User` lookups by login name
+- New: Allow editing `Collection` project links and descriptions
+- New: Allow editing `Workflow` `tasks`, `primary_language`, and `mobile_friendly`
+- New: Allow editing `User.valid_user`
+
+- Fix: Fix reloading for `User` class
+- Fix: Passing `set`s to batchable methods
+
+- Change: Use multiple threads for media uploads
+- Change: Make global client thread safe
+- Change: Retry all `GET` requests on server failures
+- Change: Log in immediately rather than waiting for first request
+- Change: Raise an exception if media mime type can't be determined
+- Change: Log a warning if libmagic is broken
+- Change: Use six for string type checking
+- Change: Raise exception when linking unsaved objects
+- Change: Update requests requirement to >=2.4.2,<2.22
+- Change: Update future requirement to >=0.16,<0.18
+
 ## 1.0.3 (2018-07-30)
 
 - Fix: TypeError when creating subjects

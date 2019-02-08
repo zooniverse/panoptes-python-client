@@ -659,11 +659,11 @@ class PanoptesObject(object):
         Returns a generator which yields instances matching the given query
         arguments.
 
-        For example, this would yield all :py:class:`Project`s::
+        For example, this would yield all :py:class:`.Project`::
 
             Project.where()
 
-        And this would yield all launch approved :py:class:`Project`s::
+        And this would yield all launch approved :py:class:`.Project`::
 
             Project.where(launch_approved=True)
         """
@@ -960,7 +960,7 @@ class LinkResolver(object):
 
 class LinkCollection(object):
     """
-    A collection of :py:class:`.PanoptesObject`s of one class which are linked
+    A collection of :py:class:`.PanoptesObject` of one class which are linked
     to a parent :py:class:`.PanoptesObject`.
 
     Allows indexing, iteration, and membership testing::
