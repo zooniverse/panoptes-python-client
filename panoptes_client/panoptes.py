@@ -935,7 +935,7 @@ class LinkResolver(object):
 
     def __setattr__(self, name, value):
         reserved_names = ('raw', 'parent')
-        if name not in reserved_names and name in self.parent.raw['links']:
+        if name not in reserved_names and name not in dir(self):
             if not self.parent._loaded:
                 self.parent.reload()
             if isinstance(value, PanoptesObject):
