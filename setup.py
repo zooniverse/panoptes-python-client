@@ -13,6 +13,7 @@ setup(
         'future>=0.16,<0.18',
         'python-magic>=0.4,<0.5',
         'redo>=1.7',
+        'six>=1.9',
     ],
     extras_require={
         'testing': [
