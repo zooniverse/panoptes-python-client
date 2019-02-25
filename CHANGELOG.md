@@ -1,3 +1,8 @@
+## 1.1.1 (2019-02-25)
+
+- Fix: Can't save new objects with individual links
+- Fix: Missing 'six' dependency
+
 ## 1.1 (2019-02-08)
 
 - New: Add asynchronous multi-threaded subject creation
