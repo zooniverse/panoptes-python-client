@@ -1,5 +1,7 @@
 FROM python:2.7-alpine
 
+RUN apk --no-cache add libmagic
+
 WORKDIR /usr/src/panoptes-python-client
 
 COPY setup.py .
