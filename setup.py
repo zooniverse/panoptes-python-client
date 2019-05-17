@@ -9,7 +9,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        'requests>=2.4.2,<2.22',
+        'requests>=2.4.2,<2.23',
         'future>=0.16,<0.18',
         'python-magic>=0.4,<0.5',
         'redo>=1.7',
