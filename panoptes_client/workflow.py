@@ -9,18 +9,22 @@ from panoptes_client.utils import batchable
 
 
 class Workflow(PanoptesObject, Exportable):
-    _api_slug = "workflows"
-    _link_slug = "workflows"
+    _api_slug = 'workflows'
+    _link_slug = 'workflows'
     _edit_attributes = (
-        "active",
-        "configuration",
-        "display_name",
-        "first_task",
-        "mobile_friendly",
-        "primary_language",
-        "retirement",
-        "tasks",
-        {"links": ("project",)},
+        'active',
+        'configuration',
+        'display_name',
+        'first_task',
+        'mobile_friendly',
+        'primary_language',
+        'retirement',
+        'tasks',
+        {
+            'links': (
+                    'project',
+            )
+        },
     )
 
     def __init__(self, raw={}, etag=None):
@@ -42,12 +46,12 @@ class Workflow(PanoptesObject, Exportable):
         if it has changed.
         """
         if not self.configuration == self._original_configuration:
-            self.modified_attributes.add("configuration")
+            self.modified_attributes.add('configuration')
 
         super(Workflow, self).save()
 
     @batchable
-    def retire_subjects(self, subjects, reason="other"):
+    def retire_subjects(self, subjects, reason='other'):
         """
         Retires subjects in this workflow.
 
@@ -65,11 +69,14 @@ class Workflow(PanoptesObject, Exportable):
             workflow.retire_subjects([Subject(12), Subject(34)])
         """
 
-        subjects = [s.id if isinstance(s, Subject) else s for s in subjects]
+        subjects = [ s.id if isinstance(s, Subject) else s for s in subjects ]
 
         return Workflow.http_post(
-            "{}/retired_subjects".format(self.id),
-            json={"subject_ids": subjects, "retirement_reason": reason},
+            '{}/retired_subjects'.format(self.id),
+            json={
+                'subject_ids': subjects,
+                'retirement_reason': reason
+            },
         )
 
     def add_subject_sets(self, subject_sets):
@@ -101,6 +108,6 @@ class Workflow(PanoptesObject, Exportable):
 
 
 LinkResolver.register(Workflow)
-LinkResolver.register(Workflow, "active_workflows", readonly=True)
+LinkResolver.register(Workflow, 'active_workflows', readonly=True)
 
 from panoptes_client.workflow_version import WorkflowVersion
