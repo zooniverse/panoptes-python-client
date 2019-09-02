@@ -22,10 +22,33 @@ class Workflow(PanoptesObject, Exportable):
         'tasks',
         {
             'links': (
-                'project',
-            ),
-        }
+                    'project',
+            )
+        },
     )
+
+    def __init__(self, raw={}, etag=None):
+        super(Workflow, self).__init__(raw, etag)
+        if not self.configuration:
+            self.configuration = {}
+            self._original_configuration = {}
+
+    def set_raw(self, raw, etag=None, loaded=True):
+        super(Workflow, self).set_raw(raw, etag, loaded)
+        if loaded and self.configuration:
+            self._original_configuration = dict(self.configuration)
+        elif loaded:
+            self._original_configuration = None
+
+    def save(self):
+        """
+        Adds workflow configuration to the list of savable attributes
+        if it has changed.
+        """
+        if not self.configuration == self._original_configuration:
+            self.modified_attributes.add('configuration')
+
+        super(Workflow, self).save()
 
     @batchable
     def retire_subjects(self, subjects, reason='other'):
@@ -53,7 +76,7 @@ class Workflow(PanoptesObject, Exportable):
             json={
                 'subject_ids': subjects,
                 'retirement_reason': reason
-            }
+            },
         )
 
     def add_subject_sets(self, subject_sets):
@@ -82,6 +105,7 @@ class Workflow(PanoptesObject, Exportable):
         """
 
         return WorkflowVersion.where(workflow=self)
+
 
 LinkResolver.register(Workflow)
 LinkResolver.register(Workflow, 'active_workflows', readonly=True)
