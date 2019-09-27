@@ -209,7 +209,7 @@ class Subject(PanoptesObject):
     def set_raw(self, raw, etag=None, loaded=True):
         super(Subject, self).set_raw(raw, etag, loaded)
         if loaded and self.metadata:
-            self._original_metadata = copy.deepcopy(self.metadata)
+            self._original_metadata = deepcopy(self.metadata)
         elif loaded:
             self._original_metadata = None
 
