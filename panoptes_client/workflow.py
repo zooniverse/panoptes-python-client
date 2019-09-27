@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function
 from builtins import str
+from copy import deepcopy
 
 from panoptes_client.exportable import Exportable
 from panoptes_client.panoptes import PanoptesObject, LinkResolver
@@ -36,7 +37,7 @@ class Workflow(PanoptesObject, Exportable):
     def set_raw(self, raw, etag=None, loaded=True):
         super(Workflow, self).set_raw(raw, etag, loaded)
         if loaded and self.configuration:
-            self._original_configuration = dict(self.configuration)
+            self._original_configuration = deepcopy(self.configuration)
         elif loaded:
             self._original_configuration = None
 
