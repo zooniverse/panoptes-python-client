@@ -60,7 +60,8 @@ class Workflow(PanoptesObject, Exportable):
           of subject IDs, a single :py:class:`Subject` instance, or a single
           subject ID.
         - **reason** gives the reason the :py:class:`Subject` has been retired.
-          Defaults to **other**.
+          Defaults to **other** and must be one of classification_count, flagged, nothing_here, consensus, other or human.
+          See https://github.com/zooniverse/Panoptes/blob/master/app/models/subject_workflow_status.rb#L9 for more details
 
         Examples::
 
