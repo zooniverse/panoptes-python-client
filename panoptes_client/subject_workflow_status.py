@@ -10,7 +10,9 @@ class SubjectWorkflowStatus(PanoptesObject):
     Example use:
 
     Get the status of a given subject:
-        subject_workflow_status = next(SubjectWorkflowStatus.where(subject_id='30089908'))
+        subject_workflow_status = next(
+            SubjectWorkflowStatus.where(subject_id='30089908')
+        )
 
     The .where(kwargs) method works with:
     - id (i.e. the id of the SubjectWorkflowStatus, which is *not* the same as
