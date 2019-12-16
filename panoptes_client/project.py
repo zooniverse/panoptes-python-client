@@ -151,5 +151,27 @@ class Project(PanoptesObject, Exportable):
         """
         return self.http_get('{}/avatar'.format(self.id))[0]
 
+    @property
+    def attached_images(self):
+        return self.http_get('{}/attached_images'.format(self.id))[0]
+
+    def add_attached_image(
+        self,
+        src,
+        content_type='image/png',
+        external_link=True,
+        metadata={},
+    ):
+        return self.http_post(
+            '{}/attached_images'.format(self.id),
+            json={'media': {
+                'src': src,
+                'content_type': content_type,
+                'external_link': external_link,
+                'metadata': metadata,
+            }},
+        )
+
+
 LinkResolver.register(Project)
 LinkResolver.register(Project, 'projects')
