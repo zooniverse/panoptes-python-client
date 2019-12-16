@@ -15,7 +15,8 @@ class SubjectWorkflowStatus(PanoptesObject):
     - subject_id
     - workflow_id
 
-    Remember that one subject may be classified on many workflows, and hence may have many SubjectWorkflowStatus' (one per subject/workflow pair).
+    Remember that one subject may be classified on many workflows, and hence
+    may have many SubjectWorkflowStatus' (one per subject/workflow pair).
     """
     _api_slug = 'subject_workflow_statuses'
     _edit_attributes = {}
