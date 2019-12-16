@@ -3,7 +3,9 @@ from panoptes_client.panoptes import PanoptesObject
 
 class SubjectWorkflowStatus(PanoptesObject):
     """
-    Retrieve SubjectWorkflowStatus responses from Panoptes i.e. the retirement status (current state, retirement date, retirement reason) of a subject/workflow pair.
+    Retrieve SubjectWorkflowStatus responses from Panoptes i.e. the retirement
+    status (current state, retirement date, retirement reason) of a
+    subject/workflow pair.
 
     Example use:
 
