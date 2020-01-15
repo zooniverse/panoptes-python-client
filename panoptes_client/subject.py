@@ -213,13 +213,16 @@ class Subject(PanoptesObject):
         elif loaded:
             self._original_metadata = None
 
-    def add_location(self, location):
+    def add_location(self, location, media_type=None):
         """
         Add a media location to this subject.
 
         - **location** can be an open :py:class:`file` object, a path to a
           local file, or a :py:class:`dict` containing MIME types and URLs for
           remote media.
+        - **media_type** is a string specifying the MIME type of the file. Ignored
+          if location is a dict. Defaults to None, in which case the type is
+          auto-detected.
 
         Examples::
 
@@ -238,18 +241,19 @@ class Subject(PanoptesObject):
 
         try:
             media_data = f.read()
-            if MEDIA_TYPE_DETECTION == 'magic':
-                media_type = magic.from_buffer(media_data, mime=True)
-            else:
-                media_type = imghdr.what(None, media_data)
-                if not media_type:
-                    raise UnknownMediaException(
-                        'Could not detect file type. Please try installing '
-                        'libmagic: https://panoptes-python-client.readthedocs.'
-                        'io/en/latest/user_guide.html#uploading-non-image-'
-                        'media-types'
-                    )
-                media_type = 'image/{}'.format(media_type)
+            if not media_type:
+                if MEDIA_TYPE_DETECTION == 'magic':
+                    media_type = magic.from_buffer(media_data, mime=True)
+                else:
+                    media_type = imghdr.what(None, media_data)
+                    if not media_type:
+                        raise UnknownMediaException(
+                            'Could not detect file type. Please try installing '
+                            'libmagic: https://panoptes-python-client.readthedocs.'
+                            'io/en/latest/user_guide.html#uploading-non-image-'
+                            'media-types'
+                        )
+                    media_type = 'image/{}'.format(media_type)
             self.locations.append(media_type)
             self._media_files.append(media_data)
         finally:
