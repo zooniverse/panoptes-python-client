@@ -17,7 +17,7 @@ setup(
     ],
     extras_require={
         'testing': [
-            'mock>=2.0,<3.1',
+            'mock>=2.0,<4.1',
         ],
         'docs': [
             'sphinx',
