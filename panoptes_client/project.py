@@ -36,6 +36,7 @@ class Project(PanoptesObject, Exportable):
         'introduction',
         'private',
         'primary_language',
+        'configuration',
     )
     _link_collection = ProjectLinkCollection
 
