@@ -33,13 +33,26 @@ class Workflow(PanoptesObject, Exportable):
         if not self.configuration:
             self.configuration = {}
             self._original_configuration = {}
+        if not self.retirement:
+            self.retirement = {}
+            self._original_retirement = {}
+        if not self.tasks:
+            self.tasks = {}
+            self._original_tasks = {}
 
     def set_raw(self, raw, etag=None, loaded=True):
         super(Workflow, self).set_raw(raw, etag, loaded)
-        if loaded and self.configuration:
-            self._original_configuration = deepcopy(self.configuration)
+        if loaded:
+            if self.configuration:
+                self._original_configuration = deepcopy(self.configuration)
+            if self.retirement:
+                self._original_retirement = deepcopy(self.retirement)
+            if self.tasks:
+                self._original_tasks = deepcopy(self.tasks)
         elif loaded:
             self._original_configuration = None
+            self._original_retirement = None
+            self._original_tasks = None
 
     def save(self):
         """
@@ -48,6 +61,10 @@ class Workflow(PanoptesObject, Exportable):
         """
         if not self.configuration == self._original_configuration:
             self.modified_attributes.add('configuration')
+        if not self.retirement == self._original_retirement:
+            self.modified_attributes.add('retirement')
+        if not self.tasks == self._original_tasks:
+            self.modified_attributes.add('tasks')
 
         super(Workflow, self).save()
 
