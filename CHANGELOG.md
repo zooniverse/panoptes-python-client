@@ -1,3 +1,12 @@
+## 1.2 (2020-06-13)
+
+- New: Add `SubjectWorkflowStatus` class
+- New: Add attached image methods to `Project`
+- Fix: Save workflow configuration if changed
+- Change: Update requests requirement >=2.4.2,<2.25
+- Change: Update mock requirement to >=2.0,<4.1
+- Change: Update future requirement from to >=0.16,<0.19
+
 ## 1.1.1 (2019-02-25)
 
 - Fix: Can't save new objects with individual links
