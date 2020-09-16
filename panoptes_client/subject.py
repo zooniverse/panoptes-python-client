@@ -183,6 +183,7 @@ class Subject(PanoptesObject):
             url,
             headers={
                 'Content-Type': media_type,
+                'x-ms-blob-type': 'BlockBlob',
             },
             data=media_data,
         )

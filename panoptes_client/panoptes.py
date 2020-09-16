@@ -58,7 +58,6 @@ class Panoptes(object):
         'GET': {},
         'PUT': {
             'Content-Type': 'application/json',
-            'x-ms-blob-type': 'BlockBlob',
         },
         'POST': {
             'Content-Type': 'application/json',
