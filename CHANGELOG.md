@@ -1,3 +1,6 @@
+## 1.3.0 (2020-09-27)
+- Change: Add Azure header to PUT requests
+
 ## 1.2 (2020-06-13)
 
 - New: Add `SubjectWorkflowStatus` class
