@@ -1,5 +1,5 @@
 ## 1.3.0 (2020-09-27)
-- Change: Add Azure header to PUT requests
+- Change: Allow uploads to Azure cloud, add header to cloud upload PUT requests
 
 ## 1.2 (2020-06-13)
 
