@@ -1,3 +1,6 @@
+## 1.3.0 (2020-09-27)
+- Change: Allow uploads to Azure cloud, add header to cloud upload PUT requests
+
 ## 1.2 (2020-06-13)
 
 - New: Add `SubjectWorkflowStatus` class
