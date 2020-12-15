@@ -93,6 +93,9 @@ class Panoptes(object):
 
         - **username** is your Zooniverse.org username.
         - **password** is your Zooniverse.org password.
+        - **login** == "interactive" will prompt for the Zooniverse.org
+          username and password, while "keyring" will get the login
+          credentials from the python keyring.
         - **endpoint** is the HTTP API endpoint you'd like to connect to.
           Defaults to **https://www.zooniverse.org**. Should not include a
           trailing slash.
