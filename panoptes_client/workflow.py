@@ -56,8 +56,8 @@ class Workflow(PanoptesObject, Exportable):
 
     def save(self):
         """
-        Adds workflow configuration to the list of savable attributes
-        if it has changed.
+        Adds workflow configuration, retirement, and tasks dicts to the list of
+        savable attributes if it has changed.
         """
         if not self.configuration == self._original_configuration:
             self.modified_attributes.add('configuration')
