@@ -1,4 +1,5 @@
 from __future__ import absolute_import, division, print_function
+from copy import deepcopy
 
 from panoptes_client.panoptes import (
     LinkCollection,
@@ -36,8 +37,32 @@ class Project(PanoptesObject, Exportable):
         'introduction',
         'private',
         'primary_language',
+        'configuration',
     )
     _link_collection = ProjectLinkCollection
+
+    def __init__(self, raw={}, etag=None):
+        super(Project, self).__init__(raw, etag)
+        if not self.configuration:
+            self.configuration = {}
+            self._original_configuration = {}
+
+    def set_raw(self, raw, etag=None, loaded=True):
+        super(Project, self).set_raw(raw, etag, loaded)
+        if loaded and self.configuration:
+            self._original_configuration = deepcopy(self.configuration)
+        elif loaded:
+            self._original_configuration = None
+
+    def save(self):
+        """
+        Adds project configuration to the list of savable attributes
+        if it has changed.
+        """
+        if not self.configuration == self._original_configuration:
+            self.modified_attributes.add('configuration')
+
+        super(Project, self).save()
 
     @classmethod
     def find(cls, id='', slug=None):
