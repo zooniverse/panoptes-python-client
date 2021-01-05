@@ -104,6 +104,8 @@ class Subject(PanoptesObject):
             self.metadata = {}
             self._original_metadata = {}
         self._media_files = []
+        for _l in self.locations:
+            self._media_files.append(None)
 
     def save(self, client=None):
         """
@@ -231,6 +233,7 @@ class Subject(PanoptesObject):
         if type(location) is dict:
             self.locations.append(location)
             self._media_files.append(None)
+            self.modified_attributes.add('locations')
             return
         elif type(location) in (str,) + _OLD_STR_TYPES:
             f = open(location, 'rb')
@@ -253,6 +256,7 @@ class Subject(PanoptesObject):
                 media_type = 'image/{}'.format(media_type)
             self.locations.append(media_type)
             self._media_files.append(media_data)
+            self.modified_attributes.add('locations')
         finally:
             f.close()
 
