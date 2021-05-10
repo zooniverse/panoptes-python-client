@@ -100,7 +100,15 @@ class Workflow(PanoptesObject, Exportable):
     @batchable
     def unretire_subjects(self, subjects, subject_sets):
         """
-        some notes here 
+        Un-retires subjects in this workflow. 
+
+        - **subjects** can be a list of :py:class:`Subject` instances, a list
+          of subject IDs, a single :py:class:`Subject` instance, or a single
+          subject ID.
+
+        - **subjects_sets* can be a list of :py:class:`SubjectSet` instances, a list
+          of subject_set IDs, a single :py:class:`SubjectSet` instance, or a single
+          subject_set ID.
         """
 
         subjects = [ s.id if isinstance(s, Subject) else s for s in subjects ]
