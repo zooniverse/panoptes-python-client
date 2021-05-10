@@ -97,6 +97,22 @@ class Workflow(PanoptesObject, Exportable):
             },
         )
 
+    @batchable
+    def unretire_subjects(self, subjects, subject_sets):
+        """
+        some notes here 
+        """
+
+        subjects = [ s.id if isinstance(s, Subject) else s for s in subjects ]
+        subject_sets = [ ss.id if isinstance(ss, SubjectSet) else ss for ss in subject_sets ]
+        return Workflow.http_post(
+            '{}/unretire_subjects'.format(self.id),
+            json={
+                'subject_ids': subjects,
+                'subject_set_ids': subject_sets
+            },
+        )
+
     def add_subject_sets(self, subject_sets):
         """
         A wrapper around :py:meth:`.LinkCollection.add`. Equivalent to::
