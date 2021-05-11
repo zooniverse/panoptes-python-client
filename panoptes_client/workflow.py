@@ -98,7 +98,7 @@ class Workflow(PanoptesObject, Exportable):
         )
 
     @batchable
-    def unretire_subjects(self, subjects, subject_sets):
+    def unretire_subjects(self, subjects=[], subject_sets=[]):
         """
         Un-retires subjects in this workflow. 
 
