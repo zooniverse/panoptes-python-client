@@ -98,9 +98,9 @@ class Workflow(PanoptesObject, Exportable):
         )
 
     @batchable
-    def unretire_subjects(self, subjects=[], subject_sets=[]):
+    def unretire_subjects(self, subjects):
         """
-        Un-retires subjects in this workflow. 
+        Un-retires subjects in this workflow by subject_id's . 
 
         - **subjects** can be a list of :py:class:`Subject` instances, a list
           of subject IDs, a single :py:class:`Subject` instance, or a single
@@ -111,12 +111,24 @@ class Workflow(PanoptesObject, Exportable):
           subject_set ID.
         """
 
+        import pdb; pdb.set_trace()
         subjects = [ s.id if isinstance(s, Subject) else s for s in subjects ]
-        subject_sets = [ ss.id if isinstance(ss, SubjectSet) else ss for ss in subject_sets ]
         return Workflow.http_post(
             '{}/unretire_subjects'.format(self.id),
             json={
-                'subject_ids': subjects,
+                'subject_ids': subjects
+            },
+        )
+    
+    @batchable
+    def unretire_subjects_by_subject_set(self, subject_sets):
+        """
+        WIP NOTES
+        """
+        subject_sets = [ s.id if isinstance(s, SubjectSet) else s for s in subject_sets ]
+        return Workflow.http_post(
+            '{}/unretire_subjects'.format(self.id),
+            json={
                 'subject_set_ids': subject_sets
             },
         )
