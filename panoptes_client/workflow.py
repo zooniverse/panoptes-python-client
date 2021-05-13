@@ -106,8 +106,7 @@ class Workflow(PanoptesObject, Exportable):
           of subject IDs, a single :py:class:`Subject` instance, or a single
           subject ID.
         """
-
-        import pdb; pdb.set_trace()
+        
         subjects = [ s.id if isinstance(s, Subject) else s for s in subjects ]
         return Workflow.http_post(
             '{}/unretire_subjects'.format(self.id),
