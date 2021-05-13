@@ -106,8 +106,8 @@ class Workflow(PanoptesObject, Exportable):
           of subject IDs, a single :py:class:`Subject` instance, or a single
           subject ID.
         """
-        
-        subjects = [ s.id if isinstance(s, Subject) else s for s in subjects ]
+
+        subjects = [s.id if isinstance(s, Subject) else s for s in subjects]
         return Workflow.http_post(
             '{}/unretire_subjects'.format(self.id),
             json={
@@ -123,7 +123,7 @@ class Workflow(PanoptesObject, Exportable):
           of subject_set IDs, a single :py:class:`SubjectSet` instance, or a single
           subject_set ID.
         """
-        subject_sets = [ s.id if isinstance(s, SubjectSet) else s for s in subject_sets ]
+        subject_sets = [s.id if isinstance(s, SubjectSet) else s for s in subject_sets]
         return Workflow.http_post(
             '{}/unretire_subjects'.format(self.id),
             json={
