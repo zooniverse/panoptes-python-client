@@ -526,7 +526,7 @@ class Panoptes(object):
                 grant_type = 'client_credentials'
 
             if not self.logged_in:
-                if grant_type is 'password':
+                if grant_type == 'password':
                     if not self.login():
                         return
 
@@ -706,7 +706,7 @@ class PanoptesObject(object):
         try:
             if (
                 name not in PanoptesObject.RESERVED_ATTRIBUTES
-                and name is not 'id'
+                and name != 'id'
                 and not self._loaded
             ):
                 self.reload()
