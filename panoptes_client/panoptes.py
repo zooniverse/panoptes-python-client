@@ -6,6 +6,7 @@ import logging
 import os
 import requests
 import threading
+import pkg_resources
 
 from datetime import datetime, timedelta
 from redo import retrier
@@ -54,6 +55,7 @@ class Panoptes(object):
     _http_headers = {
         'default': {
             'Accept': 'application/vnd.api+json; version=1',
+            'User-Agent': 'panoptes-python-client/version='+ pkg_resources.require('panoptes_client')[0].version
         },
         'GET': {},
         'PUT': {
