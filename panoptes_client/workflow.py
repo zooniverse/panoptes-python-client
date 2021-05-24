@@ -115,7 +115,7 @@ class Workflow(PanoptesObject, Exportable):
         """
 
         return self.links.subject_sets.remove(subject_sets)
-    
+
     def subject_status(self, subject_id):
         """
         Returns an list of SubjectWorkflowStatuses of the current workflow given subject_id

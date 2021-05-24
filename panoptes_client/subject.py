@@ -214,7 +214,7 @@ class Subject(PanoptesObject):
             self._original_metadata = deepcopy(self.metadata)
         elif loaded:
             self._original_metadata = None
-    
+
     def status_in_workflow(self, workflow_id):
         return list(SubjectWorkflowStatus.where(subject_id=self.id, workflow_id=workflow_id))
 
