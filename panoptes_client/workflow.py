@@ -117,7 +117,10 @@ class Workflow(PanoptesObject, Exportable):
         return self.links.subject_sets.remove(subject_sets)
     
     def subject_status(self, subject_id):
-        return SubjectWorkflowStatus.where(subject_id= subject_id, workflow_id=self.id)
+        """
+        Returns an list of SubjectWorkflowStatuses of the current workflow given subject_id
+        """
+        return list(SubjectWorkflowStatus.where(subject_id=subject_id, workflow_id=self.id))
 
     @property
     def versions(self):
