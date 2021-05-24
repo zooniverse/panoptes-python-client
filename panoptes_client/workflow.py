@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function
 from builtins import str
 from copy import deepcopy
+from panoptes_client.subject_workflow_status import SubjectWorkflowStatus
 
 from panoptes_client.exportable import Exportable
 from panoptes_client.panoptes import PanoptesObject, LinkResolver
@@ -114,6 +115,9 @@ class Workflow(PanoptesObject, Exportable):
         """
 
         return self.links.subject_sets.remove(subject_sets)
+    
+    def subject_status(self, subject_id):
+        return SubjectWorkflowStatus.where(subject_id= subject_id, workflow_id=self.id)
 
     @property
     def versions(self):
