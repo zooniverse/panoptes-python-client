@@ -118,7 +118,11 @@ class Workflow(PanoptesObject, Exportable):
 
     def subject_status(self, subject_id):
         """
-        Returns an SubjectWorkflowStatuses of the current workflow given subject_id
+        Returns SubjectWorkflowStatus of the current workflow given subject_id
+
+        Example::
+
+            workflow.subject_status(1234)
         """
         return next(SubjectWorkflowStatus.where(subject_id=subject_id, workflow_id=self.id))
 
