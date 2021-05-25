@@ -118,9 +118,9 @@ class Workflow(PanoptesObject, Exportable):
 
     def subject_status(self, subject_id):
         """
-        Returns an list of SubjectWorkflowStatuses of the current workflow given subject_id
+        Returns an SubjectWorkflowStatuses of the current workflow given subject_id
         """
-        return list(SubjectWorkflowStatus.where(subject_id=subject_id, workflow_id=self.id))
+        return next(SubjectWorkflowStatus.where(subject_id=subject_id, workflow_id=self.id))
 
     @property
     def versions(self):
