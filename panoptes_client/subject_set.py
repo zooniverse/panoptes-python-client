@@ -103,8 +103,8 @@ class SubjectSet(PanoptesObject):
         """
 
         return self.links.subjects.remove(subjects)
-    
-    def subject_statuses(self,workflow_id):
+
+    def subject_statuses(self, workflow_id):
         """
         A generator which yields :py:class:`.SubjectWorkflowStatus` objects for subjects in this
         subject set.
@@ -114,7 +114,7 @@ class SubjectSet(PanoptesObject):
             for status in subject_set.subject_statuses(1234):
                 print(status.retirement_reason)
         """
-        
+
         subject_ids = ', '.join((subject.id for subject in self.subjects))
         for status in SubjectWorkflowStatus.where(subject_id=subject_ids, workflow_id=workflow_id):
             yield status

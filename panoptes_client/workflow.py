@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division, print_function
 from builtins import str
 from copy import deepcopy
-from panoptes_client import subject
 from panoptes_client.set_member_subject import SetMemberSubject
 from panoptes_client.subject_workflow_status import SubjectWorkflowStatus
 
@@ -128,7 +127,7 @@ class Workflow(PanoptesObject, Exportable):
             for status in workflow.subject_set_status(1234):
                 print(status.retirement_reason)
         """
-        
+
         subjects = SetMemberSubject.where(subject_set_id=subject_set_id).object_list
         subject_ids = ', '.join(map(lambda member: member['links']['subject'], subjects))
         for status in SubjectWorkflowStatus.where(subject_id=subject_ids, workflow_id=self.id):
