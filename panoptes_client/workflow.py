@@ -120,7 +120,9 @@ class Workflow(PanoptesObject, Exportable):
 
     def subject_set_status(self, subject_set_id):
         subjects = SetMemberSubject.where(subject_set_id=subject_set_id).object_list
-        return subjects
+        subject_ids = ', '.join(map(lambda member: member['links']['subject'], subjects))
+        for status in SubjectWorkflowStatus.where(subject_id=subject_ids, workflow_id=self.id):
+            yield status
 
     @property
     def versions(self):
