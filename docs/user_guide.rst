@@ -195,6 +195,40 @@ at a time if you need to::
 And that's all there is to it! Your new subjects are now linked to the new
 subject set.
 
+Tutorial: Retiring and Unretiring Subjects
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+For this tutorial, we're going to retire and unretire subjects in a given workflow. We start by importing all the classes we'll need::
+
+    from panoptes_client import Panoptes, Workflow, Subject, SubjectSet
+
+Now that we've imported all that, we can use the :py:meth:`.Panoptes.connect`
+method to log in (see above tutorial) 
+
+Next we can instantiate an instance of :py:class`.Workflow`, assuming you have a `workflow_id` handy:: 
+
+    workflow = Workflow('1234')
+
+We can retire subjects by doing any one of the following, for these examples, we have a Subject with id `4321`::
+
+    workflow.retire_subjects(4321)
+    workflow.retire_subjects([4321])
+    workflow.retire_subjects(Subject(4321))
+    workflow.retire_subjects([Subject(4321)])
+
+Similarly, we allow the ability to unretire subjects by subject by doing any one of the following, for these examples, we use a `Subject` with id `4321`::
+
+    workflow.unretire_subjects(4321)
+    workflow.unretire_subjects([4321])
+    workflow.unretire_subjects(Subject(4321))
+    workflow.unretire_subjects([Subject(4321)])
+
+We also allow the ability to unretire subjects by `SubjectSet` by doing any on of the following, for these examples, we use a `SubjectSet` with id `5678`::
+
+    workflow.unretire_subjects_by_subject_set(5678)
+    workflow.unretire_subjects_by_subject_set([5678])
+    workflow.unretire_subjects_by_subject_set(SubjectSet(5678))
+    workflow.unretire_subjects_by_subject_set([SubjectSet(5678)])
+
 Other examples
 ~~~~~~~~~~~~~~
 
