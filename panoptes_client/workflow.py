@@ -117,20 +117,22 @@ class Workflow(PanoptesObject, Exportable):
 
         return self.links.subject_sets.remove(subject_sets)
 
-    def subject_set_status(self, subject_set_id):
+    def subject_workflow_statuses(self, subject_set_id):
         """
         A generator which yields :py:class:`.SubjectWorkflowStatus` objects for subjects in the
         subject set of the given workflow
 
         Examples::
 
-            for status in workflow.subject_set_status(1234):
+            for status in workflow.subject_workflow_statuses(1234):
                 print(status.retirement_reason)
         """
+        subjects = []
+        for sms in SetMemberSubject.where(subject_set_id=subject_set_id):
+            subjects.append(sms.links.subject.id)
 
-        subjects = SetMemberSubject.where(subject_set_id=subject_set_id).object_list
         subject_ids = ', '.join(map(lambda member: member['links']['subject'], subjects))
-        for status in SubjectWorkflowStatus.where(subject_id=subject_ids, workflow_id=self.id):
+        for status in SubjectWorkflowStatus.where(subject_ids=subject_ids, workflow_id=self.id):
             yield status
 
     @property
