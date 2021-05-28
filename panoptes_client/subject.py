@@ -1,4 +1,5 @@
 from __future__ import absolute_import, division, print_function
+from panoptes_client.subject_workflow_status import SubjectWorkflowStatus
 
 _OLD_STR_TYPES = (str,)
 try:
@@ -213,6 +214,16 @@ class Subject(PanoptesObject):
             self._original_metadata = deepcopy(self.metadata)
         elif loaded:
             self._original_metadata = None
+
+    def subject_workflow_status(self, workflow_id):
+        """
+        Returns SubjectWorkflowStatus of Subject in Workflow
+
+        Example::
+
+            subject.subject_workflow_status(4321)
+        """
+        return next(SubjectWorkflowStatus.where(subject_id=self.id, workflow_id=workflow_id))
 
     def add_location(self, location):
         """
