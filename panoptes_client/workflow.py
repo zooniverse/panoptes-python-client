@@ -160,7 +160,7 @@ class Workflow(PanoptesObject, Exportable):
             workflow.subject_workflow_status(1234)
         """
         return next(SubjectWorkflowStatus.where(subject_id=subject_id, workflow_id=self.id))
-    
+
     def subject_workflow_statuses(self, subject_set_id):
         """
         A generator which yields :py:class:`.SubjectWorkflowStatus` objects for subjects in the
