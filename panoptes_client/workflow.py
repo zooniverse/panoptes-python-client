@@ -89,7 +89,7 @@ class Workflow(PanoptesObject, Exportable):
             workflow.retire_subjects([Subject(12), Subject(34)])
         """
 
-        subjects = [s.id if isinstance(s, Subject) else s for s in subjects]
+        subjects = [ s.id if isinstance(s, Subject) else s for s in subjects ]
 
         return Workflow.http_post(
             '{}/retired_subjects'.format(self.id),
@@ -161,11 +161,11 @@ class Workflow(PanoptesObject, Exportable):
             for status in workflow.subject_workflow_statuses(1234):
                 print(status.retirement_reason)
         """
-        subjects = []
+        subject_ids = []
         for sms in SetMemberSubject.where(subject_set_id=subject_set_id):
-            subjects.append(sms.links.subject.id)
+            subject_ids.append(sms.links.subject.id)
 
-        subject_ids = ', '.join(map(lambda member: member['links']['subject'], subjects))
+        subject_ids = ','.join(map(str, subject_ids))
         for status in SubjectWorkflowStatus.where(subject_ids=subject_ids, workflow_id=self.id):
             yield status
 
