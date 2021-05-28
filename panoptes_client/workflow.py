@@ -89,7 +89,7 @@ class Workflow(PanoptesObject, Exportable):
             workflow.retire_subjects([Subject(12), Subject(34)])
         """
 
-        subjects = [ s.id if isinstance(s, Subject) else s for s in subjects ]
+        subjects = [s.id if isinstance(s, Subject) else s for s in subjects]
 
         return Workflow.http_post(
             '{}/retired_subjects'.format(self.id),
