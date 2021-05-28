@@ -215,13 +215,13 @@ class Subject(PanoptesObject):
         elif loaded:
             self._original_metadata = None
 
-    def status_in_workflow(self, workflow_id):
+    def subject_workflow_status(self, workflow_id):
         """
         Returns SubjectWorkflowStatus of Subject in Workflow
 
         Example::
 
-            subject.status_in_workflow(4321)
+            subject.subject_workflow_status(4321)
         """
         return next(SubjectWorkflowStatus.where(subject_id=self.id, workflow_id=workflow_id))
 
