@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function
 from builtins import str
 from copy import deepcopy
+from panoptes_client.set_member_subject import SetMemberSubject
 from panoptes_client.subject_workflow_status import SubjectWorkflowStatus
 
 from panoptes_client.exportable import Exportable
@@ -150,15 +151,33 @@ class Workflow(PanoptesObject, Exportable):
 
         return self.links.subject_sets.remove(subject_sets)
 
-    def subject_status(self, subject_id):
+    def subject_workflow_status(self, subject_id):
         """
         Returns SubjectWorkflowStatus of the current workflow given subject_id
 
         Example::
 
-            workflow.subject_status(1234)
+            workflow.subject_workflow_status(1234)
         """
         return next(SubjectWorkflowStatus.where(subject_id=subject_id, workflow_id=self.id))
+    
+    def subject_workflow_statuses(self, subject_set_id):
+        """
+        A generator which yields :py:class:`.SubjectWorkflowStatus` objects for subjects in the
+        subject set of the given workflow
+
+        Examples::
+
+            for status in workflow.subject_workflow_statuses(1234):
+                print(status.retirement_reason)
+        """
+        subject_ids = []
+        for sms in SetMemberSubject.where(subject_set_id=subject_set_id):
+            subject_ids.append(sms.links.subject.id)
+
+        subject_ids = ','.join(map(str, subject_ids))
+        for status in SubjectWorkflowStatus.where(subject_ids=subject_ids, workflow_id=self.id):
+            yield status
 
     @property
     def versions(self):
