@@ -1,3 +1,7 @@
+## 1.4.0 (2021-06-01)
+- New: Subject unretirement in Workflow
+- New: Get SubjectWorkflowStatuses via Workflow, Subject, or SubjectSet
+
 ## 1.3.0 (2020-09-27)
 - Change: Allow uploads to Azure cloud, add header to cloud upload PUT requests
 
