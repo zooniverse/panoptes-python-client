@@ -1,12 +1,10 @@
-name: Publish to PyPi
+name: Publish to Test PyPi
 
-on: 
-  release:
-    types: [created]
+on: workflow_dispatch
 
 jobs:
   build-and-publish:
-    name: Build python package and publish to PyPi
+    name: Build python package and publish to Test PyPi
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
@@ -20,8 +18,9 @@ jobs:
         pip install setuptools wheel
     - name: Build
       run: python setup.py sdist bdist_wheel
-    - name: Publish to PyPi
+    - name: Publish to Test PyPi
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN }}
+        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        repository_url: https://test.pypi.org/legacy/
