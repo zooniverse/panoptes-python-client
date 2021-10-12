@@ -89,3 +89,4 @@ ENV/
 .ropeproject
 
 .vscode
+.DS_Store
