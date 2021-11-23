@@ -10,6 +10,7 @@ from panoptes_client.panoptes import (
 )
 from panoptes_client.set_member_subject import SetMemberSubject
 from panoptes_client.subject import Subject
+from panoptes_client.exportable import Exportable
 from panoptes_client.utils import batchable
 
 from redo import retry
@@ -50,7 +51,7 @@ class SubjectSetLinkCollection(LinkCollection):
         return super(SubjectSetLinkCollection, self).remove(objs)
 
 
-class SubjectSet(PanoptesObject):
+class SubjectSet(PanoptesObject, Exportable):
     _api_slug = 'subject_sets'
     _link_slug = 'subject_sets'
     _edit_attributes = (
