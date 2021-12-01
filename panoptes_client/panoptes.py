@@ -191,6 +191,8 @@ class Panoptes(object):
         headers = _headers
 
         token = self.get_bearer_token()
+        print('MDY114 LOGGED IN?')
+        print(self.logged_in)
 
         if self.logged_in:
             headers.update({
