@@ -26,7 +26,7 @@ class Caesar(object):
         return Panoptes.client().delete(*args, **kwargs)
     
     def get_workflow_by_id(self, workflow_id):
-        print(self.http_get('workflows',workflow_id))
+        return self.http_get(f'workflows/{workflow_id}')
 
-    def get_reductions_by_workflow(self, workflow_id, subject_id, extractor_key):
-        return self.http_get('workflows', params = { 'workflow_id': workflow_id, 'subject_id' : subject_id, 'extractor_key' : extractor_key })
+    def get_reductions_by_workflow_and_subject(self, workflow_id, subject_id):
+        return self.http_get(f'workflows/{workflow_id}/subjects/{subject_id}')
