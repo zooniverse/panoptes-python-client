@@ -33,3 +33,6 @@ class Caesar(object):
     
     def get_workflow_extractors(self, workflow_id):
         return self.http_get(f'workflows/{workflow_id}/extractors')
+    
+    def get_extracts_by_workflow_and_subject(self, workflow_id, subject_id):
+        return self.http_get(f'workflows/{workflow_id}/extractors/extractor/extracts', params={'subject_id' : subject_id})
