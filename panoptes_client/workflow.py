@@ -10,6 +10,8 @@ from panoptes_client.subject import Subject
 from panoptes_client.subject_set import SubjectSet
 from panoptes_client.utils import batchable
 
+from panoptes_client.caesar import Caesar
+
 
 class Workflow(PanoptesObject, Exportable):
     _api_slug = 'workflows'
@@ -178,6 +180,10 @@ class Workflow(PanoptesObject, Exportable):
         subject_ids = ','.join(map(str, subject_ids))
         for status in SubjectWorkflowStatus.where(subject_ids=subject_ids, workflow_id=self.id):
             yield status
+    
+    def get_subject_reductions(self, subject_id):
+        caesar = Caesar()
+        return caesar.http_get(f'{self._api_slug}/{self.id}/subjects/{subject_id}/reductions')
 
     @property
     def versions(self):
