@@ -181,9 +181,13 @@ class Workflow(PanoptesObject, Exportable):
         for status in SubjectWorkflowStatus.where(subject_ids=subject_ids, workflow_id=self.id):
             yield status
     
-    def get_subject_reductions(self, subject_id):
+    def subject_reductions(self, subject_id):
         caesar = Caesar()
         return caesar.http_get(f'{self._api_slug}/{self.id}/subjects/{subject_id}/reductions')[0]
+    
+    def subject_extracts(self, subject_id):
+        caesar = Caesar()
+        return caesar.http_get(f'{self._api_slug}/{self.id}/extractors/extractor/extracts', params={'subject_id': subject_id})[0]
 
     @property
     def versions(self):
