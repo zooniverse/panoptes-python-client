@@ -183,7 +183,7 @@ class Workflow(PanoptesObject, Exportable):
     
     def get_subject_reductions(self, subject_id):
         caesar = Caesar()
-        return caesar.http_get(f'{self._api_slug}/{self.id}/subjects/{subject_id}/reductions')
+        return caesar.http_get(f'{self._api_slug}/{self.id}/subjects/{subject_id}/reductions')[0]
 
     @property
     def versions(self):
