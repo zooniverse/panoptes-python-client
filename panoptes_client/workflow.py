@@ -185,9 +185,13 @@ class Workflow(PanoptesObject, Exportable):
         caesar = Caesar()
         return caesar.http_get(f'{self._api_slug}/{self.id}/subjects/{subject_id}/reductions')[0]
     
-    def subject_extracts(self, subject_id):
+    def extractors(self):
         caesar = Caesar()
-        return caesar.http_get(f'{self._api_slug}/{self.id}/extractors/extractor/extracts', params={'subject_id': subject_id})[0]
+        return caesar.http_get(f'{self._api_slug}/{self.id}/extractors')[0]
+    
+    def reducers(self):
+        caesar = Caesar()
+        return caesar.http_get(f'{self._api_slug}/{self.id}/reducers')[0]
 
     @property
     def versions(self):

@@ -274,7 +274,8 @@ class Panoptes(object):
         if (
             response.status_code == 204 or
             int(response.headers.get('Content-Length', -1)) == 0 or
-            len(response.text) == 0
+            len(response.text) == 0 or 
+            'text/html' in response.headers.get('Content-Type')
         ):
             json_response = None
         else:
