@@ -197,6 +197,27 @@ class Project(PanoptesObject, Exportable):
             }},
         )
 
+    def copy(self,new_subject_set_name=None):
+        """
+        Copy this project to a new project that will be owned by the currently authenticated user
+
+        A new_subject_set_name string argument can be passed which will be used to name a new SubjectSet for the copied project.
+        This is useful for having an upload target straight after cloning.
+
+        Examples::
+
+            project.copy()
+            project.copy("My new subject set for uploading")
+        """
+        payload = {}
+        if new_subject_set_name:
+            payload['create_subject_set'] = new_subject_set_name
+
+        return self.http_post(
+            '{}/copy'.format(self.id),
+            json=payload,
+        )
+
 
 LinkResolver.register(Project)
 LinkResolver.register(Project, 'projects')
