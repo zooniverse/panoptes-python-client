@@ -11,7 +11,6 @@ from panoptes_client.project_role import ProjectRole
 from panoptes_client.exportable import Exportable
 from panoptes_client.utils import batchable
 
-
 class ProjectLinkCollection(LinkCollection):
     def add(self, objs):
         from panoptes_client.workflow import Workflow
@@ -213,10 +212,19 @@ class Project(PanoptesObject, Exportable):
         if new_subject_set_name:
             payload['create_subject_set'] = new_subject_set_name
 
-        return self.http_post(
+        response = self.http_post(
             '{}/copy'.format(self.id),
             json=payload,
         )
+
+        # find the API resource response in the response tuple
+        resource_response = response[0]
+        # extract the raw copied project resource response
+        raw_resource_response = resource_response[self._api_slug][0]
+        # convert it into a new project model representation
+        copied_project = Project(raw_resource_response)
+
+        return copied_project
 
 
 LinkResolver.register(Project)
