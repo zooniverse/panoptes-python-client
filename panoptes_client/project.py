@@ -196,11 +196,13 @@ class Project(PanoptesObject, Exportable):
             }},
         )
 
-    def copy(self,new_subject_set_name=None):
+    def copy(self, new_subject_set_name=None):
         """
-        Copy this project to a new project that will be owned by the currently authenticated user
+        Copy this project to a new project that will be owned by the
+        currently authenticated user.
 
-        A new_subject_set_name string argument can be passed which will be used to name a new SubjectSet for the copied project.
+        A new_subject_set_name string argument can be passed which will be
+        used to name a new SubjectSet for the copied project.
         This is useful for having an upload target straight after cloning.
 
         Examples::
