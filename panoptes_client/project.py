@@ -225,6 +225,8 @@ class Project(PanoptesObject, Exportable):
         raw_resource_response = resource_response[self._api_slug][0]
         # convert it into a new project model representation
         copied_project = Project(raw_resource_response)
+        # re-fetch the saved resource to make it savable (etag fetch)
+        copied_project.reload()
 
         return copied_project
 
