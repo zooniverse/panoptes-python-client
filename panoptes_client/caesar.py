@@ -15,7 +15,7 @@ class Caesar(object):
     def http_post(self, *args, **kwargs):
         kwargs['endpoint'] = self.endpoint
         kwargs['headers'] = {
-            'Accept': '*/*',
+            'Accept': 'application/json',
             'Content-Type': 'application/json'
         }
         return Panoptes.client().post(*args, **kwargs)
@@ -51,5 +51,9 @@ class Caesar(object):
         # extractor_payload must have 'type', eg { 'type' : 'blank', 'key' : 'extractor_key', 'task_key': 'T0'}
         return self.http_post(f'workflows/{workflow_id}/extractors', json={'extractor': extractor_payload})
     
-    # def create_workflow_reducer(self, workflow_id, reducer_payload={}):
-    #     return self.http_post(f'workflows/{workflow_id}/reducers', json={'reducer': reducer_payload })
+    def create_workflow_reducer(self, workflow_id, reducer_payload={}):
+        return self.http_post(f'workflows/{workflow_id}/reducers', json={'reducer': reducer_payload })
+
+    @classmethod
+    def url(cls, *args):
+        return '/'.join(['', cls._api_slug] + [str(a) for a in args if a])
