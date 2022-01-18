@@ -181,6 +181,17 @@ class Workflow(PanoptesObject, Exportable):
         for status in SubjectWorkflowStatus.where(subject_ids=subject_ids, workflow_id=self.id):
             yield status
     
+    """ CAESAR METHODS """
+
+    def add_to_caesar(self):
+        caesar = Caesar()
+        payload={
+            'workflow': {
+                'id': self.id
+            }
+        }
+        return caesar.http_post(self._api_slug, json=payload)
+
     def subject_reductions(self, subject_id):
         caesar = Caesar()
         return caesar.http_get(f'{self._api_slug}/{self.id}/subjects/{subject_id}/reductions')[0]
@@ -192,6 +203,17 @@ class Workflow(PanoptesObject, Exportable):
     def reducers(self):
         caesar = Caesar()
         return caesar.http_get(f'{self._api_slug}/{self.id}/reducers')[0]
+
+    def add_extractor(self, extractor_type, extractor_other_attributes={}):
+        caesar = Caesar()
+        payload = {
+            'extractor': {
+                'type': extractor_type,
+                **extractor_other_attributes
+            }
+        }
+        return caesar.http_post(f'{self._api_slug}/{self.id}/extractors', json=payload)
+    
 
     @property
     def versions(self):
