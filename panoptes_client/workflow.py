@@ -192,9 +192,12 @@ class Workflow(PanoptesObject, Exportable):
         }
         return caesar.http_post(self._api_slug, json=payload)
 
-    def subject_reductions(self, subject_id):
+    def subject_reductions(self, subject_id, reducer_key=""):
         caesar = Caesar()
-        return caesar.http_get(f'{self._api_slug}/{self.id}/subjects/{subject_id}/reductions')[0]
+        url = f'{self._api_slug}/{self.id}/subjects/{subject_id}/reductions'
+        if reducer_key and reducer_key.strip():
+            url += f'?reducer_key={reducer_key.strip()}'
+        return caesar.http_get(url)[0]
     
     def extractors(self):
         caesar = Caesar()
@@ -204,17 +207,18 @@ class Workflow(PanoptesObject, Exportable):
         caesar = Caesar()
         return caesar.http_get(f'{self._api_slug}/{self.id}/reducers')[0]
 
-    def add_extractor(self, extractor_type, extractor_other_attributes={}):
+    def add_extractor(self, extractor_type, extractor_key, task_key='T0', extractor_other_attributes={}):
         caesar = Caesar()
         payload = {
             'extractor': {
                 'type': extractor_type,
+                'key': extractor_key,
+                'task_key': task_key,
                 **extractor_other_attributes
             }
         }
         return caesar.http_post(f'{self._api_slug}/{self.id}/extractors', json=payload)
     
-
     @property
     def versions(self):
         """

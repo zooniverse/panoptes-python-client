@@ -45,14 +45,18 @@ class Caesar(object):
 
     def get_extractor_by_workflow_and_id(self, workflow_id, extractor_id):
         return self.http_get(f'workflows/{workflow_id}/extractors/{extractor_id}')
+
+    def add_workflow(self, workflow_id):
+        return self.http_post('workflows', json={'workflow': {'id': workflow_id}})
     
-    def create_workflow_extractor(self, workflow_id, extractor_key, extractor_type, other_extractor_attributes):
+    def create_workflow_extractor(self, workflow_id, extractor_key, extractor_type,task_key='T0', other_extractor_attributes={}):
         # accepted extractor_types ["blank", external, question, survey, who, pluck_field, shape]
         # extractor_payload must have 'type', eg { 'type' : 'blank', 'key' : 'extractor_key', 'task_key': 'T0'}
         payload = {
             'extractor': {
                 'type': extractor_type,
                 'key': extractor_key,
+                'task_key': task_key,
                 **other_extractor_attributes
             }
         }
@@ -63,10 +67,6 @@ class Caesar(object):
 
     def create_workflow_rules(self, workflow_id, rules_payload={}):
         return self.http_post(f'workflows/{workflow_id}/rules', json={'rules': rules_payload})
-    
-    def add_workflow(self, workflow_id):
-        return self.http_post('workflows', json={'workflow': {'id': workflow_id}})
-
 
 class CaesarObject(object):
     @classmethod
