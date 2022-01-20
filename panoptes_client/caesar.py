@@ -1,3 +1,4 @@
+from multiprocessing.sharedctypes import Value
 from panoptes_client.panoptes import Panoptes, PanoptesObject
 
 class Caesar(object):
@@ -50,8 +51,9 @@ class Caesar(object):
         return self.http_post('workflows', json={'workflow': {'id': workflow_id}})
     
     def create_workflow_extractor(self, workflow_id, extractor_key, extractor_type,task_key='T0', other_extractor_attributes={}):
-        # accepted extractor_types ["blank", external, question, survey, who, pluck_field, shape]
-        # extractor_payload must have 'type', eg { 'type' : 'blank', 'key' : 'extractor_key', 'task_key': 'T0'}
+        EXTRACTOR_TYPES = ['blank', 'external', 'question', 'survey', 'who', 'pluck_field', 'shape']
+        if extractor_type not in EXTRACTOR_TYPES:
+            raise ValueError("Invalid type")
         payload = {
             'extractor': {
                 'type': extractor_type,
@@ -65,8 +67,16 @@ class Caesar(object):
     def create_workflow_reducer(self, workflow_id, reducer_payload={}):
         return self.http_post(f'workflows/{workflow_id}/reducers', json={'reducer': reducer_payload })
 
-    def create_workflow_rules(self, workflow_id, rules_payload={}):
-        return self.http_post(f'workflows/{workflow_id}/rules', json={'rules': rules_payload})
+    def create_workflow_rules(self, workflow_id, rule_type,condition_string):
+        RULE_TYPES = ['subject', 'user']
+        if rule_type not in RULE_TYPES:
+            raise ValueError(f'Invalid rule type: {rule_type} . Can only create "subject" rules or "user" rules.')
+
+        #condition string e.g.'["gte", ["lookup", "count.classifications", 0], ["const", 30]]'
+        rules_payload={
+            'condition_string': condition_string
+        }
+        return self.http_post(f'workflows/{workflow_id}/{rule_type}_rules', json={f'{rule_type}_rule': rules_payload})
 
 class CaesarObject(object):
     @classmethod

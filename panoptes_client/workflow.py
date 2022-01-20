@@ -219,6 +219,17 @@ class Workflow(PanoptesObject, Exportable):
         }
         return caesar.http_post(f'{self._api_slug}/{self.id}/extractors', json=payload)
     
+    def add_rule(self,condition_string, rule_type):
+        caesar = Caesar()
+        RULE_TYPES = ['subject', 'user']
+        if rule_type not in RULE_TYPES:
+            raise ValueError(f'Invalid rule type: {rule_type} . Can only create "subject" rules or "user" rules.')
+            
+        rules_payload={
+            'condition_string': condition_string
+        }
+        return caesar.http_post(f'{self._api_slug}/{self.id}/{rule_type}_rules', json={f'{rule_type}_rule': rules_payload})
+
     @property
     def versions(self):
         """
