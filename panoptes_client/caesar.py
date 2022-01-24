@@ -53,7 +53,7 @@ class Caesar(object):
     def create_workflow_extractor(self, workflow_id, extractor_key, extractor_type,task_key='T0', other_extractor_attributes={}):
         EXTRACTOR_TYPES = ['blank', 'external', 'question', 'survey', 'who', 'pluck_field', 'shape']
         if extractor_type not in EXTRACTOR_TYPES:
-            raise ValueError("Invalid type")
+            raise ValueError('Invalid extractor type')
         payload = {
             'extractor': {
                 'type': extractor_type,
@@ -64,8 +64,19 @@ class Caesar(object):
         }
         return self.http_post(f'workflows/{workflow_id}/extractors', json=payload )
     
-    def create_workflow_reducer(self, workflow_id, reducer_payload={}):
-        return self.http_post(f'workflows/{workflow_id}/reducers', json={'reducer': reducer_payload })
+    def create_workflow_reducer(self, workflow_id, reducer_type, key, other_reducer_attributes={}):
+        REDUCER_TYPES = ['consensus', 'count', 'placeholder', 'external', 'first_extract', 'stats', 'unique_count', 'rectangle', 'sqs']
+        if reducer_type not in REDUCER_TYPES:
+            raise ValueError('Invalid reducer type')
+        payload = {
+            'reducer': {
+                'type': reducer_type,
+                'key': key,
+                **other_reducer_attributes
+            }
+        }
+        
+        return self.http_post(f'workflows/{workflow_id}/reducers', json=payload)
 
     def create_workflow_rules(self, workflow_id, rule_type,condition_string):
         RULE_TYPES = ['subject', 'user']

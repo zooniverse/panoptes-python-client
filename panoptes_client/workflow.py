@@ -193,6 +193,7 @@ class Workflow(PanoptesObject, Exportable):
         return caesar.http_post(self._api_slug, json=payload)
 
     def subject_reductions(self, subject_id, reducer_key=""):
+        #returns all reductions of all reducers if no reducer key given
         caesar = Caesar()
         url = f'{self._api_slug}/{self.id}/subjects/{subject_id}/reductions'
         if reducer_key and reducer_key.strip():
@@ -208,6 +209,10 @@ class Workflow(PanoptesObject, Exportable):
         return caesar.http_get(f'{self._api_slug}/{self.id}/reducers')[0]
 
     def add_extractor(self, extractor_type, extractor_key, task_key='T0', extractor_other_attributes={}):
+        EXTRACTOR_TYPES = ['blank', 'external', 'question', 'survey', 'who', 'pluck_field', 'shape']
+        if extractor_type not in EXTRACTOR_TYPES:
+            raise ValueError('Invalid extractor type')
+            
         caesar = Caesar()
         payload = {
             'extractor': {
@@ -219,12 +224,26 @@ class Workflow(PanoptesObject, Exportable):
         }
         return caesar.http_post(f'{self._api_slug}/{self.id}/extractors', json=payload)
     
+    def add_reducer(self, reducer_type, key, other_reducer_attributes={}):
+        REDUCER_TYPES = ['consensus', 'count', 'placeholder', 'external', 'first_extract', 'stats', 'unique_count', 'rectangle', 'sqs']
+        if reducer_type not in REDUCER_TYPES:
+            raise ValueError('Invalid reducer type')
+
+        payload = {
+            'reducer': {
+                'type': reducer_type,
+                'key': key,
+                **other_reducer_attributes
+            }
+        }
+        return Workflow.http_post(f'{self.id}/reducers', json=payload, endpoint='https://caesar-staging.zooniverse.org')
+    
     def add_rule(self,condition_string, rule_type):
         caesar = Caesar()
         RULE_TYPES = ['subject', 'user']
         if rule_type not in RULE_TYPES:
             raise ValueError(f'Invalid rule type: {rule_type} . Can only create "subject" rules or "user" rules.')
-            
+
         rules_payload={
             'condition_string': condition_string
         }
