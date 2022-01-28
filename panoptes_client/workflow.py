@@ -212,7 +212,7 @@ class Workflow(PanoptesObject, Exportable):
         EXTRACTOR_TYPES = ['blank', 'external', 'question', 'survey', 'who', 'pluck_field', 'shape']
         if extractor_type not in EXTRACTOR_TYPES:
             raise ValueError('Invalid extractor type')
-            
+
         caesar = Caesar()
         payload = {
             'extractor': {
@@ -229,6 +229,7 @@ class Workflow(PanoptesObject, Exportable):
         if reducer_type not in REDUCER_TYPES:
             raise ValueError('Invalid reducer type')
 
+        caesar = Caesar()
         payload = {
             'reducer': {
                 'type': reducer_type,
@@ -236,7 +237,7 @@ class Workflow(PanoptesObject, Exportable):
                 **other_reducer_attributes
             }
         }
-        return Workflow.http_post(f'{self.id}/reducers', json=payload, endpoint='https://caesar-staging.zooniverse.org')
+        return caesar.http_post(f'{self._api_slug}/{self.id}/reducers', json=payload)
     
     def add_rule(self,condition_string, rule_type):
         caesar = Caesar()
@@ -248,6 +249,24 @@ class Workflow(PanoptesObject, Exportable):
             'condition_string': condition_string
         }
         return caesar.http_post(f'{self._api_slug}/{self.id}/{rule_type}_rules', json={f'{rule_type}_rule': rules_payload})
+    
+    def add_rule_effect(self, rule_type, rule_id, action, effect_config={}):
+        RULE_TO_ACTION_TYPES = {
+            'subject': ['retire_subject', 'add_subject_to_set', 'add_to_collection', 'external'], 
+            'user': ['promote_user']
+        }
+
+        if rule_type not in RULE_TO_ACTION_TYPES.keys() or action not in RULE_TO_ACTION_TYPES[rule_type]:
+            raise ValueError('Invalid rule type or action')
+        
+        payload = {
+            f'{rule_type}_rule_effect': {
+                'action': action,
+                'config': effect_config
+            }
+        }
+        
+        return self.http_post(f'{self._api_slug}/{self.id}/{rule_type}_rules/{rule_id}/{rule_type}_rule_effects', json=payload)
 
     @property
     def versions(self):

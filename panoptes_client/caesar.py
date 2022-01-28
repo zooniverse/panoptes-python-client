@@ -1,5 +1,5 @@
 from multiprocessing.sharedctypes import Value
-from panoptes_client.panoptes import Panoptes, PanoptesObject
+from panoptes_client.panoptes import Panoptes
 
 class Caesar(object):
     def __init__(self, endpoint =  'https://caesar-staging.zooniverse.org', redirect_url= 'https://caesar.zooniverse.org/auth/zooniverse/callback'):
@@ -78,7 +78,7 @@ class Caesar(object):
         
         return self.http_post(f'workflows/{workflow_id}/reducers', json=payload)
 
-    def create_workflow_rules(self, workflow_id, rule_type,condition_string):
+    def create_workflow_rule(self, workflow_id, rule_type,condition_string='[]'):
         RULE_TYPES = ['subject', 'user']
         if rule_type not in RULE_TYPES:
             raise ValueError(f'Invalid rule type: {rule_type} . Can only create "subject" rules or "user" rules.')
@@ -88,6 +88,24 @@ class Caesar(object):
             'condition_string': condition_string
         }
         return self.http_post(f'workflows/{workflow_id}/{rule_type}_rules', json={f'{rule_type}_rule': rules_payload})
+    
+    def create_workflow_rule_effect(self, workflow_id, rule_type, rule_id, action, config={}):
+        RULE_TO_ACTION_TYPES = {
+                'subject': ['retire_subject', 'add_subject_to_set', 'add_to_collection', 'external'], 
+                'user': ['promote_user']
+        }
+
+        if rule_type not in RULE_TO_ACTION_TYPES.keys() or action not in RULE_TO_ACTION_TYPES[rule_type]:
+            raise ValueError('Invalid rule type or action')
+   
+        payload = {
+            f'{rule_type}_rule_effect': {
+                'action': action,
+                'config': config
+            }
+        }
+        
+        return self.http_post(f'workflows/{workflow_id}/{rule_type}_rules/{rule_id}/{rule_type}_rule_effects', json=payload)
 
 class CaesarObject(object):
     @classmethod
