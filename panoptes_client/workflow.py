@@ -207,6 +207,21 @@ class Workflow(PanoptesObject, Exportable):
     def reducers(self):
         caesar = Caesar()
         return caesar.http_get(f'{self._api_slug}/{self.id}/reducers')[0]
+    
+    def rules(self, rule_type):
+        RULE_TYPES = ['subject', 'user']
+        if rule_type not in RULE_TYPES:
+            raise ValueError(f'Invalid rule type: {rule_type} . Can only create "subject" rules or "user" rules.')
+        
+        caesar = Caesar()
+        return caesar.http_get(f'{self._api_slug}/{self.id}/{rule_type}_rules')[0]
+    
+    def effects(self, rule_type, rule_id):
+        RULE_TYPES = ['subject', 'user']
+        if rule_type not in RULE_TYPES:
+            raise ValueError(f'Invalid rule type: {rule_type} . Can only create "subject" rules or "user" rules.')
+        caesar = Caesar()
+        return caesar.http_get(f'{self._api_slug}/{self.id}/{rule_type}_rules/{rule_id}/{rule_type}_rule_effects')[0]
 
     def add_extractor(self, extractor_type, extractor_key, task_key='T0', extractor_other_attributes={}):
         EXTRACTOR_TYPES = ['blank', 'external', 'question', 'survey', 'who', 'pluck_field', 'shape']
