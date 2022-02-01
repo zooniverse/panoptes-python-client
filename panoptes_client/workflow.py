@@ -266,6 +266,7 @@ class Workflow(PanoptesObject, Exportable):
         return caesar.http_post(f'{self._api_slug}/{self.id}/{rule_type}_rules', json={f'{rule_type}_rule': rules_payload})
     
     def add_rule_effect(self, rule_type, rule_id, action, effect_config={}):
+        caesar = Caesar()     
         RULE_TO_ACTION_TYPES = {
             'subject': ['retire_subject', 'add_subject_to_set', 'add_to_collection', 'external'], 
             'user': ['promote_user']
@@ -281,7 +282,7 @@ class Workflow(PanoptesObject, Exportable):
             }
         }
         
-        return self.http_post(f'{self._api_slug}/{self.id}/{rule_type}_rules/{rule_id}/{rule_type}_rule_effects', json=payload)
+        return caesar.http_post(f'{self._api_slug}/{self.id}/{rule_type}_rules/{rule_id}/{rule_type}_rule_effects', json=payload)
 
     @property
     def versions(self):
