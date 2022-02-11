@@ -191,6 +191,11 @@ class Workflow(PanoptesObject, Exportable):
             }
         }
         return caesar.http_post(self._api_slug, json=payload)
+    
+    def subject_extracts(self, subject_id):
+        caesar = Caesar()
+        url = f'{self._api_slug}/{self.id}/extractors/all/extracts'
+        return caesar.http_get(url, params={'subject_id': subject_id})
 
     def subject_reductions(self, subject_id, reducer_key=""):
         #returns all reductions of all reducers if no reducer key given
@@ -208,27 +213,17 @@ class Workflow(PanoptesObject, Exportable):
         caesar = Caesar()
         return caesar.http_get(f'{self._api_slug}/{self.id}/reducers')[0]
     
-    def rules(self, rule_type):
-        RULE_TYPES = ['subject', 'user']
-        if rule_type not in RULE_TYPES:
-            raise ValueError(f'Invalid rule type: {rule_type} . Can only create "subject" rules or "user" rules.')
-        
+    def rules(self, rule_type): 
         caesar = Caesar()
         return caesar.http_get(f'{self._api_slug}/{self.id}/{rule_type}_rules')[0]
     
     def effects(self, rule_type, rule_id):
-        RULE_TYPES = ['subject', 'user']
-        if rule_type not in RULE_TYPES:
-            raise ValueError(f'Invalid rule type: {rule_type} . Can only create "subject" rules or "user" rules.')
         caesar = Caesar()
         return caesar.http_get(f'{self._api_slug}/{self.id}/{rule_type}_rules/{rule_id}/{rule_type}_rule_effects')[0]
 
     def add_extractor(self, extractor_type, extractor_key, task_key='T0', extractor_other_attributes={}):
-        EXTRACTOR_TYPES = ['blank', 'external', 'question', 'survey', 'who', 'pluck_field', 'shape']
-        if extractor_type not in EXTRACTOR_TYPES:
-            raise ValueError('Invalid extractor type')
-
         caesar = Caesar()
+        caesar.validate_extractor_type(extractor_type)
         payload = {
             'extractor': {
                 'type': extractor_type,
@@ -240,11 +235,8 @@ class Workflow(PanoptesObject, Exportable):
         return caesar.http_post(f'{self._api_slug}/{self.id}/extractors', json=payload)
     
     def add_reducer(self, reducer_type, key, other_reducer_attributes={}):
-        REDUCER_TYPES = ['consensus', 'count', 'placeholder', 'external', 'first_extract', 'stats', 'unique_count', 'rectangle', 'sqs']
-        if reducer_type not in REDUCER_TYPES:
-            raise ValueError('Invalid reducer type')
-
         caesar = Caesar()
+        caesar.validate_reducer_type(reducer_type)
         payload = {
             'reducer': {
                 'type': reducer_type,
@@ -256,24 +248,16 @@ class Workflow(PanoptesObject, Exportable):
     
     def add_rule(self,condition_string, rule_type):
         caesar = Caesar()
-        RULE_TYPES = ['subject', 'user']
-        if rule_type not in RULE_TYPES:
-            raise ValueError(f'Invalid rule type: {rule_type} . Can only create "subject" rules or "user" rules.')
-
+        caesar.validate_rule_type(rule_type)
         rules_payload={
             'condition_string': condition_string
         }
         return caesar.http_post(f'{self._api_slug}/{self.id}/{rule_type}_rules', json={f'{rule_type}_rule': rules_payload})
     
     def add_rule_effect(self, rule_type, rule_id, action, effect_config={}):
-        caesar = Caesar()     
-        RULE_TO_ACTION_TYPES = {
-            'subject': ['retire_subject', 'add_subject_to_set', 'add_to_collection', 'external'], 
-            'user': ['promote_user']
-        }
-
-        if rule_type not in RULE_TO_ACTION_TYPES.keys() or action not in RULE_TO_ACTION_TYPES[rule_type]:
-            raise ValueError('Invalid rule type or action')
+        caesar = Caesar()
+        caesar.validate_rule_type(rule_type)   
+        caesar.validate_action(action)
         
         payload = {
             f'{rule_type}_rule_effect': {
