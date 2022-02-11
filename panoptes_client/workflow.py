@@ -191,7 +191,7 @@ class Workflow(PanoptesObject, Exportable):
             }
         }
         return caesar.http_post(self._api_slug, json=payload)
-    
+
     def subject_extracts(self, subject_id):
         caesar = Caesar()
         url = f'{self._api_slug}/{self.id}/extractors/all/extracts'
@@ -204,19 +204,19 @@ class Workflow(PanoptesObject, Exportable):
         if reducer_key and reducer_key.strip():
             url += f'?reducer_key={reducer_key.strip()}'
         return caesar.http_get(url)[0]
-    
+
     def extractors(self):
         caesar = Caesar()
         return caesar.http_get(f'{self._api_slug}/{self.id}/extractors')[0]
-    
+
     def reducers(self):
         caesar = Caesar()
         return caesar.http_get(f'{self._api_slug}/{self.id}/reducers')[0]
-    
+
     def rules(self, rule_type): 
         caesar = Caesar()
         return caesar.http_get(f'{self._api_slug}/{self.id}/{rule_type}_rules')[0]
-    
+
     def effects(self, rule_type, rule_id):
         caesar = Caesar()
         return caesar.http_get(f'{self._api_slug}/{self.id}/{rule_type}_rules/{rule_id}/{rule_type}_rule_effects')[0]
@@ -233,7 +233,7 @@ class Workflow(PanoptesObject, Exportable):
             }
         }
         return caesar.http_post(f'{self._api_slug}/{self.id}/extractors', json=payload)
-    
+
     def add_reducer(self, reducer_type, key, other_reducer_attributes={}):
         caesar = Caesar()
         caesar.validate_reducer_type(reducer_type)
@@ -245,27 +245,26 @@ class Workflow(PanoptesObject, Exportable):
             }
         }
         return caesar.http_post(f'{self._api_slug}/{self.id}/reducers', json=payload)
-    
+
     def add_rule(self,condition_string, rule_type):
         caesar = Caesar()
         caesar.validate_rule_type(rule_type)
-        rules_payload={
+        rules_payload = {
             'condition_string': condition_string
         }
         return caesar.http_post(f'{self._api_slug}/{self.id}/{rule_type}_rules', json={f'{rule_type}_rule': rules_payload})
-    
+
     def add_rule_effect(self, rule_type, rule_id, action, effect_config={}):
         caesar = Caesar()
-        caesar.validate_rule_type(rule_type)   
+        caesar.validate_rule_type(rule_type)
         caesar.validate_action(action)
-        
+
         payload = {
             f'{rule_type}_rule_effect': {
                 'action': action,
                 'config': effect_config
             }
         }
-        
         return caesar.http_post(f'{self._api_slug}/{self.id}/{rule_type}_rules/{rule_id}/{rule_type}_rule_effects', json=payload)
 
     @property

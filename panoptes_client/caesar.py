@@ -5,7 +5,7 @@ class Caesar(object):
     EXTRACTOR_TYPES = ['blank', 'external', 'question', 'survey', 'who', 'pluck_field', 'shape']
     REDUCER_TYPES = ['consensus', 'count', 'placeholder', 'external', 'first_extract', 'stats', 'unique_count', 'rectangle', 'sqs']
     RULE_TO_ACTION_TYPES = {
-        'subject': ['retire_subject','add_subject_to_set', 'add_to_collection', 'external'],
+        'subject': ['retire_subject', 'add_subject_to_set', 'add_to_collection', 'external'],
         'user': ['promote_user']
     }
 
@@ -54,7 +54,7 @@ class Caesar(object):
     def add_workflow(self, workflow_id):
         return self.http_post('workflows', json={'workflow': {'id': workflow_id}})
 
-    def create_workflow_extractor(self, workflow_id, extractor_key, extractor_type,task_key='T0', other_extractor_attributes={}):
+    def create_workflow_extractor(self, workflow_id, extractor_key, extractor_type, task_key='T0', other_extractor_attributes={}):
         self.validate_extractor_type(extractor_type)
         payload = {
             'extractor': {
@@ -64,7 +64,7 @@ class Caesar(object):
                 **other_extractor_attributes
             }
         }
-        return self.http_post(f'workflows/{workflow_id}/extractors', json=payload )
+        return self.http_post(f'workflows/{workflow_id}/extractors', json=payload)
 
     def create_workflow_reducer(self, workflow_id, reducer_type, key, other_reducer_attributes={}):
         self.validate_reducer_type(reducer_type)
@@ -82,7 +82,7 @@ class Caesar(object):
         self.validate_rule_type(rule_type)
 
         # condition string e.g.'["gte", ["lookup", "count.classifications", 0], ["const", 30]]'
-        payload={f'{rule_type}_rule': {
+        payload = {f'{rule_type}_rule': {
                 'condition_string': condition_string
             }
         }
