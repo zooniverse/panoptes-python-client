@@ -20,6 +20,8 @@ RETRY_BACKOFF_INTERVAL = 5
 
 if os.environ.get('PANOPTES_DEBUG'):
     logging.basicConfig(level=logging.DEBUG)
+else:
+    logging.basicConfig()
 
 
 class Panoptes(object):
