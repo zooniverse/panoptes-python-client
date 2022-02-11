@@ -191,8 +191,6 @@ class Panoptes(object):
         headers = _headers
 
         token = self.get_bearer_token()
-        print('MDY114 LOGGED IN?')
-        print(self.logged_in)
 
         if self.logged_in:
             headers.update({
@@ -274,8 +272,7 @@ class Panoptes(object):
         if (
             response.status_code == 204 or
             int(response.headers.get('Content-Length', -1)) == 0 or
-            len(response.text) == 0 or 
-            'text/html' in response.headers.get('Content-Type')
+            len(response.text) == 0
         ):
             json_response = None
         else:
@@ -672,7 +669,6 @@ class PanoptesObject(object):
 
             Project.where(launch_approved=True)
         """
-
         _id = kwargs.pop('id', '')
         return cls.paginated_results(*cls.http_get(_id, params=kwargs))
 
