@@ -54,8 +54,11 @@ class Caesar(object):
     def add_workflow(self, workflow_id):
         return self.http_post('workflows', json={'workflow': {'id': workflow_id}})
 
-    def create_workflow_extractor(self, workflow_id, extractor_key, extractor_type, task_key='T0', other_extractor_attributes={}):
+    def create_workflow_extractor(self, workflow_id, extractor_key, extractor_type, task_key='T0', other_extractor_attributes=None):
         self.validate_extractor_type(extractor_type)
+        if other_extractor_attributes is None:
+            other_extractor_attributes = {}
+
         payload = {
             'extractor': {
                 'type': extractor_type,
@@ -66,8 +69,11 @@ class Caesar(object):
         }
         return self.http_post(f'workflows/{workflow_id}/extractors', json=payload)
 
-    def create_workflow_reducer(self, workflow_id, reducer_type, key, other_reducer_attributes={}):
+    def create_workflow_reducer(self, workflow_id, reducer_type, key, other_reducer_attributes=None):
         self.validate_reducer_type(reducer_type)
+        if other_reducer_attributes is None:
+            other_reducer_attributes = {}
+
         payload = {
             'reducer': {
                 'type': reducer_type,
@@ -88,9 +94,11 @@ class Caesar(object):
         }
         return self.http_post(f'workflows/{workflow_id}/{rule_type}_rules', json=payload)
 
-    def create_workflow_rule_effect(self, workflow_id, rule_type, rule_id, action, config={}):
+    def create_workflow_rule_effect(self, workflow_id, rule_type, rule_id, action, config=None):
         self.validate_rule_type(rule_type)
         self.validate_action(action)
+        if config is None:
+            config = {}
         payload = {
             f'{rule_type}_rule_effect': {
                 'action': action,

@@ -180,12 +180,12 @@ class Workflow(PanoptesObject, Exportable):
         subject_ids = ','.join(map(str, subject_ids))
         for status in SubjectWorkflowStatus.where(subject_ids=subject_ids, workflow_id=self.id):
             yield status
-    
+
     """ CAESAR METHODS """
 
     def add_to_caesar(self):
         caesar = Caesar()
-        payload={
+        payload = {
             'workflow': {
                 'id': self.id
             }
@@ -198,7 +198,7 @@ class Workflow(PanoptesObject, Exportable):
         return caesar.http_get(url, params={'subject_id': subject_id})
 
     def subject_reductions(self, subject_id, reducer_key=""):
-        #returns all reductions of all reducers if no reducer key given
+        # returns all reductions of all reducers if no reducer key given
         caesar = Caesar()
         url = f'{self._api_slug}/{self.id}/subjects/{subject_id}/reductions'
         if reducer_key and reducer_key.strip():
@@ -213,7 +213,7 @@ class Workflow(PanoptesObject, Exportable):
         caesar = Caesar()
         return caesar.http_get(f'{self._api_slug}/{self.id}/reducers')[0]
 
-    def rules(self, rule_type): 
+    def rules(self, rule_type):
         caesar = Caesar()
         return caesar.http_get(f'{self._api_slug}/{self.id}/{rule_type}_rules')[0]
 
@@ -221,9 +221,11 @@ class Workflow(PanoptesObject, Exportable):
         caesar = Caesar()
         return caesar.http_get(f'{self._api_slug}/{self.id}/{rule_type}_rules/{rule_id}/{rule_type}_rule_effects')[0]
 
-    def add_extractor(self, extractor_type, extractor_key, task_key='T0', extractor_other_attributes={}):
+    def add_extractor(self, extractor_type, extractor_key, task_key='T0', extractor_other_attributes=None):
         caesar = Caesar()
         caesar.validate_extractor_type(extractor_type)
+        if extractor_other_attributes is None:
+            extractor_other_attributes = {}
         payload = {
             'extractor': {
                 'type': extractor_type,
@@ -234,9 +236,11 @@ class Workflow(PanoptesObject, Exportable):
         }
         return caesar.http_post(f'{self._api_slug}/{self.id}/extractors', json=payload)
 
-    def add_reducer(self, reducer_type, key, other_reducer_attributes={}):
+    def add_reducer(self, reducer_type, key, other_reducer_attributes=None):
         caesar = Caesar()
         caesar.validate_reducer_type(reducer_type)
+        if other_reducer_attributes is None:
+            other_reducer_attributes = {}
         payload = {
             'reducer': {
                 'type': reducer_type,
@@ -246,7 +250,7 @@ class Workflow(PanoptesObject, Exportable):
         }
         return caesar.http_post(f'{self._api_slug}/{self.id}/reducers', json=payload)
 
-    def add_rule(self,condition_string, rule_type):
+    def add_rule(self, condition_string, rule_type):
         caesar = Caesar()
         caesar.validate_rule_type(rule_type)
         rules_payload = {
@@ -254,10 +258,12 @@ class Workflow(PanoptesObject, Exportable):
         }
         return caesar.http_post(f'{self._api_slug}/{self.id}/{rule_type}_rules', json={f'{rule_type}_rule': rules_payload})
 
-    def add_rule_effect(self, rule_type, rule_id, action, effect_config={}):
+    def add_rule_effect(self, rule_type, rule_id, action, effect_config=None):
         caesar = Caesar()
         caesar.validate_rule_type(rule_type)
         caesar.validate_action(action)
+        if effect_config is None:
+            effect_config = {}
 
         payload = {
             f'{rule_type}_rule_effect': {
