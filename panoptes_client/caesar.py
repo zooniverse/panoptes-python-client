@@ -51,8 +51,14 @@ class Caesar(object):
     def get_extractor_by_workflow_and_id(self, workflow_id, extractor_id):
         return self.http_get(f'workflows/{workflow_id}/extractors/{extractor_id}')
 
-    def add_workflow(self, workflow_id):
-        return self.http_post('workflows', json={'workflow': {'id': workflow_id}})
+    def add_workflow(self, workflow_id, public_extracts=False, public_reductions=False):
+        return self.http_post('workflows', json={
+            'workflow': {
+                'id': workflow_id,
+                'public_extracts': public_extracts,
+                'public_reductions': public_reductions
+                }
+            })
 
     def create_workflow_extractor(self, workflow_id, extractor_key, extractor_type, task_key='T0', other_extractor_attributes=None):
         self.validate_extractor_type(extractor_type)
@@ -111,7 +117,7 @@ class Caesar(object):
 
     def validate_rule_type(self, rule_type):
         if rule_type not in self.RULE_TO_ACTION_TYPES.keys():
-            raise ValueError(f'Invalid rule type: {rule_type}.  Rule types can either be by "subject" or "user" ')
+            raise ValueError(f'Invalid rule type: {rule_type}. Rule types can either be by "subject" or "user"')
 
     def validate_reducer_type(self, reducer_type):
         if reducer_type not in self.REDUCER_TYPES:

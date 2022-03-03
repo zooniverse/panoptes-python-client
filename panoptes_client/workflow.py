@@ -183,11 +183,13 @@ class Workflow(PanoptesObject, Exportable):
 
     """ CAESAR METHODS """
 
-    def add_to_caesar(self):
+    def add_to_caesar(self, public_extracts=False, public_reductions=False):
         caesar = Caesar()
         payload = {
             'workflow': {
-                'id': self.id
+                'id': self.id,
+                'public_extracts': public_extracts,
+                'public_reductions': public_reductions
             }
         }
         return caesar.http_post(self._api_slug, json=payload)
