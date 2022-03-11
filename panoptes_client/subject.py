@@ -104,9 +104,7 @@ class Subject(PanoptesObject):
         if not self.metadata:
             self.metadata = {}
             self._original_metadata = {}
-        self._media_files = []
-        for _l in self.locations:
-            self._media_files.append(None)
+        self._media_files = [None] * len(self.locations)
 
     def save(self, client=None):
         """
