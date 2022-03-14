@@ -275,6 +275,64 @@ class Workflow(PanoptesObject, Exportable):
         }
         return caesar.http_post(f'{self._api_slug}/{self.id}/{rule_type}_rules/{rule_id}/{rule_type}_rule_effects', json=payload)
 
+    def import_ml_data_extracts(self, csv_source):
+        caesar = Caesar()
+        return caesar.http_post(f'{self._api_slug}/{self.id}/extracts/import', json={'file': csv_source})
+
+    def add_alice_extractors(self, alice_task_key='T0', question_task_key='T1', question_extractor_if_missing='ignore', other_question_extractor_attrib={}, other_alice_extractor_attrib={}):
+        " eg. {if_missing : ignore, minimum_workflow_version}"
+        question_extractor_attributes = {
+            'if_missing': question_extractor_if_missing,
+            **other_question_extractor_attrib
+        }
+
+        alice_extractor_attributes = {
+            'url': f'https://aggregation-caesar.zooniverse.org/extractors/line_text_extractor?task={alice_task_key}', 
+            **other_alice_extractor_attrib
+        }
+
+        self.add_extractor('question', 'complete', question_task_key, question_extractor_attributes)
+        self.add_extractor('external', 'alice', alice_task_key, alice_extractor_attributes)
+
+    def add_alice_reducers(self, alice_min_views, low_consensus_threshold):
+        external_reducer_url = 'https://aggregation-caesar.zooniverse.org/reducers/optics_line_text_reducer'
+        if alice_min_views or low_consensus_threshold:
+            external_reducer_url += f'?minimum_views={alice_min_views}&low_consensus_threshold={low_consensus_threshold}'
+        external_reducer_attributes = {
+            'url': external_reducer_url,
+            'filters': {
+                'extractor_keys': ['alice']
+            }
+        }
+        self.add_reducer('external', 'alice', external_reducer_attributes)
+
+        stats_reducer_attribs = {
+            'filters': {
+                'extractor_keys': ['complete']
+            }
+        }
+        self.add_reducer('stats', 'complete', stats_reducer_attribs)
+
+        count_reducer_attribs = {
+            'filters': {
+                'extractor_keys': ['complete']
+            }
+        }
+        self.add_reducer('count', 'count', count_reducer_attribs)
+
+    def add_alice_rules_and_effects(self, question_retirement_limit=3, count_retirement_limit=30):
+        question_subject_rule = self.add_rule(f'["gte", ["lookup", "complete.0", 0], ["const", {question_retirement_limit}]]' 'subject')
+        send_to_alice_effect_config = {
+            'url': 'https://tove.zooniverse.org/import', 
+            'reducer_key': 'alice'
+        }
+        self.add_rule_effect('subject', question_subject_rule['id'], 'external', send_to_alice_effect_config)
+        self.add_rule_effect('subject', question_subject_rule['id'], 'retire_subject', {'reason': 'consensus'})
+
+        count_subject_rule = self.add_rule(f'["gte", ["lookup", "count.classifications", 0], ["const", {count_retirement_limit}]]','subject')
+        self.add_rule_effect('subject', count_subject_rule['id'], 'external', send_to_alice_effect_config)
+        self.add_rule_effect('subject', count_subject_rule['id'], 'retire_subject', {'reason': 'classification_count'})
+
     @property
     def versions(self):
         """
