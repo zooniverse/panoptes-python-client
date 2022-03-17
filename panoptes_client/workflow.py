@@ -333,6 +333,11 @@ class Workflow(PanoptesObject, Exportable):
         count_subject_rule = self.add_rule(f'["gte", ["lookup", "count.classifications", 0], ["const", {count_retirement_limit}]]','subject')
         self.add_rule_effect('subject', count_subject_rule[0]['id'], 'external', send_to_alice_effect_config)
         self.add_rule_effect('subject', count_subject_rule[0]['id'], 'retire_subject', {'reason': 'classification_count'})
+    
+    def configure_for_alice(self):
+        self.add_alice_extractors()
+        self.add_alice_reducers()
+        self.add_alice_rules_and_effects()
 
     @property
     def versions(self):
