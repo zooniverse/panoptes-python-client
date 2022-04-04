@@ -1,12 +1,13 @@
 import unittest
 import sys
 
-from panoptes_client import Workflow, Caesar
-
 if sys.version_info <= (3, 0):
     from mock import patch
 else:
     from unittest.mock import patch
+
+from panoptes_client.workflow import Workflow
+from panoptes_client.caesar import Caesar
 
 
 class TestWorkflow(unittest.TestCase):
