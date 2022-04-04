@@ -215,7 +215,7 @@ class Workflow(PanoptesObject, Exportable):
     def subject_reductions(self, subject_id, reducer_key=""):
         """
         Returns a list of subject reductions as dicts from Caesar for a given subject.
-        Defaults to return all subject reductions for a given subject. 
+        Defaults to return all subject reductions for a given subject.
         - **reducer_key** If reducer key is given, will filter and return reductions for the reducer with inputted reducer_key.
 
         Examples::
@@ -238,7 +238,7 @@ class Workflow(PanoptesObject, Exportable):
 
     def reducers(self):
         """
-        Returns a list of reducers as dicts from Caesar for particular workflow. 
+        Returns a list of reducers as dicts from Caesar for particular workflow.
 
         Examples::
             workflow.reducers()
