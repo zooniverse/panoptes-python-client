@@ -369,4 +369,5 @@ class Workflow(PanoptesObject, Exportable):
 LinkResolver.register(Workflow)
 LinkResolver.register(Workflow, 'active_workflows', readonly=True)
 
+# Keep import WorkflowVersion import on bottom to avoid circular import
 from panoptes_client.workflow_version import WorkflowVersion
