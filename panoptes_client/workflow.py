@@ -1,5 +1,4 @@
 from __future__ import absolute_import, division, print_function
-from panoptes_client.workflow_version import WorkflowVersion
 from builtins import str
 from copy import deepcopy
 from panoptes_client.set_member_subject import SetMemberSubject
@@ -369,3 +368,5 @@ class Workflow(PanoptesObject, Exportable):
 
 LinkResolver.register(Workflow)
 LinkResolver.register(Workflow, 'active_workflows', readonly=True)
+
+from panoptes_client.workflow_version import WorkflowVersion
