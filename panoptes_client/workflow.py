@@ -184,42 +184,75 @@ class Workflow(PanoptesObject, Exportable):
     """ CAESAR METHODS """
 
     def add_to_caesar(self):
-        caesar = Caesar()
+        """
+        Adds selected Workflow to Caesar. Returns workflow as a dict from Caesar if successful.
+
+        Examples::
+            workflow.add_to_caesar()
+        """
         payload = {
             'workflow': {
                 'id': self.id
             }
         }
-        return caesar.http_post(self._api_slug, json=payload)
+        return Caesar().http_post(self._api_slug, json=payload)[0]
 
     def subject_extracts(self, subject_id):
-        caesar = Caesar()
+        """
+        Returns a list of subject extracts as a dict from Caesar for a given subject.
+
+        Examples::
+            workflow.subject_extracts(1234)
+
+            s = Subject(1234)
+            workflow.subject_extracts(s.id)
+        """
         url = f'{self._api_slug}/{self.id}/extractors/all/extracts'
-        return caesar.http_get(url, params={'subject_id': subject_id})
+        return Caesar().http_get(url, params={'subject_id': subject_id})[0]
 
     def subject_reductions(self, subject_id, reducer_key=""):
-        # returns all reductions of all reducers if no reducer key given
-        caesar = Caesar()
+        """
+        Returns a list of subject reductions as dicts from Caesar for a given subject.
+        Defaults to return all subject reductions for a given subject. 
+        - **reducer_key** If reducer key is given, will filter and return reductions for the reducer with inputted reducer_key.
+ 
+        Examples::
+            workflow.subject_reductions(1234)
+            workflow.subject_reductions(1234,'points')
+        """
         url = f'{self._api_slug}/{self.id}/subjects/{subject_id}/reductions'
         if reducer_key and reducer_key.strip():
             url += f'?reducer_key={reducer_key.strip()}'
-        return caesar.http_get(url)[0]
+        return Caesar().http_get(url)[0]
 
     def extractors(self):
-        caesar = Caesar()
-        return caesar.http_get(f'{self._api_slug}/{self.id}/extractors')[0]
+        """
+        Returns a list of extractors as dicts from Caesar for particular workflow. 
+
+        Examples::
+            workflow.extractors()
+        """
+        return Caesar().http_get(f'{self._api_slug}/{self.id}/extractors')[0]
 
     def reducers(self):
-        caesar = Caesar()
-        return caesar.http_get(f'{self._api_slug}/{self.id}/reducers')[0]
+        """
+        Returns a list of reducers as dicts from Caesar for particular workflow. 
+
+        Examples::
+            workflow.reducers()
+        """
+        return Caesar().http_get(f'{self._api_slug}/{self.id}/reducers')[0]
 
     def rules(self, rule_type):
-        caesar = Caesar()
-        return caesar.http_get(f'{self._api_slug}/{self.id}/{rule_type}_rules')[0]
+        """
+        Returns a list of Caesar workflow rules as dicts.
+
+         - **rule_type** can either be 'subject' or 'user'; if 'subject' will return subject rules, if 'user' will return user rules
+        """
+        return Caesar().http_get(f'{self._api_slug}/{self.id}/{rule_type}_rules')[0]
 
     def effects(self, rule_type, rule_id):
-        caesar = Caesar()
-        return caesar.http_get(f'{self._api_slug}/{self.id}/{rule_type}_rules/{rule_id}/{rule_type}_rule_effects')[0]
+        return Caesar().http_get(f'{self._api_slug}/{self.id}/{rule_type}_rules/{rule_id}/{rule_type}_rule_effects')[0]
 
     def add_extractor(self, extractor_type, extractor_key, task_key='T0', extractor_other_attributes=None):
         caesar = Caesar()
