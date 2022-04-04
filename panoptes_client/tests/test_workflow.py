@@ -36,40 +36,59 @@ class TestWorkflow(unittest.TestCase):
         workflow = Workflow(1)
         workflow.subject_extracts(1234)
 
-        self.caesar_get_mock.assert_called_with(f'workflows/{workflow.id}/extractors/all/extracts', params={'subject_id': 1234})
+        self.caesar_get_mock.assert_called_with(
+            f'workflows/{workflow.id}/extractors/all/extracts', params={'subject_id': 1234})
 
     def test_subject_reductions_get_all_reductions(self):
         workflow = Workflow(1)
         workflow.subject_reductions(1234)
 
-        self.caesar_get_mock.assert_called_with(f'workflows/{workflow.id}/subjects/1234/reductions')
+        self.caesar_get_mock.assert_called_with(
+            f'workflows/{workflow.id}/subjects/1234/reductions')
 
     def test_subject_reductions_filter_by_reducer_key(self):
         workflow = Workflow(1)
         workflow.subject_reductions(1234, 'test_reducer_key')
 
-        self.caesar_get_mock.assert_called_with(f'workflows/{workflow.id}/subjects/1234/reductions?reducer_key=test_reducer_key')
+        self.caesar_get_mock.assert_called_with(
+            f'workflows/{workflow.id}/subjects/1234/reductions?reducer_key=test_reducer_key')
 
     def test_extractors(self):
         workflow = Workflow(1)
         workflow.extractors()
 
-        self.caesar_get_mock.assert_called_with(f'workflows/{workflow.id}/extractors')
-    
+        self.caesar_get_mock.assert_called_with(
+            f'workflows/{workflow.id}/extractors')
+
     def test_reducers(self):
         workflow = Workflow(1)
         workflow.reducers()
 
-        self.caesar_get_mock.assert_called_with(f'workflows/{workflow.id}/reducers')
+        self.caesar_get_mock.assert_called_with(
+            f'workflows/{workflow.id}/reducers')
+
+    def test_rules_subject_rules(self):
+        workflow = Workflow(1)
+        workflow.rules('subject')
+
+        self.caesar_get_mock.assert_called_with(
+            f'workflows/{workflow.id}/subject_rules')
+
+    def test_rules_user_rules(self):
+        workflow = Workflow(1)
+        workflow.rules('user')
+
+        self.caesar_get_mock.assert_called_with(
+            f'workflows/{workflow.id}/user_rules')
 
     def test_add_extractor_valid_extractor(self):
         workflow = Workflow(1)
         workflow.add_extractor('external', 'alice')
 
-        self.caesar_post_mock.assert_called_with(f'workflows/{workflow.id}/extractors', json= {
+        self.caesar_post_mock.assert_called_with(f'workflows/{workflow.id}/extractors', json={
             'extractor': {
                 'type': 'external',
-                'key': 'alice', 
+                'key': 'alice',
                 'task_key': 'T0'
             }
         })
@@ -80,13 +99,14 @@ class TestWorkflow(unittest.TestCase):
             workflow.add_extractor('invalid_extractor_type', 'invalid')
 
         self.caesar_post_mock.assert_not_called()
-        self.assertEqual('Invalid extractor type', str(extractor_error.exception))
+        self.assertEqual('Invalid extractor type',
+                         str(extractor_error.exception))
 
     def test_add_reducer_valid_reducer(self):
         workflow = Workflow(1)
         workflow.add_reducer('count', 'count_key')
 
-        self.caesar_post_mock.assert_called_with(f'workflows/{workflow.id}/reducers', json= {
+        self.caesar_post_mock.assert_called_with(f'workflows/{workflow.id}/reducers', json={
             'reducer': {
                 'type': 'count',
                 'key': 'count_key'
@@ -97,7 +117,7 @@ class TestWorkflow(unittest.TestCase):
         with self.assertRaises(ValueError) as invalid_reducer_err:
             workflow = Workflow(1)
             workflow.add_reducer('invalid_reducer_type', 'key')
-        
-        self.caesar_post_mock.assert_not_called()
-        self.assertEqual('Invalid reducer type', str(invalid_reducer_err.exception))
 
+        self.caesar_post_mock.assert_not_called()
+        self.assertEqual('Invalid reducer type', str(
+            invalid_reducer_err.exception))
