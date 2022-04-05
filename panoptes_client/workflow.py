@@ -315,7 +315,7 @@ class Workflow(PanoptesObject, Exportable):
     def add_rule(self, condition_string, rule_type):
         """
         Adds a Caesar rule for given workflow. Will return rule as a dict with 'id' if successful.
-        - **condition_string** is  a string that represents a single operation (sometimes nested). The general syntax is like if you'd write Lisp in json. It is a stringified array with the first item being a string identifying the operator. See for examples of condition strings https://zooniverse.github.io/caesar/#rules
+        - **condition_string** is  a string that represents a single operation (sometimes nested). The general syntax is like if you'd write Lisp in json. It is a stringified array with the first item being a string identifying the operator. See https://zooniverse.github.io/caesar/#rules for examples of condition strings
         - **rule_type** can either be 'subject' or 'user'
 
 
