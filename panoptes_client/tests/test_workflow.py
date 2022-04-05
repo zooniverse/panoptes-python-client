@@ -29,7 +29,9 @@ class TestWorkflow(unittest.TestCase):
 
         self.caesar_post_mock.assert_called_with('workflows', json={
             'workflow': {
-                'id': workflow.id
+                'id': workflow.id,
+                'public_extracts': False,
+                'public_reductions': False
             }
         })
 
