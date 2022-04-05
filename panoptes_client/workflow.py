@@ -332,7 +332,7 @@ class Workflow(PanoptesObject, Exportable):
 
     def add_rule_effect(self, rule_type, rule_id, action, effect_config=None):
         """
-        Adds a Caesar effect for workflow, given the workflow rule. Will return effect as a dict with 'id' if successful. 
+        Adds a Caesar effect for workflow and given the workflow rule with id rule_id. Will return effect as a dict with 'id' if successful. 
         - **rule_type** can either be 'subject' or 'user'
         - **rule_id** is the id of the subject rule or user rule that the effect should run
         - **action** can be one of the following: 
