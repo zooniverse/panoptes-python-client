@@ -82,6 +82,19 @@ class TestWorkflow(unittest.TestCase):
         self.caesar_get_mock.assert_called_with(
             f'workflows/{workflow.id}/user_rules')
 
+    def test_effects_subject_rule_effects(self):
+        workflow = Workflow(1)
+        workflow.effects('subject', 123)
+
+        self.caesar_get_mock.assert_called_with(
+            f'workflows/{workflow.id}/subject_rules/123/subject_rule_effects')
+    
+    def test_effects_user_rule_effects(self):
+        workflow = Workflow(1)
+        workflow.effects('user', 123)
+        self.caesar_get_mock.assert_called_with(
+            f'workflows/{workflow.id}/user_rules/123/user_rule_effects')
+
     def test_add_extractor_valid_extractor(self):
         workflow = Workflow(1)
         workflow.add_extractor('external', 'alice')
@@ -122,3 +135,46 @@ class TestWorkflow(unittest.TestCase):
         self.caesar_post_mock.assert_not_called()
         self.assertEqual('Invalid reducer type', str(
             invalid_reducer_err.exception))
+
+    def test_add_rule_valid_rule_type(self):
+        workflow = Workflow(1)
+        condition_string = '["gte", ["lookup", "complete.0", 0], ["const", 3]]'
+        workflow.add_rule(condition_string, 'subject')
+
+        self.caesar_post_mock.assert_called_with(f'workflows/{workflow.id}/subject_rules', json={
+            'subject_rule': {
+                'condition_string': condition_string
+            }
+        })
+
+    def test_add_rule_invalid_rule_type(self):
+        with self.assertRaises(ValueError) as invalid_rule_type_err:
+            workflow = Workflow(1)
+            condition_string = '["gte", ["lookup", "complete.0", 0], ["const", 3]]'
+            invalid_rule_type = 'invalid_type'
+            workflow.add_rule(condition_string, invalid_rule_type)
+
+        self.caesar_post_mock.assert_not_called()
+        self.assertEqual(f'Invalid rule type: {invalid_rule_type}. Rule types can either be by "subject" or "user"', str(invalid_rule_type_err.exception))
+
+    def test_add_rule_effect_valid_effect(self):
+        workflow = Workflow(1)
+        retire_reason = {
+            'reason': 'other'
+        }
+        workflow.add_rule_effect('subject', 12, 'retire_subject', retire_reason)
+
+        self.caesar_post_mock.assert_called_with(f'workflows/{workflow.id}/subject_rules/{12}/subject_rule_effects', json={
+            'subject_rule_effect': {
+                'action': 'retire_subject',
+                'config': retire_reason
+            }
+        })
+    
+    def test_add_rule_effect_invalid_effect(self):
+        with self.assertRaises(ValueError) as invalid_effect_err:
+            workflow = Workflow(1)
+            workflow.add_rule_effect('subject', 12, 'promote_user', {'some': 'config'})
+        
+        self.caesar_post_mock.assert_not_called()
+        self.assertEqual('Invalid action for rule type', str(invalid_effect_err.exception))

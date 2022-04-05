@@ -111,7 +111,7 @@ class Caesar(object):
 
     def validate_rule_type(self, rule_type):
         if rule_type not in self.RULE_TO_ACTION_TYPES.keys():
-            raise ValueError(f'Invalid rule type: {rule_type}.  Rule types can either be by "subject" or "user" ')
+            raise ValueError(f'Invalid rule type: {rule_type}. Rule types can either be by "subject" or "user"')
 
     def validate_reducer_type(self, reducer_type):
         if reducer_type not in self.REDUCER_TYPES:

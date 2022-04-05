@@ -320,7 +320,7 @@ class Workflow(PanoptesObject, Exportable):
 
 
         Examples::
-            workflow.add_rule(f'["gte", ["lookup", "complete.0", 0], ["const", 3]]', 'subject')
+            workflow.add_rule('["gte", ["lookup", "complete.0", 0], ["const", 3]]', 'subject')
 
         """
         caesar = Caesar()
@@ -344,7 +344,7 @@ class Workflow(PanoptesObject, Exportable):
         """
         caesar = Caesar()
         caesar.validate_rule_type(rule_type)
-        caesar.validate_action(action)
+        caesar.validate_action(rule_type, action)
         if effect_config is None:
             effect_config = {}
 
