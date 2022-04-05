@@ -9,7 +9,7 @@ class Caesar(object):
         'user': ['promote_user']
     }
 
-    def __init__(self, endpoint='https://caesar-staging.zooniverse.org', redirect_url='https://caesar.zooniverse.org/auth/zooniverse/callback'):
+    def __init__(self, endpoint='https://caesar.zooniverse.org', redirect_url='https://caesar.zooniverse.org/auth/zooniverse/callback'):
         self.endpoint = endpoint
         self.headers = {
             'Accept': 'application/json'
