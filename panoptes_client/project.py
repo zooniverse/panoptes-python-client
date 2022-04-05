@@ -11,7 +11,6 @@ from panoptes_client.project_role import ProjectRole
 from panoptes_client.exportable import Exportable
 from panoptes_client.utils import batchable
 
-
 class ProjectLinkCollection(LinkCollection):
     def add(self, objs):
         from panoptes_client.workflow import Workflow
@@ -196,6 +195,42 @@ class Project(PanoptesObject, Exportable):
                 'metadata': metadata,
             }},
         )
+
+    def copy(self, new_subject_set_name=None):
+        """
+        Copy this project to a new project that will be owned by the
+        currently authenticated user.
+
+        A new_subject_set_name string argument can be passed which will be
+        used to name a new SubjectSet for the copied project.
+        This is useful for having an upload target straight after cloning.
+
+        Examples::
+
+            project.copy()
+            project.copy("My new subject set for uploading")
+        """
+        payload = {}
+        if new_subject_set_name:
+            payload['create_subject_set'] = new_subject_set_name
+
+        response = self.http_post(
+            '{}/copy'.format(self.id),
+            json=payload,
+        )
+
+        # find the API resource response in the response tuple
+        resource_response = response[0]
+        # save the etag from the copied project response
+        etag = response[1]
+        # extract the raw copied project resource response
+        raw_resource_response = resource_response[self._api_slug][0]
+
+        # convert it into a new project model representation
+        # ensure we provide the etag - without it the resource won't be savable
+        copied_project = Project(raw_resource_response, etag)
+
+        return copied_project
 
 
 LinkResolver.register(Project)
