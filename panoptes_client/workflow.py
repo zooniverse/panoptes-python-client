@@ -27,7 +27,7 @@ class Workflow(PanoptesObject, Exportable):
         'tasks',
         {
             'links': (
-                    'project',
+                'project',
             )
         },
     )
@@ -127,7 +127,8 @@ class Workflow(PanoptesObject, Exportable):
           of subject_set IDs, a single :py:class:`SubjectSet` instance, or a single
           subject_set ID.
         """
-        subject_sets = [s.id if isinstance(s, SubjectSet) else s for s in subject_sets]
+        subject_sets = [s.id if isinstance(
+            s, SubjectSet) else s for s in subject_sets]
         return Workflow.http_post(
             '{}/unretire_subjects'.format(self.id),
             json={
@@ -184,7 +185,12 @@ class Workflow(PanoptesObject, Exportable):
     """ CAESAR METHODS """
 
     def add_to_caesar(self, public_extracts=False, public_reductions=False):
-        caesar = Caesar()
+        """
+        Adds selected Workflow to Caesar. Returns workflow as a dict from Caesar if successful.
+
+        Examples::
+            workflow.add_to_caesar()
+        """
         payload = {
             'workflow': {
                 'id': self.id,
@@ -192,38 +198,86 @@ class Workflow(PanoptesObject, Exportable):
                 'public_reductions': public_reductions
             }
         }
-        return caesar.http_post(self._api_slug, json=payload)
+        return Caesar().http_post(self._api_slug, json=payload)[0]
 
     def subject_extracts(self, subject_id):
-        caesar = Caesar()
+        """
+        Returns a list of subject extracts as a dict from Caesar for a given subject.
+
+        Examples::
+            workflow.subject_extracts(1234)
+
+            s = Subject(1234)
+            workflow.subject_extracts(s.id)
+        """
         url = f'{self._api_slug}/{self.id}/extractors/all/extracts'
-        return caesar.http_get(url, params={'subject_id': subject_id})
+        return Caesar().http_get(url, params={'subject_id': subject_id})[0]
 
     def subject_reductions(self, subject_id, reducer_key=""):
-        # returns all reductions of all reducers if no reducer key given
-        caesar = Caesar()
+        """
+        Returns a list of subject reductions as dicts from Caesar for a given subject.
+        Defaults to return all subject reductions for a given subject.
+        - **reducer_key** If reducer key is given, will filter and return reductions for the reducer with inputted reducer_key.
+
+        Examples::
+            workflow.subject_reductions(1234)
+            workflow.subject_reductions(1234,'points')
+        """
         url = f'{self._api_slug}/{self.id}/subjects/{subject_id}/reductions'
         if reducer_key and reducer_key.strip():
             url += f'?reducer_key={reducer_key.strip()}'
-        return caesar.http_get(url)[0]
+        return Caesar().http_get(url)[0]
 
     def extractors(self):
-        caesar = Caesar()
-        return caesar.http_get(f'{self._api_slug}/{self.id}/extractors')[0]
+        """
+        Returns a list of extractors as dicts from Caesar for particular workflow. 
+
+        Examples::
+            workflow.extractors()
+        """
+        return Caesar().http_get(f'{self._api_slug}/{self.id}/extractors')[0]
 
     def reducers(self):
-        caesar = Caesar()
-        return caesar.http_get(f'{self._api_slug}/{self.id}/reducers')[0]
+        """
+        Returns a list of reducers as dicts from Caesar for particular workflow.
+
+        Examples::
+            workflow.reducers()
+        """
+        return Caesar().http_get(f'{self._api_slug}/{self.id}/reducers')[0]
 
     def rules(self, rule_type):
-        caesar = Caesar()
-        return caesar.http_get(f'{self._api_slug}/{self.id}/{rule_type}_rules')[0]
+        """
+        Returns a list of Caesar workflow rules as dicts.
+
+         - **rule_type** can either be 'subject' or 'user'; if 'subject' will return subject rules, if 'user' will return user rules
+
+         Examples::
+            workflow.rules('subject')
+            workflow.rules('user')
+        """
+        return Caesar().http_get(f'{self._api_slug}/{self.id}/{rule_type}_rules')[0]
 
     def effects(self, rule_type, rule_id):
-        caesar = Caesar()
-        return caesar.http_get(f'{self._api_slug}/{self.id}/{rule_type}_rules/{rule_id}/{rule_type}_rule_effects')[0]
+        """
+        Returns a list of Caesar workflow effects as dicts for the workflow rule with id `rule_id`
+        - **rule_type** can either be 'subject' or 'user'; if 'subject' will return effects of subject rules with id `rule_id`, if 'user' will return will return effects of user rules with id `rule_id`
+
+        Examples::
+            workflow.effects('subject', 123)
+            workflow.effects('user', 321)
+        """
+        return Caesar().http_get(f'{self._api_slug}/{self.id}/{rule_type}_rules/{rule_id}/{rule_type}_rule_effects')[0]
 
     def add_extractor(self, extractor_type, extractor_key, task_key='T0', extractor_other_attributes=None):
+        """
+        Adds a Caesar extractor for given workflow. Will return extractor as a dict with 'id' if successful
+        - **extractor_type** can be one of the following: 'blank', 'external', 'question', 'survey', 'who', 'pluck_field', or 'shape'
+        - **extractor_key** is the unique key that you want to give to the extractor. The key will be used to track this specific reducer within Caesar.
+
+        Examples::
+            workflow.add_extractor('question', 'complete', 'T0', {'if_missing': ignore })
+        """
         caesar = Caesar()
         caesar.validate_extractor_type(extractor_type)
         if extractor_other_attributes is None:
@@ -236,9 +290,17 @@ class Workflow(PanoptesObject, Exportable):
                 **extractor_other_attributes
             }
         }
-        return caesar.http_post(f'{self._api_slug}/{self.id}/extractors', json=payload)
+        return caesar.http_post(f'{self._api_slug}/{self.id}/extractors', json=payload)[0]
 
     def add_reducer(self, reducer_type, key, other_reducer_attributes=None):
+        """
+        Adds a Caesar reducer for given workflow. Will return reducer as dict with 'id' if successful. 
+        - **reducer_type** can be one of the following: 'consensus', 'count', 'placeholder', 'external', 'first_extract', 'stats', 'unique_count', 'rectangle', 'sqs'
+        - **key** is a unique name for your reducer. This key will be used to track this specific reducer within Caesar.
+
+        Examples::
+            workflow.add_reducer('count', 'count', {'filters' : {'extractor_keys': ['complete']}})
+        """
         caesar = Caesar()
         caesar.validate_reducer_type(reducer_type)
         if other_reducer_attributes is None:
@@ -250,17 +312,38 @@ class Workflow(PanoptesObject, Exportable):
                 **other_reducer_attributes
             }
         }
-        return caesar.http_post(f'{self._api_slug}/{self.id}/reducers', json=payload)
+        return caesar.http_post(f'{self._api_slug}/{self.id}/reducers', json=payload)[0]
 
     def add_rule(self, condition_string, rule_type):
+        """
+        Adds a Caesar rule for given workflow. Will return rule as a dict with 'id' if successful.
+        - **condition_string** is  a string that represents a single operation (sometimes nested). The general syntax is like if you'd write Lisp in json. It is a stringified array with the first item being a string identifying the operator. See https://zooniverse.github.io/caesar/#rules for examples of condition strings
+        - **rule_type** can either be 'subject' or 'user'
+
+
+        Examples::
+            workflow.add_rule('["gte", ["lookup", "complete.0", 0], ["const", 3]]', 'subject')
+
+        """
         caesar = Caesar()
         caesar.validate_rule_type(rule_type)
         rules_payload = {
             'condition_string': condition_string
         }
-        return caesar.http_post(f'{self._api_slug}/{self.id}/{rule_type}_rules', json={f'{rule_type}_rule': rules_payload})
+        return caesar.http_post(f'{self._api_slug}/{self.id}/{rule_type}_rules', json={f'{rule_type}_rule': rules_payload})[0]
 
     def add_rule_effect(self, rule_type, rule_id, action, effect_config=None):
+        """
+        Adds a Caesar effect for workflow and given the workflow rule with id rule_id. Will return effect as a dict with 'id' if successful. 
+        - **rule_type** can either be 'subject' or 'user'
+        - **rule_id** is the id of the subject rule or user rule that the effect should run
+        - **action** can be one of the following: 
+            - **(actions for subject rules)** - 'retire_subject', 'add_subject_to_set', 'add_to_collection', 'external'
+            - **(actions for user rules)** - 'promote_user'
+
+        Examples::
+            workflow.add_rule_effect('subject', subject_rule['id'], 'retire_subject', {'reason': 'classification_count'})
+        """
         caesar = Caesar()
         caesar.validate_rule_type(rule_type)
         caesar.validate_action(rule_type, action)
@@ -273,7 +356,7 @@ class Workflow(PanoptesObject, Exportable):
                 'config': effect_config
             }
         }
-        return caesar.http_post(f'{self._api_slug}/{self.id}/{rule_type}_rules/{rule_id}/{rule_type}_rule_effects', json=payload)
+        return caesar.http_post(f'{self._api_slug}/{self.id}/{rule_type}_rules/{rule_id}/{rule_type}_rule_effects', json=payload)[0]
 
     def import_ml_data_extracts(self, csv_source):
         caesar = Caesar()
@@ -352,4 +435,5 @@ class Workflow(PanoptesObject, Exportable):
 LinkResolver.register(Workflow)
 LinkResolver.register(Workflow, 'active_workflows', readonly=True)
 
+# Keep import WorkflowVersion import on bottom to avoid circular import
 from panoptes_client.workflow_version import WorkflowVersion

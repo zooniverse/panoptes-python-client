@@ -195,6 +195,35 @@ at a time if you need to::
 And that's all there is to it! Your new subjects are now linked to the new
 subject set.
 
+Tutorial: Adding a Workflow to Caesar
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+For this tutorial, we will connect to Caesar and add workflow to Caesar in 2 ways (via Caesar or via Workflow). We start by importing all the classes we'll need:
+
+    from panoptes_client import Panoptes, Workflow, Caesar
+    
+Now that we've imported all that, we can use the :py:meth:`.Panoptes.connect`
+method to log in (see above tutorial). 
+
+Next we can instantiate an instance of :py:class`.Caesar`:: 
+
+    caesar = Caesar()
+    
+Note that the token from coming from :py:meth:`.Panoptes.connect` will also get us connected to Caesar.
+
+We can add workflow to Caesar using this instace of :py:class`.Caesar`, assuming you have a `workflow_id` handy::
+
+    caesar.add_workflow(1234)
+ 
+Another way we can do this is via :py:class`.Workflow`. We can do this by first instantiating an instance of :py:class`.Workflow` with provided `workflow_id`::
+ 
+    workflow = Workflow(1234)
+ 
+We can then add this workflow to Caesar::
+ 
+    workflow.add_to_caesar()
+
+
+
 Tutorial: Retiring and Unretiring Subjects
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 For this tutorial, we're going to retire and unretire subjects in a given workflow. We start by importing all the classes we'll need::
@@ -277,3 +306,32 @@ already known::
         user=user_id,
         settings=new_settings,
     )
+ 
+Other examples (Caesar features by Workflow)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Most Caesar use cases are usually through a workflow: the following are examples of Caesar functions that can be done via Workflow. 
+
+Add Caesar Extractor by Workflow::
+    
+    workflow = Workflow(1234)
+    workflow.add_extractor('question', 'complete', 'T1', {'if_missing' : 'ignore'}) 
+ 
+Add Reducer by Workflow::
+
+    external_reducer_attributes = {
+        'url': 'https://aggregation-caesar.zooniverse.org/reducers/optics_line_text_reducer',
+        'filters': {
+            'extractor_keys': ['alice']
+        }
+    }
+    workflow.add_reducer('external', 'alice', external_reducer_attributes)
+    
+Adding Subject Rules by Workflow. When creating a rule, the `condition_string` argumentis a stringified array with the first item being a string identifying the operator. See https://zooniverse.github.io/caesar/#rules for examples of condition strings::
+
+    condition_string = '["gte", ["lookup", "complete.0", 0], ["const", 30]]'
+    workflow.add_rule(condition_string, 'subject')
+    
+Adding Subject Effect for a Subject Rule with id `1234` by Workflow. Ths particular effect being created will retire subjects early due to a consensus. ::
+
+    workflow.add_rule_effect('subject', 1234, 'retire_subject', {'reason' : 'consensus'})
+
