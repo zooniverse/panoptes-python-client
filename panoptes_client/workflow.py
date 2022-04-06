@@ -187,9 +187,13 @@ class Workflow(PanoptesObject, Exportable):
     def add_to_caesar(self, public_extracts=False, public_reductions=False):
         """
         Adds selected Workflow to Caesar. Returns workflow as a dict from Caesar if successful.
+         - **public_extracts** set to True to Enable Public Extracts, Defaults to False
+        - **public_reductions** set to True to Enable Public Reductions. Defaults to False
 
         Examples::
             workflow.add_to_caesar()
+            workflow.add_to_caesar(True, True)
+
         """
         payload = {
             'workflow': {
@@ -359,11 +363,38 @@ class Workflow(PanoptesObject, Exportable):
         return caesar.http_post(f'{self._api_slug}/{self.id}/{rule_type}_rules/{rule_id}/{rule_type}_rule_effects', json=payload)[0]
 
     def import_ml_data_extracts(self, csv_source):
-        caesar = Caesar()
-        return caesar.http_post(f'{self._api_slug}/{self.id}/extracts/import', json={'file': csv_source})
+        """
+        Part of ACLS-HTR efforts. Imports machine-learnt data as extracts into Caesar. 
+        - **csv_source** must be a publicly accessible csv at the time of import. 
+        Eg. csv can be hosted via an AWS S3 Bucket, Azure Blob Storage, or even through panoptes. See :  https://panoptes-uploads-staging.zooniverse.org/project_attached_image/f1ab241f-2896-4efc-a1bc-3baaff64d783.csv for an example csv.
+            - `csv_source`'s csv must have header/titles/rows of the following 
+                - `extractor_key` (key corresponding to the extractor in Caesar)
+                - `subject_id`
+                - `data` : which is the machine learnt data of the corresponding subject
 
-    def add_alice_extractors(self, alice_task_key='T0', question_task_key='T1', question_extractor_if_missing='ignore', other_question_extractor_attrib={}, other_alice_extractor_attrib={}):
-        " eg. {if_missing : ignore, minimum_workflow_version}"
+        Example::
+            workflow.import_ml_data_extracts('https://panoptes-uploads-staging.zooniverse.org/project_attached_image/f1ab241f-2896-4efc-a1bc-3baaff64d783.csv')
+        """
+        return Caesar().http_post(f'{self._api_slug}/{self.id}/extracts/import', json={'file': csv_source})
+
+    def add_alice_extractors(self, alice_task_key='T0', question_task_key='T1', question_extractor_if_missing='ignore', other_question_extractor_attrib=None, other_alice_extractor_attrib=None):
+        """
+        Adds Alice Extractors (2 extractors set up, a Question Extractor as well as an External Extractor)
+        - QuestionExtractor getting created will have a key of `complete`
+        -**question_task_key** - Task Id that reflects placement of “Have all the volunteer-made underline marks turned grey?” step. Defaults to T1
+        - ExternalExtractor getting created will have a key of `alice`
+        -**alice_task_key** - Task Id that reflects placement of Transcription Task step (Defaults to T0)
+
+        Examples::
+
+            workflow.add_alice_extractors()
+        """
+        if other_question_extractor_attrib is None:
+            other_question_extractor_attrib = {}
+
+        if other_alice_extractor_attrib is None:
+            other_alice_extractor_attrib = {}
+
         question_extractor_attributes = {
             'if_missing': question_extractor_if_missing,
             **other_question_extractor_attrib
@@ -418,6 +449,14 @@ class Workflow(PanoptesObject, Exportable):
         self.add_rule_effect('subject', count_subject_rule[0]['id'], 'retire_subject', {'reason': 'classification_count'})
     
     def configure_for_alice(self):
+        """
+        Configures workflow for ALICE/TOVE. This assumes workflow has alreaady been added to Caesar. (Can do this via `workflow.add_to_caesar(True, True)`)
+
+        - This method will create Caesar Extractors needed for ALICE with defaults. 
+        - This method will also create Caesar Reducers needed for ALICE with defaults. (In particular, `minimum_views` = 5, and `low_consensus_threshold` = 3)
+        - And this method will also create Caesar Subject Rules and Effects needed for ALICE with defaults. (In particular, Question-based retirement's retirement limit is 3 and Count-based retirement default is 30.)
+        
+        """
         self.add_alice_extractors()
         self.add_alice_reducers()
         self.add_alice_rules_and_effects()
