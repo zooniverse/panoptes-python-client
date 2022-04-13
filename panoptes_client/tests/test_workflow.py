@@ -1,13 +1,12 @@
 import unittest
 import sys
+from panoptes_client.workflow import Workflow
+from panoptes_client.caesar import Caesar
 
 if sys.version_info <= (3, 0):
     from mock import patch
 else:
     from unittest.mock import patch
-
-from panoptes_client.workflow import Workflow
-from panoptes_client.caesar import Caesar
 
 
 class TestWorkflow(unittest.TestCase):
@@ -90,7 +89,7 @@ class TestWorkflow(unittest.TestCase):
 
         self.caesar_get_mock.assert_called_with(
             f'workflows/{workflow.id}/subject_rules/123/subject_rule_effects')
-    
+
     def test_effects_user_rule_effects(self):
         workflow = Workflow(1)
         workflow.effects('user', 123)
@@ -172,11 +171,11 @@ class TestWorkflow(unittest.TestCase):
                 'config': retire_reason
             }
         })
-    
+
     def test_add_rule_effect_invalid_effect(self):
         with self.assertRaises(ValueError) as invalid_effect_err:
             workflow = Workflow(1)
             workflow.add_rule_effect('subject', 12, 'promote_user', {'some': 'config'})
-        
+
         self.caesar_post_mock.assert_not_called()
         self.assertEqual('Invalid action for rule type', str(invalid_effect_err.exception))
