@@ -324,7 +324,6 @@ class Workflow(PanoptesObject, Exportable):
         - **condition_string** is  a string that represents a single operation (sometimes nested). The general syntax is like if you'd write Lisp in json. It is a stringified array with the first item being a string identifying the operator. See https://zooniverse.github.io/caesar/#rules for examples of condition strings
         - **rule_type** can either be 'subject' or 'user'
 
-
         Examples::
             workflow.add_rule('["gte", ["lookup", "complete.0", 0], ["const", 3]]', 'subject')
 
@@ -453,7 +452,7 @@ class Workflow(PanoptesObject, Exportable):
         """
         question_subject_rule = self.add_rule(f'["gte", ["lookup", "complete.0", 0], ["const", {question_retirement_limit}]]', 'subject')
         send_to_alice_effect_config = {
-            'url': 'https://tove.zooniverse.org/import', 
+            'url': 'https://tove.zooniverse.org/import',
             'reducer_key': 'alice'
         }
         self.add_rule_effect('subject', question_subject_rule['id'], 'external', send_to_alice_effect_config)
