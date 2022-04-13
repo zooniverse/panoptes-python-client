@@ -455,12 +455,12 @@ class Workflow(PanoptesObject, Exportable):
             'url': 'https://tove.zooniverse.org/import', 
             'reducer_key': 'alice'
         }
-        self.add_rule_effect('subject', question_subject_rule[0]['id'], 'external', send_to_alice_effect_config)
-        self.add_rule_effect('subject', question_subject_rule[0]['id'], 'retire_subject', {'reason': 'consensus'})
+        self.add_rule_effect('subject', question_subject_rule['id'], 'external', send_to_alice_effect_config)
+        self.add_rule_effect('subject', question_subject_rule['id'], 'retire_subject', {'reason': 'consensus'})
 
-        count_subject_rule = self.add_rule(f'["gte", ["lookup", "count.classifications", 0], ["const", {count_retirement_limit}]]','subject')
-        self.add_rule_effect('subject', count_subject_rule[0]['id'], 'external', send_to_alice_effect_config)
-        self.add_rule_effect('subject', count_subject_rule[0]['id'], 'retire_subject', {'reason': 'classification_count'})
+        count_subject_rule = self.add_rule(f'["gte", ["lookup", "count.classifications", 0], ["const", {count_retirement_limit}]]', 'subject')
+        self.add_rule_effect('subject', count_subject_rule['id'], 'external', send_to_alice_effect_config)
+        self.add_rule_effect('subject', count_subject_rule['id'], 'retire_subject', {'reason': 'classification_count'})
     
     def configure_for_alice(self):
         """
