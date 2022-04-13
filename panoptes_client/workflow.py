@@ -410,8 +410,9 @@ class Workflow(PanoptesObject, Exportable):
 
     def add_alice_reducers(self, alice_min_views=5, low_consensus_threshold=3):
         """
-        Adds ALICE Reducers for given workflow. (3 reducers created; an External Reducer, a StatsReducer, and a CountReducer)
-        -**alice_min_views** -  This is the threshold number of classifications in order to "gray-out" a transcribed line. Default is 5
+        Adds ALICE Reducers for given workflow. 
+        (3 reducers created; an External Reducer, a StatsReducer, and a CountReducer)
+        -**alice_min_views** - This is the threshold number of classifications in order to "gray-out" a transcribed line. Default is 5
         - **low_consensus_threshold** - This is the threshold number of classifications in agreement for good consensus. Default is 3
         """
         external_reducer_url = 'https://aggregation-caesar.zooniverse.org/reducers/optics_line_text_reducer'
