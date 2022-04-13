@@ -77,8 +77,8 @@ class Caesar(object):
                 'id': workflow_id,
                 'public_extracts': public_extracts,
                 'public_reductions': public_reductions
-                }
-            })[0]
+            }
+        })[0]
 
     def create_workflow_extractor(self, workflow_id, extractor_key,
                                   extractor_type, task_key='T0', other_extractor_attributes=None):

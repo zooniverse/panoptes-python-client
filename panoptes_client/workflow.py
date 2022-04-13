@@ -372,14 +372,19 @@ class Workflow(PanoptesObject, Exportable):
                 'config': effect_config
             }
         }
-        return caesar.http_post(f'{self._api_slug}/{self.id}/{rule_type}_rules/{rule_id}/{rule_type}_rule_effects', json=payload)[0]
+        return caesar.http_post(
+            f'{self._api_slug}/{self.id}/{rule_type}_rules/{rule_id}/{rule_type}_rule_effects',
+            json=payload
+        )[0]
 
     def import_ml_data_extracts(self, csv_source):
         """
         Part of ACLS-HTR efforts. Imports machine-learnt data as extracts into Caesar.
         - **csv_source** must be a publicly accessible csv at the time of import.
         Eg. csv can be hosted via an AWS S3 Bucket, Azure Blob Storage, or even through panoptes.
-        See : https://panoptes-uploads-staging.zooniverse.org/project_attached_image/f1ab241f-2896-4efc-a1bc-3baaff64d783.csv for an example csv.
+        See :
+        https://panoptes-uploads-staging.zooniverse.org/project_attached_image/f1ab241f-2896-4efc-a1bc-3baaff64d783.csv
+        for an example csv.
             - `csv_source`'s csv must have header/titles/rows of the following
                 - `extractor_key` (key corresponding to the extractor in Caesar)
                 - `subject_id`
@@ -401,7 +406,8 @@ class Workflow(PanoptesObject, Exportable):
         """
         Adds ALICE Extractors (2 extractors set up, a Question Extractor as well as an External Extractor)
         - QuestionExtractor getting created will have a key of `complete`
-        -**question_task_key** - Task Id that reflects placement of “Have all the volunteer-made underline marks turned grey?” step. Defaults to T1
+        -**question_task_key** - Task Id that reflects placement of :
+        “Have all the volunteer-made underline marks turned grey?” step. Defaults to T1
         - ExternalExtractor getting created will have a key of `alice`
         -**alice_task_key** - Task Id that reflects placement of Transcription Task step (Defaults to T0)
 
@@ -432,12 +438,15 @@ class Workflow(PanoptesObject, Exportable):
         """
         Adds ALICE Reducers for given workflow.
         (3 reducers created; an External Reducer, a StatsReducer, and a CountReducer)
-        -**alice_min_views** - This is the threshold number of classifications in order to "gray-out" a transcribed line. Default is 5
-        - **low_consensus_threshold** - This is the threshold number of classifications in agreement for good consensus. Default is 3
+        -**alice_min_views** -This is the threshold number of classifications in order to "gray-out" a transcribed line.
+        Default is 5.
+        - **low_consensus_threshold** - This is the threshold number of classifications in agreement for good consensus.
+        Default is 3
         """
         external_reducer_url = 'https://aggregation-caesar.zooniverse.org/reducers/optics_line_text_reducer'
         if alice_min_views or low_consensus_threshold:
-            external_reducer_url += f'?minimum_views={alice_min_views}&low_consensus_threshold={low_consensus_threshold}'
+            external_reducer_url += f'?minimum_views={alice_min_views}&'
+            external_reducer_url += f'low_consensus_threshold={low_consensus_threshold}'
 
         default_filter_attribs = {
             'repeated_classifications': 'keep_first'
@@ -466,14 +475,20 @@ class Workflow(PanoptesObject, Exportable):
         Adds Subject rules and its corresponding effects for ALICE configuration for the given workflow.
         (2 subject rules will be created that will trigger retirement [Question rule and a Count rule])
         - A total of 4 subject rule effects should get created.
-        -  There should be 2 effects related to the Question Rule condition (one to send to ALICE and the othher to retire subject)
-        - There should also be 2 effects related to the Count Rule condition (one to send to alice and the other to retire subject)
+        -  There should be 2 effects related to the Question Rule condition
+        (one to send to ALICE and the othher to retire subject)
+        - There should also be 2 effects related to the Count Rule condition
+        (one to send to alice and the other to retire subject)
         -**question_retirement_limit** Question subject rule created will trigger retirement when the answer to:
         "is this complete" question reaches this threshhold limit (defaults to 3)
-        - **count_retirement_limit** Count Subject Rule created will trigger retirement when the classification count reaches this limit
+        - **count_retirement_limit**
+        Count Subject Rule created will trigger retirement when the classification count reaches this limit
 
         """
-        question_subject_rule = self.add_rule(f'["gte", ["lookup", "complete.0", 0], ["const", {question_retirement_limit}]]', 'subject')
+        question_subject_rule = self.add_rule(
+            f'["gte", ["lookup", "complete.0", 0], ["const", {question_retirement_limit}]]',
+            'subject'
+        )
         send_to_alice_effect_config = {
             'url': 'https://tove.zooniverse.org/import',
             'reducer_key': 'alice'
@@ -481,7 +496,10 @@ class Workflow(PanoptesObject, Exportable):
         self.add_rule_effect('subject', question_subject_rule['id'], 'external', send_to_alice_effect_config)
         self.add_rule_effect('subject', question_subject_rule['id'], 'retire_subject', {'reason': 'consensus'})
 
-        count_subject_rule = self.add_rule(f'["gte", ["lookup", "count.classifications", 0], ["const", {count_retirement_limit}]]', 'subject')
+        count_subject_rule = self.add_rule(
+            f'["gte", ["lookup", "count.classifications", 0], ["const", {count_retirement_limit}]]',
+            'subject'
+        )
         self.add_rule_effect('subject', count_subject_rule['id'], 'external', send_to_alice_effect_config)
         self.add_rule_effect('subject', count_subject_rule['id'], 'retire_subject', {'reason': 'classification_count'})
 
