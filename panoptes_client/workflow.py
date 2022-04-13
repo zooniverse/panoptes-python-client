@@ -396,12 +396,12 @@ class Workflow(PanoptesObject, Exportable):
         return Caesar().http_post(f'{self._api_slug}/{self.id}/extracts/import', json={'file': csv_source})
 
     def add_alice_extractors(
-                             self,
-                             alice_task_key='T0',
-                             question_task_key='T1',
-                             question_extractor_if_missing='ignore',
-                             other_question_extractor_attrib=None,
-                             other_alice_extractor_attrib=None
+        self,
+        alice_task_key='T0',
+        question_task_key='T1',
+        question_extractor_if_missing='ignore',
+        other_question_extractor_attrib=None,
+        other_alice_extractor_attrib=None
     ):
         """
         Adds ALICE Extractors (2 extractors set up, a Question Extractor as well as an External Extractor)
