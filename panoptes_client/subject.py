@@ -177,7 +177,7 @@ class Subject(PanoptesObject):
                         )
 
                 self._media_files = [None] * len(self.locations)
-                
+
             finally:
                 if not async_save:
                     upload_exec.shutdown()
