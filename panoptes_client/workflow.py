@@ -476,7 +476,7 @@ class Workflow(PanoptesObject, Exportable):
         (2 subject rules will be created that will trigger retirement [Question rule and a Count rule])
         - A total of 4 subject rule effects should get created.
         -  There should be 2 effects related to the Question Rule condition
-        (one to send to ALICE and the othher to retire subject)
+        (one to send to ALICE and the other to retire subject)
         - There should also be 2 effects related to the Count Rule condition
         (one to send to alice and the other to retire subject)
         -**question_retirement_limit** Question subject rule created will trigger retirement when the answer to:
