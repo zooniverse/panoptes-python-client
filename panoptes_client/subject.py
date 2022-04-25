@@ -104,7 +104,7 @@ class Subject(PanoptesObject):
         if not self.metadata:
             self.metadata = {}
             self._original_metadata = {}
-        self._media_files = []
+        self._media_files = [None] * len(self.locations)
 
     def save(self, client=None):
         """
@@ -175,6 +175,9 @@ class Subject(PanoptesObject):
                             ),
                             log_args=False,
                         )
+
+                self._media_files = [None] * len(self.locations)
+
             finally:
                 if not async_save:
                     upload_exec.shutdown()
@@ -242,6 +245,7 @@ class Subject(PanoptesObject):
         if type(location) is dict:
             self.locations.append(location)
             self._media_files.append(None)
+            self.modified_attributes.add('locations')
             return
         elif type(location) in (str,) + _OLD_STR_TYPES:
             f = open(location, 'rb')
@@ -264,6 +268,7 @@ class Subject(PanoptesObject):
                 media_type = 'image/{}'.format(media_type)
             self.locations.append(media_type)
             self._media_files.append(media_data)
+            self.modified_attributes.add('locations')
         finally:
             f.close()
 
