@@ -71,6 +71,9 @@ class Caesar(object):
     def add_workflow(self, workflow_id, public_extracts=False, public_reductions=False):
         """
         Adds workflow with provided workflow_id to Caesar. Returns workflow as a dict from Caesar if successful.
+
+        Examples::
+            Caesar().add_workflow(123, public_extracts=True, public_reductions=True)
         """
         return self.http_post('workflows', json={
             'workflow': {
@@ -90,7 +93,7 @@ class Caesar(object):
         The key will be used to track this specific reducer within Caesar.
 
         Examples::
-            Caesar().add_extractor(12, 'question', 'complete', 'T0', {'if_missing': ignore })
+            Caesar().create_workflow_extractor(12, 'question', 'complete', 'T0', {'if_missing': ignore })
         """
 
         self.validate_extractor_type(extractor_type)
@@ -116,7 +119,7 @@ class Caesar(object):
         - **key** is a unique name for your reducer. This key will be used to track this specific reducer within Caesar.
 
         Examples::
-            Caesar().add_reducer(1234, 'count', 'count', {'filters' : {'extractor_keys': ['complete']}})
+            Caesar().create_workflow_reducer(1234, 'count', 'count', {'filters' : {'extractor_keys': ['complete']}})
         """
 
         self.validate_reducer_type(reducer_type)
@@ -146,7 +149,7 @@ class Caesar(object):
         Examples::
             caesar = Caesar()
             workflow = Workflow(1234)
-            caesar.add_rule(workflow.id,'["gte", ["lookup", "complete.0", 0], ["const", 3]]', 'subject')
+            caesar.create_workflow_rule(workflow.id, 'subject','["gte", ["lookup", "complete.0", 0], ["const", 3]]')
 
         """
 
@@ -169,8 +172,8 @@ class Caesar(object):
             - **(actions for user rules)** - 'promote_user'
 
         Examples::
-            retirement_effect_config = {'reason': 'classification_count'}
-            Caesar().add_rule_effect(1234, 'subject', subject_rule['id'], 'retire_subject', retirement_effect_config)
+            retirement_config = {'reason': 'classification_count'}
+            Caesar().create_workflow_rule_effect(1, 'subject', subject_rule['id'], 'retire_subject', retirement_config)
         """
 
         self.validate_rule_type(rule_type)

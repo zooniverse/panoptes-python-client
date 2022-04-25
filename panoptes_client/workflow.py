@@ -192,7 +192,7 @@ class Workflow(PanoptesObject, Exportable):
 
         Examples::
             workflow.add_to_caesar()
-            workflow.add_to_caesar(True, True)
+            workflow.add_to_caesar(public_extracts=True, public_reductions=True)
 
         """
         payload = {
