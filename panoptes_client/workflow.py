@@ -228,7 +228,7 @@ class Workflow(PanoptesObject, Exportable):
             workflow.subject_reductions(1234,'points')
         """
         url = f'{self._api_slug}/{self.id}/subjects/{subject_id}/reductions'
-        if reducer_key and reducer_key.strip():
+        if reducer_key.strip():
             url += f'?reducer_key={reducer_key.strip()}'
         return Caesar().http_get(url)[0]
 
