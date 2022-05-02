@@ -13,6 +13,7 @@ of the ``panoptes_client`` package:
 - :py:class:`.SubjectSet`
 - :py:class:`.User`
 - :py:class:`.Workflow`
+- :py:class:`.Caesar`
 
 For example::
 

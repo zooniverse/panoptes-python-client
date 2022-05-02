@@ -671,7 +671,6 @@ class PanoptesObject(object):
 
             Project.where(launch_approved=True)
         """
-
         _id = kwargs.pop('id', '')
         return cls.paginated_results(*cls.http_get(_id, params=kwargs))
 

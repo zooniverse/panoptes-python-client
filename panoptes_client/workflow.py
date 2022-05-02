@@ -10,6 +10,8 @@ from panoptes_client.subject import Subject
 from panoptes_client.subject_set import SubjectSet
 from panoptes_client.utils import batchable
 
+from panoptes_client.caesar import Caesar
+
 
 class Workflow(PanoptesObject, Exportable):
     _api_slug = 'workflows'
@@ -25,7 +27,7 @@ class Workflow(PanoptesObject, Exportable):
         'tasks',
         {
             'links': (
-                    'project',
+                'project',
             )
         },
     )
@@ -125,7 +127,8 @@ class Workflow(PanoptesObject, Exportable):
           of subject_set IDs, a single :py:class:`SubjectSet` instance, or a single
           subject_set ID.
         """
-        subject_sets = [s.id if isinstance(s, SubjectSet) else s for s in subject_sets]
+        subject_sets = [s.id if isinstance(
+            s, SubjectSet) else s for s in subject_sets]
         return Workflow.http_post(
             '{}/unretire_subjects'.format(self.id),
             json={
@@ -179,6 +182,343 @@ class Workflow(PanoptesObject, Exportable):
         for status in SubjectWorkflowStatus.where(subject_ids=subject_ids, workflow_id=self.id):
             yield status
 
+    """ CAESAR METHODS """
+
+    def add_to_caesar(self, public_extracts=False, public_reductions=False):
+        """
+        Adds selected Workflow to Caesar. Returns workflow as a dict from Caesar if successful.
+        - **public_extracts** set to True to Enable Public Extracts, Defaults to False
+        - **public_reductions** set to True to Enable Public Reductions. Defaults to False
+
+        Examples::
+            workflow.add_to_caesar()
+            workflow.add_to_caesar(public_extracts=True, public_reductions=True)
+
+        """
+        payload = {
+            'workflow': {
+                'id': self.id,
+                'public_extracts': public_extracts,
+                'public_reductions': public_reductions
+            }
+        }
+        return Caesar().http_post(self._api_slug, json=payload)[0]
+
+    def subject_extracts(self, subject_id):
+        """
+        Returns a list of subject extracts as a dict from Caesar for a given subject.
+
+        Examples::
+            workflow.subject_extracts(1234)
+
+            s = Subject(1234)
+            workflow.subject_extracts(s.id)
+        """
+        url = f'{self._api_slug}/{self.id}/extractors/all/extracts'
+        return Caesar().http_get(url, params={'subject_id': subject_id})[0]
+
+    def subject_reductions(self, subject_id, reducer_key=""):
+        """
+        Returns a list of subject reductions as dicts from Caesar for a given subject.
+        Defaults to return all subject reductions for a given subject.
+        - **reducer_key** If given, will filter and return reductions for the reducer with that reducer_key.
+
+        Examples::
+            workflow.subject_reductions(1234)
+            workflow.subject_reductions(1234,'points')
+        """
+        url = f'{self._api_slug}/{self.id}/subjects/{subject_id}/reductions'
+        if reducer_key.strip():
+            url += f'?reducer_key={reducer_key.strip()}'
+        return Caesar().http_get(url)[0]
+
+    def extractors(self):
+        """
+        Returns a list of extractors as dicts from Caesar for particular workflow.
+
+        Examples::
+            workflow.extractors()
+        """
+        return Caesar().http_get(f'{self._api_slug}/{self.id}/extractors')[0]
+
+    def reducers(self):
+        """
+        Returns a list of reducers as dicts from Caesar for particular workflow.
+
+        Examples::
+            workflow.reducers()
+        """
+        return Caesar().http_get(f'{self._api_slug}/{self.id}/reducers')[0]
+
+    def rules(self, rule_type):
+        """
+        Returns a list of Caesar workflow rules as dicts.
+
+         - **rule_type** can either be 'subject' or 'user';
+            if 'subject' will return subject rules,
+            if 'user' will return user rules
+
+         Examples::
+            workflow.rules('subject')
+            workflow.rules('user')
+        """
+        return Caesar().http_get(f'{self._api_slug}/{self.id}/{rule_type}_rules')[0]
+
+    def effects(self, rule_type, rule_id):
+        """
+        Returns a list of Caesar workflow effects as dicts for the workflow rule with id `rule_id`
+        - **rule_type** can either be 'subject' or 'user';
+        if 'subject' will return effects of subject rules with id `rule_id`,
+        if 'user' will return will return effects of user rules with id `rule_id`
+
+        Examples::
+            workflow.effects('subject', 123)
+            workflow.effects('user', 321)
+        """
+        return Caesar().http_get(f'{self._api_slug}/{self.id}/{rule_type}_rules/{rule_id}/{rule_type}_rule_effects')[0]
+
+    def add_extractor(self, extractor_type, extractor_key, task_key='T0', extractor_other_attributes=None):
+        """
+        Adds a Caesar extractor for given workflow. Will return extractor as a dict with 'id' if successful
+        - **extractor_type** can be one of the following:
+            'blank', 'external', 'question', 'survey', 'who', 'pluck_field', or 'shape'
+        - **extractor_key** is the unique key that you want to give to the extractor.
+            The key will be used to track this specific reducer within Caesar.
+
+        Examples::
+            workflow.add_extractor('question', 'complete', 'T0', {'if_missing': ignore })
+        """
+        caesar = Caesar()
+        caesar.validate_extractor_type(extractor_type)
+        if extractor_other_attributes is None:
+            extractor_other_attributes = {}
+        payload = {
+            'extractor': {
+                'type': extractor_type,
+                'key': extractor_key,
+                'task_key': task_key,
+                **extractor_other_attributes
+            }
+        }
+        return caesar.http_post(f'{self._api_slug}/{self.id}/extractors', json=payload)[0]
+
+    def add_reducer(self, reducer_type, key, other_reducer_attributes=None):
+        """
+        Adds a Caesar reducer for given workflow. Will return reducer as dict with 'id' if successful.
+        - **reducer_type** can be one of the following:
+            'consensus', 'count', 'placeholder', 'external', 'first_extract',
+            'stats', 'unique_count', 'rectangle', 'sqs'
+        - **key** is a unique name for your reducer. This key will be used to track this specific reducer within Caesar.
+
+        Examples::
+            workflow.add_reducer('count', 'count', {'filters' : {'extractor_keys': ['complete']}})
+        """
+        caesar = Caesar()
+        caesar.validate_reducer_type(reducer_type)
+        if other_reducer_attributes is None:
+            other_reducer_attributes = {}
+        payload = {
+            'reducer': {
+                'type': reducer_type,
+                'key': key,
+                **other_reducer_attributes
+            }
+        }
+        return caesar.http_post(f'{self._api_slug}/{self.id}/reducers', json=payload)[0]
+
+    def add_rule(self, condition_string, rule_type):
+        """
+        Adds a Caesar rule for given workflow. Will return rule as a dict with 'id' if successful.
+        - **condition_string** is  a string that represents a single operation (sometimes nested).
+            The general syntax is like if you'd write Lisp in json.
+            It is a stringified array with the first item being a string identifying the operator.
+            See https://zooniverse.github.io/caesar/#rules for examples of condition strings
+        - **rule_type** can either be 'subject' or 'user'
+
+        Examples::
+            workflow.add_rule('["gte", ["lookup", "complete.0", 0], ["const", 3]]', 'subject')
+
+        """
+        caesar = Caesar()
+        caesar.validate_rule_type(rule_type)
+        payload = {f'{rule_type}_rule': {
+            'condition_string': condition_string
+        }}
+        return caesar.http_post(f'{self._api_slug}/{self.id}/{rule_type}_rules', json=payload)[0]
+
+    def add_rule_effect(self, rule_type, rule_id, action, effect_config=None):
+        """
+        Adds a Caesar effect for workflow and given the workflow rule with id rule_id.
+        Method will return effect as a dict with 'id' if successful.
+        - **rule_type** can either be 'subject' or 'user'
+        - **rule_id** is the id of the subject rule or user rule that the effect should run
+        - **action** can be one of the following:
+            - **(actions for subject rules)** - 'retire_subject', 'add_subject_to_set', 'add_to_collection', 'external'
+            - **(actions for user rules)** - 'promote_user'
+
+        Examples::
+            workflow.add_rule_effect('subject', subject_rule['id'], 'retire_subject',
+                                    {'reason': 'classification_count'})
+        """
+        caesar = Caesar()
+        caesar.validate_rule_type(rule_type)
+        caesar.validate_action(rule_type, action)
+        if effect_config is None:
+            effect_config = {}
+
+        payload = {
+            f'{rule_type}_rule_effect': {
+                'action': action,
+                'config': effect_config
+            }
+        }
+        return caesar.http_post(
+            f'{self._api_slug}/{self.id}/{rule_type}_rules/{rule_id}/{rule_type}_rule_effects',
+            json=payload
+        )[0]
+
+    def import_ml_data_extracts(self, csv_source):
+        """
+        Part of ACLS-HTR efforts. Imports machine-learnt data as extracts into Caesar.
+        - **csv_source** must be a publicly accessible csv at the time of import.
+        Eg. csv can be hosted via an AWS S3 Bucket, Azure Blob Storage, or even through panoptes.
+        See :
+        https://panoptes-uploads-staging.zooniverse.org/project_attached_image/f1ab241f-2896-4efc-a1bc-3baaff64d783.csv
+        for an example csv.
+            - `csv_source`'s csv must have header/titles/rows of the following
+                - `extractor_key` (key corresponding to the extractor in Caesar)
+                - `subject_id`
+                - `data` : which is the machine learnt data of the corresponding subject
+
+        Example::
+            workflow.import_ml_data_extracts('https://panoptes-uploads-staging.zooniverse.org/project_attached_image/f1ab241f-2896-4efc-a1bc-3baaff64d783.csv')
+        """
+        return Caesar().http_post(f'{self._api_slug}/{self.id}/extracts/import', json={'file': csv_source})
+
+    def add_alice_extractors(
+        self,
+        alice_task_key='T0',
+        question_task_key='T1',
+        question_extractor_if_missing='ignore',
+        other_question_extractor_attrib=None,
+        other_alice_extractor_attrib=None
+    ):
+        """
+        Adds ALICE Extractors (2 extractors set up, a Question Extractor as well as an External Extractor)
+        - QuestionExtractor getting created will have a key of `complete`
+        -**question_task_key** - Task Id that reflects placement of :
+        “Have all the volunteer-made underline marks turned grey?” step. Defaults to T1
+        - ExternalExtractor getting created will have a key of `alice`
+        -**alice_task_key** - Task Id that reflects placement of Transcription Task step (Defaults to T0)
+
+        Examples::
+
+            workflow.add_alice_extractors()
+        """
+        if other_question_extractor_attrib is None:
+            other_question_extractor_attrib = {}
+
+        if other_alice_extractor_attrib is None:
+            other_alice_extractor_attrib = {}
+
+        question_extractor_attributes = {
+            'if_missing': question_extractor_if_missing,
+            **other_question_extractor_attrib
+        }
+
+        alice_extractor_attributes = {
+            'url': f'https://aggregation-caesar.zooniverse.org/extractors/line_text_extractor?task={alice_task_key}',
+            **other_alice_extractor_attrib
+        }
+
+        self.add_extractor('question', 'complete', question_task_key, question_extractor_attributes)
+        self.add_extractor('external', 'alice', alice_task_key, alice_extractor_attributes)
+
+    def add_alice_reducers(self, alice_min_views=5, low_consensus_threshold=3):
+        """
+        Adds ALICE Reducers for given workflow.
+        (3 reducers created; an External Reducer, a StatsReducer, and a CountReducer)
+        -**alice_min_views** -This is the threshold number of classifications in order to "gray-out" a transcribed line.
+        Default is 5.
+        - **low_consensus_threshold** - This is the threshold number of classifications in agreement for good consensus.
+        Default is 3
+        """
+        external_reducer_url = 'https://aggregation-caesar.zooniverse.org/reducers/optics_line_text_reducer'
+        if alice_min_views or low_consensus_threshold:
+            external_reducer_url += f'?minimum_views={alice_min_views}&'
+            external_reducer_url += f'low_consensus_threshold={low_consensus_threshold}'
+
+        default_filter_attribs = {
+            'repeated_classifications': 'keep_first'
+        }
+        external_reducer_attributes = {
+            'url': external_reducer_url,
+            'filters': {
+                'extractor_keys': ['alice'],
+                **default_filter_attribs
+            }
+        }
+        self.add_reducer('external', 'alice', external_reducer_attributes)
+
+        complete_reducer_attribs = {
+            'filters': {
+                'extractor_keys': ['complete'],
+                **default_filter_attribs
+            }
+        }
+        self.add_reducer('stats', 'complete', complete_reducer_attribs)
+
+        self.add_reducer('count', 'count', complete_reducer_attribs)
+
+    def add_alice_rules_and_effects(self, question_retirement_limit=3, count_retirement_limit=30):
+        """
+        Adds Subject rules and its corresponding effects for ALICE configuration for the given workflow.
+        (2 subject rules will be created that will trigger retirement [Question rule and a Count rule])
+        - A total of 4 subject rule effects should get created.
+        -  There should be 2 effects related to the Question Rule condition
+        (one to send to ALICE and the other to retire subject)
+        - There should also be 2 effects related to the Count Rule condition
+        (one to send to alice and the other to retire subject)
+        -**question_retirement_limit** Question subject rule created will trigger retirement when the answer to:
+        "is this complete" question reaches this threshhold limit (defaults to 3)
+        - **count_retirement_limit**
+        Count Subject Rule created will trigger retirement when the classification count reaches this limit
+
+        """
+        question_subject_rule = self.add_rule(
+            f'["gte", ["lookup", "complete.0", 0], ["const", {question_retirement_limit}]]',
+            'subject'
+        )
+        send_to_alice_effect_config = {
+            'url': 'https://tove.zooniverse.org/import',
+            'reducer_key': 'alice'
+        }
+        self.add_rule_effect('subject', question_subject_rule['id'], 'external', send_to_alice_effect_config)
+        self.add_rule_effect('subject', question_subject_rule['id'], 'retire_subject', {'reason': 'consensus'})
+
+        count_subject_rule = self.add_rule(
+            f'["gte", ["lookup", "count.classifications", 0], ["const", {count_retirement_limit}]]',
+            'subject'
+        )
+        self.add_rule_effect('subject', count_subject_rule['id'], 'external', send_to_alice_effect_config)
+        self.add_rule_effect('subject', count_subject_rule['id'], 'retire_subject', {'reason': 'classification_count'})
+
+    def configure_for_alice(self):
+        """
+        Configures workflow for ALICE/TOVE. This assumes workflow has alreaady been added to Caesar.
+        (Can do this via `workflow.add_to_caesar(True, True)`)
+
+        - This method will create Caesar Extractors needed for ALICE with defaults.
+        - This method will also create Caesar Reducers needed for ALICE with defaults.
+        (In particular, `minimum_views` = 5, and `low_consensus_threshold` = 3)
+        - And this method will also create Caesar Subject Rules and Effects needed for ALICE with defaults.
+        (In particular, Question-based retirement's retirement limit is 3 and Count-based retirement default is 30.)
+
+        """
+        self.add_alice_extractors()
+        self.add_alice_reducers()
+        self.add_alice_rules_and_effects()
+
     @property
     def versions(self):
         """
@@ -192,4 +532,5 @@ class Workflow(PanoptesObject, Exportable):
 LinkResolver.register(Workflow)
 LinkResolver.register(Workflow, 'active_workflows', readonly=True)
 
+# Keep import WorkflowVersion import on bottom to avoid circular import
 from panoptes_client.workflow_version import WorkflowVersion
