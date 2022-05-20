@@ -41,7 +41,7 @@ class CaesarRuleGenParser(ast.NodeVisitor):
             op = node.ops.pop(0)
             left = node.left
             node.left = node.comparators.pop(0)
-            return [self.visit(op), self.visit(node.left)] + [self.visit(node)]
+            return [self.visit(op), self.visit(left)] + [self.visit(node)]
         return [
             self.visit(node.ops[0]),
             self.visit(node.left),
