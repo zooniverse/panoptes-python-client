@@ -507,6 +507,7 @@ class Workflow(PanoptesObject, Exportable):
         """
         Configures workflow for ALICE/TOVE.
 
+        - This method will add workflow to Caesar
         - This method will create Caesar Extractors needed for ALICE with defaults.
         - This method will also create Caesar Reducers needed for ALICE with defaults.
         (In particular, `minimum_views` = 5, and `low_consensus_threshold` = 3)
