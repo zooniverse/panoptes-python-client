@@ -324,14 +324,14 @@ Add Reducer by Workflow::
             'extractor_keys': ['alice']
         }
     }
-    workflow.add_reducer('external', 'alice', external_reducer_attributes)
+    workflow.add_caesar_reducer('external', 'alice', external_reducer_attributes)
     
 Adding Subject Rules by Workflow. When creating a rule, the `condition_string` argumentis a stringified array with the first item being a string identifying the operator. See https://zooniverse.github.io/caesar/#rules for examples of condition strings::
 
     condition_string = '["gte", ["lookup", "complete.0", 0], ["const", 30]]'
-    workflow.add_rule(condition_string, 'subject')
+    workflow.add_caesar_rule(condition_string, 'subject')
     
 Adding Subject Effect for a Subject Rule with id `1234` by Workflow. Ths particular effect being created will retire subjects early due to a consensus. ::
 
-    workflow.add_rule_effect('subject', 1234, 'retire_subject', {'reason' : 'consensus'})
+    workflow.add_caesar_rule_effect('subject', 1234, 'retire_subject', {'reason' : 'consensus'})
 

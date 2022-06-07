@@ -505,8 +505,7 @@ class Workflow(PanoptesObject, Exportable):
 
     def configure_for_alice(self):
         """
-        Configures workflow for ALICE/TOVE. This assumes workflow has alreaady been added to Caesar.
-        (Can do this via `workflow.add_to_caesar(True, True)`)
+        Configures workflow for ALICE/TOVE.
 
         - This method will create Caesar Extractors needed for ALICE with defaults.
         - This method will also create Caesar Reducers needed for ALICE with defaults.
