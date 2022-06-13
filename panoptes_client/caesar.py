@@ -97,7 +97,6 @@ class Caesar(object):
                     }
                 })[0]
             else:
-                print(err)
                 raise err
         else:
             return self.http_put(f'workflows/{workflow_id}', json={
