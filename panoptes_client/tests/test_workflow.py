@@ -27,7 +27,7 @@ class TestWorkflow(unittest.TestCase):
     def test_save_to_caesar_update(self):
         workflow = Workflow(1)
         workflow.save_to_caesar()
-        
+
         self.caesar_put_mock.assert_called_once()
         self.caesar_put_mock.assert_called_with('workflows/1', json={
             'workflow': {

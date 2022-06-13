@@ -46,7 +46,7 @@ class Caesar(object):
     def http_delete(self, *args, **kwargs):
         kwargs['endpoint'] = self.endpoint
         return Panoptes.client().delete(*args, **kwargs)
-    
+
     def get_workflow(self, workflow_id):
         """
         Returns workflow object if exists in Caesar
