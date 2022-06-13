@@ -204,53 +204,53 @@ class Workflow(PanoptesObject, Exportable):
         }
         return Caesar().http_post(self._api_slug, json=payload)[0]
 
-    def subject_extracts(self, subject_id):
+    def caesar_subject_extracts(self, subject_id):
         """
         Returns a list of subject extracts as a dict from Caesar for a given subject.
 
         Examples::
-            workflow.subject_extracts(1234)
+            workflow.caesar_subject_extracts(1234)
 
             s = Subject(1234)
-            workflow.subject_extracts(s.id)
+            workflow.caesar_subject_extracts(s.id)
         """
         url = f'{self._api_slug}/{self.id}/extractors/all/extracts'
         return Caesar().http_get(url, params={'subject_id': subject_id})[0]
 
-    def subject_reductions(self, subject_id, reducer_key=""):
+    def caesar_subject_reductions(self, subject_id, reducer_key=""):
         """
         Returns a list of subject reductions as dicts from Caesar for a given subject.
         Defaults to return all subject reductions for a given subject.
         - **reducer_key** If given, will filter and return reductions for the reducer with that reducer_key.
 
         Examples::
-            workflow.subject_reductions(1234)
-            workflow.subject_reductions(1234,'points')
+            workflow.caesar_subject_reductions(1234)
+            workflow.caesar_subject_reductions(1234,'points')
         """
         url = f'{self._api_slug}/{self.id}/subjects/{subject_id}/reductions'
         if reducer_key.strip():
             url += f'?reducer_key={reducer_key.strip()}'
         return Caesar().http_get(url)[0]
 
-    def extractors(self):
+    def caesar_extractors(self):
         """
         Returns a list of extractors as dicts from Caesar for particular workflow.
 
         Examples::
-            workflow.extractors()
+            workflow.caesar_extractors()
         """
         return Caesar().http_get(f'{self._api_slug}/{self.id}/extractors')[0]
 
-    def reducers(self):
+    def caesar_reducers(self):
         """
         Returns a list of reducers as dicts from Caesar for particular workflow.
 
         Examples::
-            workflow.reducers()
+            workflow.caesar_reducers()
         """
         return Caesar().http_get(f'{self._api_slug}/{self.id}/reducers')[0]
 
-    def rules(self, rule_type):
+    def caesar_rules(self, rule_type):
         """
         Returns a list of Caesar workflow rules as dicts.
 
@@ -259,12 +259,12 @@ class Workflow(PanoptesObject, Exportable):
             if 'user' will return user rules
 
          Examples::
-            workflow.rules('subject')
-            workflow.rules('user')
+            workflow.caesar_rules('subject')
+            workflow.caesar_rules('user')
         """
         return Caesar().http_get(f'{self._api_slug}/{self.id}/{rule_type}_rules')[0]
 
-    def effects(self, rule_type, rule_id):
+    def caesar_effects(self, rule_type, rule_id):
         """
         Returns a list of Caesar workflow effects as dicts for the workflow rule with id `rule_id`
         - **rule_type** can either be 'subject' or 'user';
@@ -272,12 +272,12 @@ class Workflow(PanoptesObject, Exportable):
         if 'user' will return will return effects of user rules with id `rule_id`
 
         Examples::
-            workflow.effects('subject', 123)
-            workflow.effects('user', 321)
+            workflow.caesar_effects('subject', 123)
+            workflow.caesar_effects('user', 321)
         """
         return Caesar().http_get(f'{self._api_slug}/{self.id}/{rule_type}_rules/{rule_id}/{rule_type}_rule_effects')[0]
 
-    def add_extractor(self, extractor_type, extractor_key, task_key='T0', extractor_other_attributes=None):
+    def add_caesar_extractor(self, extractor_type, extractor_key, task_key='T0', extractor_other_attributes=None):
         """
         Adds a Caesar extractor for given workflow. Will return extractor as a dict with 'id' if successful
         - **extractor_type** can be one of the following:
@@ -286,7 +286,7 @@ class Workflow(PanoptesObject, Exportable):
             The key will be used to track this specific reducer within Caesar.
 
         Examples::
-            workflow.add_extractor('question', 'complete', 'T0', {'if_missing': ignore })
+            workflow.add_caesar_extractor('question', 'complete', 'T0', {'if_missing': ignore })
         """
         caesar = Caesar()
         caesar.validate_extractor_type(extractor_type)
@@ -302,7 +302,7 @@ class Workflow(PanoptesObject, Exportable):
         }
         return caesar.http_post(f'{self._api_slug}/{self.id}/extractors', json=payload)[0]
 
-    def add_reducer(self, reducer_type, key, other_reducer_attributes=None):
+    def add_caesar_reducer(self, reducer_type, key, other_reducer_attributes=None):
         """
         Adds a Caesar reducer for given workflow. Will return reducer as dict with 'id' if successful.
         - **reducer_type** can be one of the following:
@@ -311,7 +311,7 @@ class Workflow(PanoptesObject, Exportable):
         - **key** is a unique name for your reducer. This key will be used to track this specific reducer within Caesar.
 
         Examples::
-            workflow.add_reducer('count', 'count', {'filters' : {'extractor_keys': ['complete']}})
+            workflow.add_caesar_reducer('count', 'count', {'filters' : {'extractor_keys': ['complete']}})
         """
         caesar = Caesar()
         caesar.validate_reducer_type(reducer_type)
@@ -326,7 +326,7 @@ class Workflow(PanoptesObject, Exportable):
         }
         return caesar.http_post(f'{self._api_slug}/{self.id}/reducers', json=payload)[0]
 
-    def add_rule(self, condition_string, rule_type):
+    def add_caesar_rule(self, condition_string, rule_type):
         """
         Adds a Caesar rule for given workflow. Will return rule as a dict with 'id' if successful.
         - **condition_string** is  a string that represents a single operation (sometimes nested).
@@ -336,7 +336,7 @@ class Workflow(PanoptesObject, Exportable):
         - **rule_type** can either be 'subject' or 'user'
 
         Examples::
-            workflow.add_rule('["gte", ["lookup", "complete.0", 0], ["const", 3]]', 'subject')
+            workflow.add_caesar_rule('["gte", ["lookup", "complete.0", 0], ["const", 3]]', 'subject')
 
         """
         caesar = Caesar()
@@ -346,7 +346,7 @@ class Workflow(PanoptesObject, Exportable):
         }}
         return caesar.http_post(f'{self._api_slug}/{self.id}/{rule_type}_rules', json=payload)[0]
 
-    def add_rule_effect(self, rule_type, rule_id, action, effect_config=None):
+    def add_caesar_rule_effect(self, rule_type, rule_id, action, effect_config=None):
         """
         Adds a Caesar effect for workflow and given the workflow rule with id rule_id.
         Method will return effect as a dict with 'id' if successful.
@@ -357,7 +357,7 @@ class Workflow(PanoptesObject, Exportable):
             - **(actions for user rules)** - 'promote_user'
 
         Examples::
-            workflow.add_rule_effect('subject', subject_rule['id'], 'retire_subject',
+            workflow.add_caesar_rule_effect('subject', subject_rule['id'], 'retire_subject',
                                     {'reason': 'classification_count'})
         """
         caesar = Caesar()
@@ -377,7 +377,7 @@ class Workflow(PanoptesObject, Exportable):
             json=payload
         )[0]
 
-    def import_ml_data_extracts(self, csv_source):
+    def import_caesar_data_extracts(self, csv_source):
         """
         Part of ACLS-HTR efforts. Imports machine-learnt data as extracts into Caesar.
         - **csv_source** must be a publicly accessible csv at the time of import.
@@ -391,7 +391,7 @@ class Workflow(PanoptesObject, Exportable):
                 - `data` : which is the machine learnt data of the corresponding subject
 
         Example::
-            workflow.import_ml_data_extracts('https://panoptes-uploads-staging.zooniverse.org/project_attached_image/f1ab241f-2896-4efc-a1bc-3baaff64d783.csv')
+            workflow.import_caesar_data_extracts('https://panoptes-uploads-staging.zooniverse.org/project_attached_image/f1ab241f-2896-4efc-a1bc-3baaff64d783.csv')
         """
         return Caesar().http_post(f'{self._api_slug}/{self.id}/extracts/import', json={'file': csv_source})
 
@@ -431,8 +431,8 @@ class Workflow(PanoptesObject, Exportable):
             **other_alice_extractor_attrib
         }
 
-        self.add_extractor('question', 'complete', question_task_key, question_extractor_attributes)
-        self.add_extractor('external', 'alice', alice_task_key, alice_extractor_attributes)
+        self.add_caesar_extractor('question', 'complete', question_task_key, question_extractor_attributes)
+        self.add_caesar_extractor('external', 'alice', alice_task_key, alice_extractor_attributes)
 
     def add_alice_reducers(self, alice_min_views=5, low_consensus_threshold=3):
         """
@@ -458,7 +458,7 @@ class Workflow(PanoptesObject, Exportable):
                 **default_filter_attribs
             }
         }
-        self.add_reducer('external', 'alice', external_reducer_attributes)
+        self.add_caesar_reducer('external', 'alice', external_reducer_attributes)
 
         complete_reducer_attribs = {
             'filters': {
@@ -466,9 +466,9 @@ class Workflow(PanoptesObject, Exportable):
                 **default_filter_attribs
             }
         }
-        self.add_reducer('stats', 'complete', complete_reducer_attribs)
+        self.add_caesar_reducer('stats', 'complete', complete_reducer_attribs)
 
-        self.add_reducer('count', 'count', complete_reducer_attribs)
+        self.add_caesar_reducer('count', 'count', complete_reducer_attribs)
 
     def add_alice_rules_and_effects(self, question_retirement_limit=3, count_retirement_limit=30):
         """
@@ -485,7 +485,7 @@ class Workflow(PanoptesObject, Exportable):
         Count Subject Rule created will trigger retirement when the classification count reaches this limit
 
         """
-        question_subject_rule = self.add_rule(
+        question_subject_rule = self.add_caesar_rule(
             f'["gte", ["lookup", "complete.0", 0], ["const", {question_retirement_limit}]]',
             'subject'
         )
@@ -493,21 +493,21 @@ class Workflow(PanoptesObject, Exportable):
             'url': 'https://tove.zooniverse.org/import',
             'reducer_key': 'alice'
         }
-        self.add_rule_effect('subject', question_subject_rule['id'], 'external', send_to_alice_effect_config)
-        self.add_rule_effect('subject', question_subject_rule['id'], 'retire_subject', {'reason': 'consensus'})
+        self.add_caesar_rule_effect('subject', question_subject_rule['id'], 'external', send_to_alice_effect_config)
+        self.add_caesar_rule_effect('subject', question_subject_rule['id'], 'retire_subject', {'reason': 'consensus'})
 
-        count_subject_rule = self.add_rule(
+        count_subject_rule = self.add_caesar_rule(
             f'["gte", ["lookup", "count.classifications", 0], ["const", {count_retirement_limit}]]',
             'subject'
         )
-        self.add_rule_effect('subject', count_subject_rule['id'], 'external', send_to_alice_effect_config)
-        self.add_rule_effect('subject', count_subject_rule['id'], 'retire_subject', {'reason': 'classification_count'})
+        self.add_caesar_rule_effect('subject', count_subject_rule['id'], 'external', send_to_alice_effect_config)
+        self.add_caesar_rule_effect('subject', count_subject_rule['id'], 'retire_subject', {'reason': 'classification_count'})
 
     def configure_for_alice(self):
         """
-        Configures workflow for ALICE/TOVE. This assumes workflow has alreaady been added to Caesar.
-        (Can do this via `workflow.add_to_caesar(True, True)`)
+        Configures workflow for ALICE/TOVE.
 
+        - This method will add workflow to Caesar
         - This method will create Caesar Extractors needed for ALICE with defaults.
         - This method will also create Caesar Reducers needed for ALICE with defaults.
         (In particular, `minimum_views` = 5, and `low_consensus_threshold` = 3)
@@ -515,6 +515,7 @@ class Workflow(PanoptesObject, Exportable):
         (In particular, Question-based retirement's retirement limit is 3 and Count-based retirement default is 30.)
 
         """
+        self.add_to_caesar(public_extracts=True, public_reductions=True)
         self.add_alice_extractors()
         self.add_alice_reducers()
         self.add_alice_rules_and_effects()

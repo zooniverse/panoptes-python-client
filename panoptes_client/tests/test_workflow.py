@@ -34,71 +34,71 @@ class TestWorkflow(unittest.TestCase):
             }
         })
 
-    def test_subject_extracts(self):
+    def test_caesar_subject_extracts(self):
         workflow = Workflow(1)
-        workflow.subject_extracts(1234)
+        workflow.caesar_subject_extracts(1234)
 
         self.caesar_get_mock.assert_called_with(
             f'workflows/{workflow.id}/extractors/all/extracts', params={'subject_id': 1234})
 
-    def test_subject_reductions_get_all_reductions(self):
+    def test_caesar_subject_reductions_get_all_reductions(self):
         workflow = Workflow(1)
-        workflow.subject_reductions(1234)
+        workflow.caesar_subject_reductions(1234)
 
         self.caesar_get_mock.assert_called_with(
             f'workflows/{workflow.id}/subjects/1234/reductions')
 
-    def test_subject_reductions_filter_by_reducer_key(self):
+    def test_caesar_subject_reductions_filter_by_reducer_key(self):
         workflow = Workflow(1)
-        workflow.subject_reductions(1234, 'test_reducer_key')
+        workflow.caesar_subject_reductions(1234, 'test_reducer_key')
 
         self.caesar_get_mock.assert_called_with(
             f'workflows/{workflow.id}/subjects/1234/reductions?reducer_key=test_reducer_key')
 
-    def test_extractors(self):
+    def test_caesar_extractors(self):
         workflow = Workflow(1)
-        workflow.extractors()
+        workflow.caesar_extractors()
 
         self.caesar_get_mock.assert_called_with(
             f'workflows/{workflow.id}/extractors')
 
-    def test_reducers(self):
+    def test_caesar_reducers(self):
         workflow = Workflow(1)
-        workflow.reducers()
+        workflow.caesar_reducers()
 
         self.caesar_get_mock.assert_called_with(
             f'workflows/{workflow.id}/reducers')
 
-    def test_rules_subject_rules(self):
+    def test_caesar_rules_subject_rules(self):
         workflow = Workflow(1)
-        workflow.rules('subject')
+        workflow.caesar_rules('subject')
 
         self.caesar_get_mock.assert_called_with(
             f'workflows/{workflow.id}/subject_rules')
 
-    def test_rules_user_rules(self):
+    def test_caesar_rules_user_rules(self):
         workflow = Workflow(1)
-        workflow.rules('user')
+        workflow.caesar_rules('user')
 
         self.caesar_get_mock.assert_called_with(
             f'workflows/{workflow.id}/user_rules')
 
-    def test_effects_subject_rule_effects(self):
+    def test_caesar_effects_subject_rule_effects(self):
         workflow = Workflow(1)
-        workflow.effects('subject', 123)
+        workflow.caesar_effects('subject', 123)
 
         self.caesar_get_mock.assert_called_with(
             f'workflows/{workflow.id}/subject_rules/123/subject_rule_effects')
 
-    def test_effects_user_rule_effects(self):
+    def test_caesar_effects_user_rule_effects(self):
         workflow = Workflow(1)
-        workflow.effects('user', 123)
+        workflow.caesar_effects('user', 123)
         self.caesar_get_mock.assert_called_with(
             f'workflows/{workflow.id}/user_rules/123/user_rule_effects')
 
-    def test_add_extractor_valid_extractor(self):
+    def test_add_caesar_extractor_valid_extractor(self):
         workflow = Workflow(1)
-        workflow.add_extractor('external', 'alice')
+        workflow.add_caesar_extractor('external', 'alice')
 
         self.caesar_post_mock.assert_called_with(f'workflows/{workflow.id}/extractors', json={
             'extractor': {
@@ -108,18 +108,18 @@ class TestWorkflow(unittest.TestCase):
             }
         })
 
-    def test_add_extractor_invalid_extractor(self):
+    def test_add_caesar_extractor_invalid_extractor(self):
         with self.assertRaises(ValueError) as extractor_error:
             workflow = Workflow(1)
-            workflow.add_extractor('invalid_extractor_type', 'invalid')
+            workflow.add_caesar_extractor('invalid_extractor_type', 'invalid')
 
         self.caesar_post_mock.assert_not_called()
         self.assertEqual('Invalid extractor type',
                          str(extractor_error.exception))
 
-    def test_add_reducer_valid_reducer(self):
+    def test_add_caesar_reducer_valid_reducer(self):
         workflow = Workflow(1)
-        workflow.add_reducer('count', 'count_key')
+        workflow.add_caesar_reducer('count', 'count_key')
 
         self.caesar_post_mock.assert_called_with(f'workflows/{workflow.id}/reducers', json={
             'reducer': {
@@ -128,19 +128,19 @@ class TestWorkflow(unittest.TestCase):
             }
         })
 
-    def test_add_reducer_invalid_reducer(self):
+    def test_add_caesar_reducer_invalid_reducer(self):
         with self.assertRaises(ValueError) as invalid_reducer_err:
             workflow = Workflow(1)
-            workflow.add_reducer('invalid_reducer_type', 'key')
+            workflow.add_caesar_reducer('invalid_reducer_type', 'key')
 
         self.caesar_post_mock.assert_not_called()
         self.assertEqual('Invalid reducer type', str(
             invalid_reducer_err.exception))
 
-    def test_add_rule_valid_rule_type(self):
+    def test_add_caesar_rule_valid_rule_type(self):
         workflow = Workflow(1)
         condition_string = '["gte", ["lookup", "complete.0", 0], ["const", 3]]'
-        workflow.add_rule(condition_string, 'subject')
+        workflow.add_caesar_rule(condition_string, 'subject')
 
         self.caesar_post_mock.assert_called_with(f'workflows/{workflow.id}/subject_rules', json={
             'subject_rule': {
@@ -148,23 +148,23 @@ class TestWorkflow(unittest.TestCase):
             }
         })
 
-    def test_add_rule_invalid_rule_type(self):
+    def test_add_caesar_rule_invalid_rule_type(self):
         with self.assertRaises(ValueError) as invalid_rule_type_err:
             workflow = Workflow(1)
             condition_string = '["gte", ["lookup", "complete.0", 0], ["const", 3]]'
             invalid_rule_type = 'invalid_type'
-            workflow.add_rule(condition_string, invalid_rule_type)
+            workflow.add_caesar_rule(condition_string, invalid_rule_type)
 
         self.caesar_post_mock.assert_not_called()
         expected_message = f'Invalid rule type: {invalid_rule_type}. Rule types can either be by "subject" or "user"'
         self.assertEqual(expected_message, str(invalid_rule_type_err.exception))
 
-    def test_add_rule_effect_valid_effect(self):
+    def test_add_caesar_rule_effect_valid_effect(self):
         workflow = Workflow(1)
         retire_reason = {
             'reason': 'other'
         }
-        workflow.add_rule_effect('subject', 12, 'retire_subject', retire_reason)
+        workflow.add_caesar_rule_effect('subject', 12, 'retire_subject', retire_reason)
         expected_endpoint = f'workflows/{workflow.id}/subject_rules/{12}/subject_rule_effects'
         self.caesar_post_mock.assert_called_with(expected_endpoint, json={
             'subject_rule_effect': {
@@ -173,10 +173,10 @@ class TestWorkflow(unittest.TestCase):
             }
         })
 
-    def test_add_rule_effect_invalid_effect(self):
+    def test_add_caesar_rule_effect_invalid_effect(self):
         with self.assertRaises(ValueError) as invalid_effect_err:
             workflow = Workflow(1)
-            workflow.add_rule_effect('subject', 12, 'promote_user', {'some': 'config'})
+            workflow.add_caesar_rule_effect('subject', 12, 'promote_user', {'some': 'config'})
 
         self.caesar_post_mock.assert_not_called()
         self.assertEqual('Invalid action for rule type', str(invalid_effect_err.exception))
