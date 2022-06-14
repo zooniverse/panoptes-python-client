@@ -212,7 +212,7 @@ Note that the token from coming from :py:meth:`.Panoptes.connect` will also get 
 
 We can add workflow to Caesar using this instace of :py:class`.Caesar`, assuming you have a `workflow_id` handy::
 
-    caesar.add_workflow(1234)
+    caesar.save_workflow(1234)
  
 Another way we can do this is via :py:class`.Workflow`. We can do this by first instantiating an instance of :py:class`.Workflow` with provided `workflow_id`::
  
@@ -220,7 +220,7 @@ Another way we can do this is via :py:class`.Workflow`. We can do this by first 
  
 We can then add this workflow to Caesar::
  
-    workflow.add_to_caesar()
+    workflow.save_to_caesar()
 
 
 
