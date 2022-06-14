@@ -1,4 +1,4 @@
-from panoptes_client.panoptes import Panoptes
+from panoptes_client.panoptes import Panoptes, PanoptesAPIException
 
 
 class Caesar(object):
@@ -37,11 +37,21 @@ class Caesar(object):
 
     def http_put(self, *args, **kwargs):
         kwargs['endpoint'] = self.endpoint
+        kwargs['headers'] = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
         return Panoptes.client().put(*args, **kwargs)
 
     def http_delete(self, *args, **kwargs):
         kwargs['endpoint'] = self.endpoint
         return Panoptes.client().delete(*args, **kwargs)
+
+    def get_workflow(self, workflow_id):
+        """
+        Returns workflow object if exists in Caesar
+        """
+        return self.http_get(f'workflows/{workflow_id}')[0]
 
     def get_reductions_by_workflow_and_subject(self, workflow_id, subject_id):
         """
@@ -68,20 +78,36 @@ class Caesar(object):
         return self.http_get(
             f'workflows/{workflow_id}/extractors/extractor/extracts', params={'subject_id': subject_id})[0]
 
-    def add_workflow(self, workflow_id, public_extracts=False, public_reductions=False):
+    def save_workflow(self, workflow_id, public_extracts=False, public_reductions=False):
         """
-        Adds workflow with provided workflow_id to Caesar. Returns workflow as a dict from Caesar if successful.
+        Adds/updates workflow with provided workflow_id to Caesar. Checks to see if workflow exists in Caesar, if not
+        then creates workflow and returns workflow as a dict from Caesar if created.
+        If workflow is already in Caesar, will update the Caesar workflow.
 
         Examples::
-            Caesar().add_workflow(123, public_extracts=True, public_reductions=True)
+            Caesar().save_workflow(123, public_extracts=True, public_reductions=True)
         """
-        return self.http_post('workflows', json={
-            'workflow': {
-                'id': workflow_id,
-                'public_extracts': public_extracts,
-                'public_reductions': public_reductions
-            }
-        })[0]
+        try:
+            self.get_workflow(workflow_id)
+        except PanoptesAPIException as err:
+            if "couldn't find workflow with 'id'" in str(err).lower():
+                return self.http_post('workflows', json={
+                    'workflow': {
+                        'id': workflow_id,
+                        'public_extracts': public_extracts,
+                        'public_reductions': public_reductions
+                    }
+                })[0]
+            else:
+                raise err
+        else:
+            return self.http_put(f'workflows/{workflow_id}', json={
+                'workflow': {
+                    'id': workflow_id,
+                    'public_extracts': public_extracts,
+                    'public_reductions': public_reductions
+                }
+            })[0]
 
     def create_workflow_extractor(self, workflow_id, extractor_key,
                                   extractor_type, task_key='T0', other_extractor_attributes=None):

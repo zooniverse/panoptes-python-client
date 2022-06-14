@@ -184,25 +184,18 @@ class Workflow(PanoptesObject, Exportable):
 
     """ CAESAR METHODS """
 
-    def add_to_caesar(self, public_extracts=False, public_reductions=False):
+    def save_to_caesar(self, public_extracts=False, public_reductions=False):
         """
-        Adds selected Workflow to Caesar. Returns workflow as a dict from Caesar if successful.
+        Adds/updates selected Workflow to Caesar. Returns workflow as a dict from Caesar if created.
         - **public_extracts** set to True to Enable Public Extracts, Defaults to False
         - **public_reductions** set to True to Enable Public Reductions. Defaults to False
 
         Examples::
-            workflow.add_to_caesar()
-            workflow.add_to_caesar(public_extracts=True, public_reductions=True)
+            workflow.save_to_caesar()
+            workflow.save_to_caesar(public_extracts=True, public_reductions=True)
 
         """
-        payload = {
-            'workflow': {
-                'id': self.id,
-                'public_extracts': public_extracts,
-                'public_reductions': public_reductions
-            }
-        }
-        return Caesar().http_post(self._api_slug, json=payload)[0]
+        return Caesar().save_workflow(self.id, public_extracts, public_reductions)
 
     def caesar_subject_extracts(self, subject_id):
         """
@@ -515,7 +508,7 @@ class Workflow(PanoptesObject, Exportable):
         (In particular, Question-based retirement's retirement limit is 3 and Count-based retirement default is 30.)
 
         """
-        self.add_to_caesar(public_extracts=True, public_reductions=True)
+        self.save_to_caesar(public_extracts=True, public_reductions=True)
         self.add_alice_extractors()
         self.add_alice_reducers()
         self.add_alice_rules_and_effects()

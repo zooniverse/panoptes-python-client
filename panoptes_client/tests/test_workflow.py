@@ -1,5 +1,6 @@
 import unittest
 import sys
+from panoptes_client.panoptes import PanoptesAPIException
 from panoptes_client.workflow import Workflow
 from panoptes_client.caesar import Caesar
 
@@ -14,18 +15,35 @@ class TestWorkflow(unittest.TestCase):
     def setUp(self):
         super().setUp()
         caesar_post_patch = patch.object(Caesar, 'http_post')
+        caesar_put_patch = patch.object(Caesar, 'http_put')
         caesar_get_patch = patch.object(Caesar, 'http_get')
         self.caesar_post_mock = caesar_post_patch.start()
+        self.caesar_put_mock = caesar_put_patch.start()
         self.caesar_get_mock = caesar_get_patch.start()
         self.addCleanup(caesar_post_patch.stop)
         self.addCleanup(caesar_get_patch.stop)
+        self.addCleanup(caesar_put_patch.stop)
 
-    def test_add_to_caesar(self):
+    def test_save_to_caesar_update(self):
         workflow = Workflow(1)
-        workflow.add_to_caesar()
+        workflow.save_to_caesar()
+
+        self.caesar_put_mock.assert_called_once()
+        self.caesar_put_mock.assert_called_with('workflows/1', json={
+            'workflow': {
+                'id': workflow.id,
+                'public_extracts': False,
+                'public_reductions': False
+            }
+        })
+
+    def test_save_to_caesar_create(self):
+        self.caesar_get_mock.side_effect = PanoptesAPIException("Couldn't find Workflow with 'id'=1")
+
+        workflow = Workflow(1)
+        workflow.save_to_caesar()
 
         self.caesar_post_mock.assert_called_once()
-
         self.caesar_post_mock.assert_called_with('workflows', json={
             'workflow': {
                 'id': workflow.id,
@@ -33,6 +51,16 @@ class TestWorkflow(unittest.TestCase):
                 'public_reductions': False
             }
         })
+
+    def test_save_to_caesar_raises_err(self):
+        self.caesar_get_mock.side_effect = PanoptesAPIException("Some other error not workflow_id missing error")
+
+        with self.assertRaises(PanoptesAPIException):
+            workflow = Workflow(1)
+            workflow.save_to_caesar()
+
+        self.caesar_post_mock.assert_not_called()
+        self.caesar_put_mock.assert_not_called()
 
     def test_caesar_subject_extracts(self):
         workflow = Workflow(1)
