@@ -1,4 +1,4 @@
-from panoptes_client.panoptes import Panoptes
+from panoptes_client.panoptes import Panoptes, PanoptesAPIException
 
 
 class Caesar(object):
@@ -80,14 +80,16 @@ class Caesar(object):
 
     def save_workflow(self, workflow_id, public_extracts=False, public_reductions=False):
         """
-        Adds/updates workflow with provided workflow_id to Caesar. Returns workflow as a dict from Caesar if created.
+        Adds/updates workflow with provided workflow_id to Caesar. Checks to see if workflow exists in Caesar, if not
+        then creates workflow and returns workflow as a dict from Caesar if created.
+        If workflow is already in Caesar, will update the Caesar workflow.
 
         Examples::
-            Caesar().add_workflow(123, public_extracts=True, public_reductions=True)
+            Caesar().save_workflow(123, public_extracts=True, public_reductions=True)
         """
         try:
             self.get_workflow(workflow_id)
-        except Exception as err:
+        except PanoptesAPIException as err:
             if "couldn't find workflow with 'id'" in str(err).lower():
                 return self.http_post('workflows', json={
                     'workflow': {
