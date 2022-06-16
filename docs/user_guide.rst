@@ -212,7 +212,7 @@ Note that the token from coming from :py:meth:`.Panoptes.connect` will also get 
 
 We can add workflow to Caesar using this instace of :py:class`.Caesar`, assuming you have a `workflow_id` handy::
 
-    caesar.add_workflow(1234)
+    caesar.save_workflow(1234)
  
 Another way we can do this is via :py:class`.Workflow`. We can do this by first instantiating an instance of :py:class`.Workflow` with provided `workflow_id`::
  
@@ -220,7 +220,7 @@ Another way we can do this is via :py:class`.Workflow`. We can do this by first 
  
 We can then add this workflow to Caesar::
  
-    workflow.add_to_caesar()
+    workflow.save_to_caesar()
 
 
 
@@ -324,14 +324,14 @@ Add Reducer by Workflow::
             'extractor_keys': ['alice']
         }
     }
-    workflow.add_reducer('external', 'alice', external_reducer_attributes)
+    workflow.add_caesar_reducer('external', 'alice', external_reducer_attributes)
     
 Adding Subject Rules by Workflow. When creating a rule, the `condition_string` argumentis a stringified array with the first item being a string identifying the operator. See https://zooniverse.github.io/caesar/#rules for examples of condition strings::
 
     condition_string = '["gte", ["lookup", "complete.0", 0], ["const", 30]]'
-    workflow.add_rule(condition_string, 'subject')
+    workflow.add_caesar_rule(condition_string, 'subject')
     
 Adding Subject Effect for a Subject Rule with id `1234` by Workflow. Ths particular effect being created will retire subjects early due to a consensus. ::
 
-    workflow.add_rule_effect('subject', 1234, 'retire_subject', {'reason' : 'consensus'})
+    workflow.add_caesar_rule_effect('subject', 1234, 'retire_subject', {'reason' : 'consensus'})
 
