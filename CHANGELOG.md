@@ -1,3 +1,8 @@
+## 1.5.0 (2022-06-16)
+- New: Caesar connection/configuration
+- Fix: Broken installs due to strict version constraints with requests and idna in python 3
+- Fix: Fix media uploads for existing subjects
+
 ## 1.4.0 (2021-06-01)
 - New: Subject unretirement in Workflow
 - New: Get SubjectWorkflowStatuses via Workflow, Subject, or SubjectSet
