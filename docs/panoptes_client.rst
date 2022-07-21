@@ -115,3 +115,10 @@ panoptes\_client\.workflow\_version module
     :undoc-members:
     :show-inheritance:
     :exclude-members: http_get
+
+panoptes\_client\.Caesar module
+------------------------------------------
+
+.. automodule:: panoptes_client.workflow_version
+    :members:
+    :show-inheritance:
