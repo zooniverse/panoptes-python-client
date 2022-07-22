@@ -117,7 +117,7 @@ panoptes\_client\.workflow\_version module
     :exclude-members: http_get
 
 panoptes\_client\.caesar module
-------------------------------------------
+-------------------------------
 
 .. automodule:: panoptes_client.caesar
     :members:
