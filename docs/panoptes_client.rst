@@ -116,9 +116,9 @@ panoptes\_client\.workflow\_version module
     :show-inheritance:
     :exclude-members: http_get
 
-panoptes\_client\.Caesar module
+panoptes\_client\.caesar module
 ------------------------------------------
 
-.. automodule:: panoptes_client.workflow_version
+.. automodule:: panoptes_client.caesar
     :members:
     :show-inheritance:
