@@ -489,7 +489,7 @@ class Workflow(PanoptesObject, Exportable):
         (one to send to ALICE and the other to retire subject).
         There should also be 2 effects related to the Count Rule condition
         (one to send to alice and the other to retire subject)
-        
+
         - **question_retirement_limit** - Question subject rule created will trigger retirement when the answer to:
           "is this complete" question reaches this threshhold limit (defaults to 3)
         - **count_retirement_limit** - Count Subject Rule created will trigger retirement when the classification count reaches this limit (defaults to 30)

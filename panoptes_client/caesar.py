@@ -90,7 +90,7 @@ class Caesar(object):
         If workflow is already in Caesar, will update the Caesar workflow.
 
         Examples::
-        
+
             Caesar().save_workflow(123, public_extracts=True, public_reductions=True)
         """
         try:
