@@ -90,6 +90,7 @@ class Caesar(object):
         If workflow is already in Caesar, will update the Caesar workflow.
 
         Examples::
+        
             Caesar().save_workflow(123, public_extracts=True, public_reductions=True)
         """
         try:
@@ -117,13 +118,13 @@ class Caesar(object):
     def create_workflow_extractor(self, workflow_id, extractor_key,
                                   extractor_type, task_key='T0', other_extractor_attributes=None):
         """
-        Adds a Caesar extractor for workflow with id workflow_id. Will return extractor as a dict with 'id' if success
-        - **extractor_type** can be one of the following:
-            'blank', 'external', 'question', 'survey', 'who', 'pluck_field', or 'shape'
-        - **extractor_key** is the unique key that you want to give to the extractor.
-        The key will be used to track this specific reducer within Caesar.
+        Adds a Caesar extractor for workflow with id workflow_id. Will return extractor as a dict with 'id' if success.
+
+        - **extractor_type** can be one of the following: 'blank', 'external', 'question', 'survey', 'who', 'pluck_field', or 'shape'
+        - **extractor_key** is the unique key that you want to give to the extractor. The key will be used to track this specific reducer within Caesar.
 
         Examples::
+
             Caesar().create_workflow_extractor(12, 'question', 'complete', 'T0', {'if_missing': ignore })
         """
 
@@ -144,12 +145,14 @@ class Caesar(object):
     def create_workflow_reducer(self, workflow_id, reducer_type, key, other_reducer_attributes=None):
         """
         Adds a Caesar reducer for given workflow. Will return reducer as dict with 'id' if successful.
+
         - **reducer_type** can be one of the following:
-            'consensus', 'count', 'placeholder', 'external', 'first_extract',
-            'stats', 'unique_count', 'rectangle', 'sqs'
+          'consensus', 'count', 'placeholder', 'external', 'first_extract',
+          'stats', 'unique_count', 'rectangle', 'sqs'
         - **key** is a unique name for your reducer. This key will be used to track this specific reducer within Caesar.
 
         Examples::
+
             Caesar().create_workflow_reducer(1234, 'count', 'count', {'filters' : {'extractor_keys': ['complete']}})
         """
 
@@ -170,14 +173,15 @@ class Caesar(object):
     def create_workflow_rule(self, workflow_id, rule_type, condition_string='[]'):
         """
         Adds a Caesar rule for given workflow. Will return rule as a dict with 'id' if successful.
+
         - **condition_string** is  a string that represents a single operation (sometimes nested).
-        The general syntax is like if you'd write Lisp in json.
-        It is a stringified array with the first item being a string identifying the operator.
-        See for examples of condition strings https://zooniverse.github.io/caesar/#rules
+          The general syntax is like if you'd write Lisp in json.
+          It is a stringified array with the first item being a string identifying the operator.
+          See for examples of condition strings https://zooniverse.github.io/caesar/#rules
         - **rule_type** can either be 'subject' or 'user'
 
-
         Examples::
+
             caesar = Caesar()
             workflow = Workflow(1234)
             caesar.create_workflow_rule(workflow.id, 'subject','["gte", ["lookup", "complete.0", 0], ["const", 3]]')
@@ -196,13 +200,15 @@ class Caesar(object):
         """
         Adds a Caesar effect for workflow with id `workflow_id` and rule with id `rule_id`.
         Method will return effect as a dict with 'id' if successful.
+
         - **rule_type** can either be 'subject' or 'user'
         - **rule_id** is the id of the subject rule or user rule that the effect should run
         - **action** can be one of the following:
-            - **(actions for subject rules)** - 'retire_subject', 'add_subject_to_set', 'add_to_collection', 'external'
-            - **(actions for user rules)** - 'promote_user'
+          - **(actions for subject rules)** - 'retire_subject', 'add_subject_to_set', 'add_to_collection', 'external'
+          - **(actions for user rules)** - 'promote_user'
 
         Examples::
+
             retirement_config = {'reason': 'classification_count'}
             Caesar().create_workflow_rule_effect(1, 'subject', subject_rule['id'], 'retire_subject', retirement_config)
         """
