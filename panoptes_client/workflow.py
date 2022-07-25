@@ -395,11 +395,12 @@ class Workflow(PanoptesObject, Exportable):
 
         - **csv_source** must be a publicly accessible csv at the time of import.
           Eg. csv can be hosted via an AWS S3 Bucket, Azure Blob Storage, or Panoptes media item.
-          See `this csv <https://panoptes-uploads-staging.zooniverse.org/project_attached_image/f1ab241f-2896-4efc-a1bc-3baaff64d783.csv>` as an example.
-          - `csv_source`'s csv must have header/titles/rows of the following
-            - `extractor_key` (key corresponding to the extractor in Caesar)
-            - `subject_id`
-            - `data` (the machine learnt data for the corresponding subject)
+          See `this csv <https://panoptes-uploads-staging.zooniverse.org/project_attached_image/f1ab241f-2896-4efc-a1bc-3baaff64d783.csv>`_ as an example.
+          `csv_source`'s csv must have header/titles/rows of the following:
+
+          - `extractor_key` (key corresponding to the extractor in Caesar)
+          - `subject_id`
+          - `data` (the machine learnt data for the corresponding subject)
 
         Example::
 
@@ -407,14 +408,10 @@ class Workflow(PanoptesObject, Exportable):
         """
         return Caesar().http_post(f'{self._api_slug}/{self.id}/extracts/import', json={'file': csv_source})
 
-    def add_alice_extractors(
-        self,
-        alice_task_key='T0',
-        question_task_key='T1',
-        question_extractor_if_missing='ignore',
-        other_question_extractor_attrib=None,
-        other_alice_extractor_attrib=None
-    ):
+    def add_alice_extractors(self, alice_task_key='T0', question_task_key='T1',
+                             question_extractor_if_missing='ignore',
+                             other_question_extractor_attrib=None,
+                             other_alice_extractor_attrib=None):
         """
         Adds ALICE Extractors (two extractors: Question and External).
 
@@ -487,12 +484,12 @@ class Workflow(PanoptesObject, Exportable):
         """
         Adds subject rules and corresponding effects for ALICE configuration of the given workflow.
         Two subject rules are created that will trigger retirement: a Question rule and a Count rule.
-
-        - A total of 4 subject rule effects should get created.
-        - There should be 2 effects related to the Question Rule condition
-          (one to send to ALICE and the other to retire subject)
-        - There should also be 2 effects related to the Count Rule condition
-          (one to send to alice and the other to retire subject)
+        A total of 4 subject rule effects should get created.
+        There should be 2 effects related to the Question Rule condition
+        (one to send to ALICE and the other to retire subject).
+        There should also be 2 effects related to the Count Rule condition
+        (one to send to alice and the other to retire subject)
+        
         - **question_retirement_limit** - Question subject rule created will trigger retirement when the answer to:
           "is this complete" question reaches this threshhold limit (defaults to 3)
         - **count_retirement_limit** - Count Subject Rule created will trigger retirement when the classification count reaches this limit (defaults to 30)
