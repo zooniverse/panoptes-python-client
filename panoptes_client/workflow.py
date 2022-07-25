@@ -123,9 +123,10 @@ class Workflow(PanoptesObject, Exportable):
     def unretire_subjects_by_subject_set(self, subject_sets):
         """
         Un-retires subjects in this workflow by subject_sets.
-         - **subjects_sets* can be a list of :py:class:`SubjectSet` instances, a list
-          of subject_set IDs, a single :py:class:`SubjectSet` instance, or a single
-          subject_set ID.
+
+        - **subjects_sets** can be a list of :py:class:`SubjectSet` instances, a
+          list of subject_set IDs, a single :py:class:`SubjectSet` instance, or
+          a single subject_set ID.
         """
         subject_sets = [s.id if isinstance(
             s, SubjectSet) else s for s in subject_sets]
@@ -187,10 +188,12 @@ class Workflow(PanoptesObject, Exportable):
     def save_to_caesar(self, public_extracts=False, public_reductions=False):
         """
         Adds/updates selected Workflow to Caesar. Returns workflow as a dict from Caesar if created.
+
         - **public_extracts** set to True to Enable Public Extracts, Defaults to False
         - **public_reductions** set to True to Enable Public Reductions. Defaults to False
 
         Examples::
+
             workflow.save_to_caesar()
             workflow.save_to_caesar(public_extracts=True, public_reductions=True)
 
@@ -202,6 +205,7 @@ class Workflow(PanoptesObject, Exportable):
         Returns a list of subject extracts as a dict from Caesar for a given subject.
 
         Examples::
+
             workflow.caesar_subject_extracts(1234)
 
             s = Subject(1234)
@@ -214,9 +218,11 @@ class Workflow(PanoptesObject, Exportable):
         """
         Returns a list of subject reductions as dicts from Caesar for a given subject.
         Defaults to return all subject reductions for a given subject.
+
         - **reducer_key** If given, will filter and return reductions for the reducer with that reducer_key.
 
         Examples::
+
             workflow.caesar_subject_reductions(1234)
             workflow.caesar_subject_reductions(1234,'points')
         """
@@ -230,6 +236,7 @@ class Workflow(PanoptesObject, Exportable):
         Returns a list of extractors as dicts from Caesar for particular workflow.
 
         Examples::
+
             workflow.caesar_extractors()
         """
         return Caesar().http_get(f'{self._api_slug}/{self.id}/extractors')[0]
@@ -239,6 +246,7 @@ class Workflow(PanoptesObject, Exportable):
         Returns a list of reducers as dicts from Caesar for particular workflow.
 
         Examples::
+
             workflow.caesar_reducers()
         """
         return Caesar().http_get(f'{self._api_slug}/{self.id}/reducers')[0]
@@ -247,11 +255,12 @@ class Workflow(PanoptesObject, Exportable):
         """
         Returns a list of Caesar workflow rules as dicts.
 
-         - **rule_type** can either be 'subject' or 'user';
-            if 'subject' will return subject rules,
-            if 'user' will return user rules
+        - **rule_type** can either be 'subject' or 'user';
+          if 'subject' will return subject rules,
+          if 'user' will return user rules
 
-         Examples::
+        Examples::
+
             workflow.caesar_rules('subject')
             workflow.caesar_rules('user')
         """
@@ -259,12 +268,14 @@ class Workflow(PanoptesObject, Exportable):
 
     def caesar_effects(self, rule_type, rule_id):
         """
-        Returns a list of Caesar workflow effects as dicts for the workflow rule with id `rule_id`
+        Returns a list of Caesar workflow effects as dicts for the workflow rule with id `rule_id`.
+
         - **rule_type** can either be 'subject' or 'user';
-        if 'subject' will return effects of subject rules with id `rule_id`,
-        if 'user' will return will return effects of user rules with id `rule_id`
+          if 'subject' will return effects of subject rules with id `rule_id`,
+          if 'user' will return will return effects of user rules with id `rule_id`
 
         Examples::
+
             workflow.caesar_effects('subject', 123)
             workflow.caesar_effects('user', 321)
         """
@@ -272,13 +283,15 @@ class Workflow(PanoptesObject, Exportable):
 
     def add_caesar_extractor(self, extractor_type, extractor_key, task_key='T0', extractor_other_attributes=None):
         """
-        Adds a Caesar extractor for given workflow. Will return extractor as a dict with 'id' if successful
+        Adds a Caesar extractor for given workflow. Will return extractor as a dict with 'id' if successful.
+
         - **extractor_type** can be one of the following:
             'blank', 'external', 'question', 'survey', 'who', 'pluck_field', or 'shape'
         - **extractor_key** is the unique key that you want to give to the extractor.
             The key will be used to track this specific reducer within Caesar.
 
         Examples::
+
             workflow.add_caesar_extractor('question', 'complete', 'T0', {'if_missing': ignore })
         """
         caesar = Caesar()
@@ -298,12 +311,14 @@ class Workflow(PanoptesObject, Exportable):
     def add_caesar_reducer(self, reducer_type, key, other_reducer_attributes=None):
         """
         Adds a Caesar reducer for given workflow. Will return reducer as dict with 'id' if successful.
+
         - **reducer_type** can be one of the following:
             'consensus', 'count', 'placeholder', 'external', 'first_extract',
             'stats', 'unique_count', 'rectangle', 'sqs'
         - **key** is a unique name for your reducer. This key will be used to track this specific reducer within Caesar.
 
         Examples::
+
             workflow.add_caesar_reducer('count', 'count', {'filters' : {'extractor_keys': ['complete']}})
         """
         caesar = Caesar()
@@ -322,6 +337,7 @@ class Workflow(PanoptesObject, Exportable):
     def add_caesar_rule(self, condition_string, rule_type):
         """
         Adds a Caesar rule for given workflow. Will return rule as a dict with 'id' if successful.
+
         - **condition_string** is  a string that represents a single operation (sometimes nested).
             The general syntax is like if you'd write Lisp in json.
             It is a stringified array with the first item being a string identifying the operator.
@@ -329,6 +345,7 @@ class Workflow(PanoptesObject, Exportable):
         - **rule_type** can either be 'subject' or 'user'
 
         Examples::
+
             workflow.add_caesar_rule('["gte", ["lookup", "complete.0", 0], ["const", 3]]', 'subject')
 
         """
@@ -343,6 +360,7 @@ class Workflow(PanoptesObject, Exportable):
         """
         Adds a Caesar effect for workflow and given the workflow rule with id rule_id.
         Method will return effect as a dict with 'id' if successful.
+
         - **rule_type** can either be 'subject' or 'user'
         - **rule_id** is the id of the subject rule or user rule that the effect should run
         - **action** can be one of the following:
@@ -350,6 +368,7 @@ class Workflow(PanoptesObject, Exportable):
             - **(actions for user rules)** - 'promote_user'
 
         Examples::
+
             workflow.add_caesar_rule_effect('subject', subject_rule['id'], 'retire_subject',
                                     {'reason': 'classification_count'})
         """
@@ -372,18 +391,18 @@ class Workflow(PanoptesObject, Exportable):
 
     def import_caesar_data_extracts(self, csv_source):
         """
-        Part of ACLS-HTR efforts. Imports machine-learnt data as extracts into Caesar.
+        Imports machine-learnt data as extracts into Caesar.
+
         - **csv_source** must be a publicly accessible csv at the time of import.
-        Eg. csv can be hosted via an AWS S3 Bucket, Azure Blob Storage, or even through panoptes.
-        See :
-        https://panoptes-uploads-staging.zooniverse.org/project_attached_image/f1ab241f-2896-4efc-a1bc-3baaff64d783.csv
-        for an example csv.
-            - `csv_source`'s csv must have header/titles/rows of the following
-                - `extractor_key` (key corresponding to the extractor in Caesar)
-                - `subject_id`
-                - `data` : which is the machine learnt data of the corresponding subject
+          Eg. csv can be hosted via an AWS S3 Bucket, Azure Blob Storage, or Panoptes media item.
+          See `this csv <https://panoptes-uploads-staging.zooniverse.org/project_attached_image/f1ab241f-2896-4efc-a1bc-3baaff64d783.csv>` as an example.
+          - `csv_source`'s csv must have header/titles/rows of the following
+            - `extractor_key` (key corresponding to the extractor in Caesar)
+            - `subject_id`
+            - `data` (the machine learnt data for the corresponding subject)
 
         Example::
+
             workflow.import_caesar_data_extracts('https://panoptes-uploads-staging.zooniverse.org/project_attached_image/f1ab241f-2896-4efc-a1bc-3baaff64d783.csv')
         """
         return Caesar().http_post(f'{self._api_slug}/{self.id}/extracts/import', json={'file': csv_source})
@@ -397,12 +416,13 @@ class Workflow(PanoptesObject, Exportable):
         other_alice_extractor_attrib=None
     ):
         """
-        Adds ALICE Extractors (2 extractors set up, a Question Extractor as well as an External Extractor)
+        Adds ALICE Extractors (two extractors: Question and External).
+
         - QuestionExtractor getting created will have a key of `complete`
-        -**question_task_key** - Task Id that reflects placement of :
-        “Have all the volunteer-made underline marks turned grey?” step. Defaults to T1
+        - **question_task_key** - Task ID that reflects placement of:
+          “Have all the volunteer-made underline marks turned grey?” step. Defaults to T1
         - ExternalExtractor getting created will have a key of `alice`
-        -**alice_task_key** - Task Id that reflects placement of Transcription Task step (Defaults to T0)
+        - **alice_task_key** - Task ID that reflects placement of Transcription Task step (Defaults to T0)
 
         Examples::
 
@@ -429,12 +449,12 @@ class Workflow(PanoptesObject, Exportable):
 
     def add_alice_reducers(self, alice_min_views=5, low_consensus_threshold=3):
         """
-        Adds ALICE Reducers for given workflow.
-        (3 reducers created; an External Reducer, a StatsReducer, and a CountReducer)
-        -**alice_min_views** -This is the threshold number of classifications in order to "gray-out" a transcribed line.
-        Default is 5.
+        Adds ALICE Reducers for given workflow (three reducers: External, Stats, Count).
+
+        - **alice_min_views** - This is the threshold number of classifications in order to "gray-out" a transcribed line.
+          Default is 5.
         - **low_consensus_threshold** - This is the threshold number of classifications in agreement for good consensus.
-        Default is 3
+          Default is 3
         """
         external_reducer_url = 'https://aggregation-caesar.zooniverse.org/reducers/optics_line_text_reducer'
         if alice_min_views or low_consensus_threshold:
@@ -465,17 +485,17 @@ class Workflow(PanoptesObject, Exportable):
 
     def add_alice_rules_and_effects(self, question_retirement_limit=3, count_retirement_limit=30):
         """
-        Adds Subject rules and its corresponding effects for ALICE configuration for the given workflow.
-        (2 subject rules will be created that will trigger retirement [Question rule and a Count rule])
+        Adds subject rules and corresponding effects for ALICE configuration of the given workflow.
+        Two subject rules are created that will trigger retirement: a Question rule and a Count rule.
+
         - A total of 4 subject rule effects should get created.
-        -  There should be 2 effects related to the Question Rule condition
-        (one to send to ALICE and the other to retire subject)
+        - There should be 2 effects related to the Question Rule condition
+          (one to send to ALICE and the other to retire subject)
         - There should also be 2 effects related to the Count Rule condition
-        (one to send to alice and the other to retire subject)
-        -**question_retirement_limit** Question subject rule created will trigger retirement when the answer to:
-        "is this complete" question reaches this threshhold limit (defaults to 3)
-        - **count_retirement_limit**
-        Count Subject Rule created will trigger retirement when the classification count reaches this limit
+          (one to send to alice and the other to retire subject)
+        - **question_retirement_limit** - Question subject rule created will trigger retirement when the answer to:
+          "is this complete" question reaches this threshhold limit (defaults to 3)
+        - **count_retirement_limit** - Count Subject Rule created will trigger retirement when the classification count reaches this limit (defaults to 30)
 
         """
         question_subject_rule = self.add_caesar_rule(
@@ -503,9 +523,9 @@ class Workflow(PanoptesObject, Exportable):
         - This method will add workflow to Caesar
         - This method will create Caesar Extractors needed for ALICE with defaults.
         - This method will also create Caesar Reducers needed for ALICE with defaults.
-        (In particular, `minimum_views` = 5, and `low_consensus_threshold` = 3)
+          (In particular, `minimum_views` = 5, and `low_consensus_threshold` = 3)
         - And this method will also create Caesar Subject Rules and Effects needed for ALICE with defaults.
-        (In particular, Question-based retirement's retirement limit is 3 and Count-based retirement default is 30.)
+          (In particular, Question-based retirement's retirement limit is 3 and Count-based retirement default is 30.)
 
         """
         self.save_to_caesar(public_extracts=True, public_reductions=True)
