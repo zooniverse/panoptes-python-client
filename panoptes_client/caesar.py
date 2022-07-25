@@ -2,6 +2,11 @@ from panoptes_client.panoptes import Panoptes, PanoptesAPIException
 
 
 class Caesar(object):
+    """
+    The low-level Caesar HTTP client class. Use this class to interact with the
+    Caesar API. User credentials are shared with Panoptes, so log in via
+    :py:meth:`.Panoptes.connect` before use.
+    """
     EXTRACTOR_TYPES = ['blank', 'external', 'question', 'survey', 'who', 'pluck_field', 'shape']
     REDUCER_TYPES = [
         'consensus', 'count', 'placeholder', 'external', 'first_extract', 'stats',
