@@ -38,11 +38,5 @@ class Inaturalist(object):
                 'taxon_id': taxon_id,
                 'subject_set_id': subject_set_id,
                 'updated_since': updated_since
-            },
-            headers={
-                'Accept': 'application/vnd.api+json; version=1',
-                'Content-Type': 'application/json'
-            },
-            endpoint='http://localhost:3000',
-            retry=False
+            }
         )

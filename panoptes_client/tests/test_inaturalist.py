@@ -13,27 +13,28 @@ from panoptes_client.inaturalist import Inaturalist
 
 class TestInaturalist(unittest.TestCase):
 
+
     def test_inat_import(self):
-        with patch('panoptes_client.panoptes.Panoptes') as pc:
-            pc.client().post = Mock(return_value=200)
+        with patch('panoptes_client.panoptes.Panoptes.client') as pc:
+            pc().post = Mock(return_value=200)
             Inaturalist.inat_import(16462, 4)
 
-            pc.client().post.assert_called_with(
-                '/api/inaturalist/import',
+            pc().post.assert_called_with(
+                'api/inaturalist/import',
                 json={
                     'taxon_id': 16462,
                     'subject_set_id': 4,
                     'updated_since': None
-                },
+                }
             )
 
     def test_inat_import_updated_since(self):
-        with patch('panoptes_client.panoptes.Panoptes') as pc:
-            pc.client().json_request = Mock(return_value=200)
+        with patch('panoptes_client.panoptes.Panoptes.client') as pc:
+            pc().post = Mock(return_value=200)
             Inaturalist.inat_import(16462, 4, '2022-10-31')
 
-            pc.client().post.assert_called_with(
-                '/api/inaturalist/import',
+            pc().post.assert_called_with(
+                'api/inaturalist/import',
                 json={
                     'taxon_id': 16462,
                     'subject_set_id': 4,
