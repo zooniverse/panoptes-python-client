@@ -1,5 +1,6 @@
 from panoptes_client.panoptes import Panoptes
 
+
 class Inaturalist(object):
     """
     The class that interacts with the Panoptes' iNaturalist functionality.
@@ -30,7 +31,6 @@ class Inaturalist(object):
             # Import all royal flycatcher observations to subject set id 4:
             Inaturalist.inat_import(16462, 4)
         """
-
 
         return Panoptes.client().post(
             f'api/inaturalist/import',

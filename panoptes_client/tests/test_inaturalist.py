@@ -11,6 +11,7 @@ else:
 from panoptes_client.inaturalist import Inaturalist
 
 class TestInaturalist(unittest.TestCase):
+
     def test_inat_import(self):
         with patch('panoptes_client.panoptes.Panoptes') as pc:
             pc.client().post = Mock(return_value=200)
@@ -23,7 +24,7 @@ class TestInaturalist(unittest.TestCase):
                     'subject_set_id': 4,
                     'updated_since': None
                 },
-        )
+            )
 
     def test_inat_import_updated_since(self):
         with patch('panoptes_client.panoptes.Panoptes') as pc:
