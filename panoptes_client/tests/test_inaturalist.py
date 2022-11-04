@@ -10,6 +10,7 @@ else:
 
 from panoptes_client.inaturalist import Inaturalist
 
+
 class TestInaturalist(unittest.TestCase):
 
     def test_inat_import(self):

@@ -34,7 +34,7 @@ class Inaturalist(object):
 
         return Panoptes.client().post(
             f'api/inaturalist/import',
-            json= {
+            json={
                 'taxon_id': taxon_id,
                 'subject_set_id': subject_set_id,
                 'updated_since': updated_since
