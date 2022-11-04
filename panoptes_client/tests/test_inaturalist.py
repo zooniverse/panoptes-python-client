@@ -13,7 +13,6 @@ from panoptes_client.inaturalist import Inaturalist
 
 class TestInaturalist(unittest.TestCase):
 
-
     def test_inat_import(self):
         with patch('panoptes_client.panoptes.Panoptes.client') as pc:
             pc().post = Mock(return_value=200)
