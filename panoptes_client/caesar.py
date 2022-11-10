@@ -226,7 +226,7 @@ class Caesar(object):
 
         request_url = f'workflows/{workflow_id}/{rule_type}_rules/{rule_id}/{rule_type}_rule_effects'
         return self.http_post(request_url, json=payload)[0]
-    
+
     def import_data_extracts(self, workflow_id, csv_source):
         """
         Imports machine-learnt data extracts into Caesar.
@@ -238,7 +238,7 @@ class Caesar(object):
 
           - `extractor_key` (key corresponding to the extractor in Caesar)
           - `subject_id`
-          - `data` (the machine learnt data for the corresponding subject). This entry should be JSON. 
+          - `data` (the machine learnt data for the corresponding subject). This entry should be JSON.
 
           Example::
 
