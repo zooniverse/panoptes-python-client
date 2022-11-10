@@ -307,7 +307,24 @@ already known::
         settings=new_settings,
     )
 
-Other examples (Caesar features by Workflow)
+Importing iNaturalist observations to Panoptes as subjects is possible via an
+API endpoint. Project owners and collaborators can use this client to send
+a request to begin that import process::
+
+    # The ID of the iNat taxon to be imported
+    taxon_id = 1234
+
+    # The subject set to which new subjects will be added
+    subject_set_id = 5678
+
+    Inaturalist.inat_import(taxon_id, subject_set_id)
+
+As an optional parameter, the updated_since timestamp string can be included
+and will filter obeservations by that parameter::
+
+    Inaturalist.inat_import(taxon_id, subject_set_id, '2022-10-31')
+
+Other examples Caesar features by Workflow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Most Caesar use cases are usually through a workflow: the following are examples of Caesar functions that can be done via Workflow.
 
