@@ -227,6 +227,26 @@ class Caesar(object):
         request_url = f'workflows/{workflow_id}/{rule_type}_rules/{rule_id}/{rule_type}_rule_effects'
         return self.http_post(request_url, json=payload)[0]
 
+    def import_data_extracts(self, workflow_id, csv_source):
+        """
+        Imports machine-learnt data extracts into Caesar.
+
+        - **csv_source** must be a publicly accessible csv at the time of import.
+          Eg. csv can be hosted via an AWS S3 Bucket, Azure Blob Storage, or Panoptes media item.
+          See `this csv <https://panoptes-uploads-staging.zooniverse.org/project_attached_image/f1ab241f-2896-4efc-a1bc-3baaff64d783.csv>`_ as an example.
+          `csv_source`'s csv must have header/titles/rows of the following:
+
+          - `extractor_key` (key corresponding to the extractor in Caesar)
+          - `subject_id`
+          - `data` (the machine learnt data for the corresponding subject). This entry should be JSON.
+
+          Example::
+
+            caesar = Caesar(endpoint='https://caesar-staging.zooniverse.org')
+            caesar.import_data_extracts(1234, 'https://panoptes-uploads-staging.zooniverse.org/project_attached_image/f1ab241f-2896-4efc-a1bc-3baaff64d783.csv')
+        """
+        return self.http_post(f'workflows/{workflow_id}/extracts/import', json={'file': csv_source})
+
     def validate_rule_type(self, rule_type):
         if rule_type not in self.RULE_TO_ACTION_TYPES.keys():
             raise ValueError(f'Invalid rule type: {rule_type}. Rule types can either be by "subject" or "user"')
