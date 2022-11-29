@@ -19,7 +19,7 @@ class TestInaturalist(unittest.TestCase):
             Inaturalist.inat_import(16462, 4)
 
             pc().post.assert_called_with(
-                'api/inaturalist/import',
+                '/inaturalist/import',
                 json={
                     'taxon_id': 16462,
                     'subject_set_id': 4,
@@ -33,7 +33,7 @@ class TestInaturalist(unittest.TestCase):
             Inaturalist.inat_import(16462, 4, '2022-10-31')
 
             pc().post.assert_called_with(
-                'api/inaturalist/import',
+                '/inaturalist/import',
                 json={
                     'taxon_id': 16462,
                     'subject_set_id': 4,
