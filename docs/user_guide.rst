@@ -325,7 +325,8 @@ and will filter obeservations by that parameter::
     Inaturalist.inat_import(taxon_id, subject_set_id, '2022-10-31')
 
 Be aware that this command only initiates a background job on the Zooniverse
-to import Observations. You can refresh the subject set in the project builder
+to import Observations. The request will return a 200 upon success, but there
+is no progress to observe. You can refresh the subject set in the project builder
 to see how far along it is, and the authenticated user will receive an email
 when this job is completed.
 
