@@ -13,7 +13,7 @@ setup(
     ),
     long_description=long_description,
     long_description_content_type='text/markdown',
-    version='1.5.0',
+    version='1.6.0',
     packages=find_packages(),
     include_package_data=True,
     install_requires=[

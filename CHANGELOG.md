@@ -1,3 +1,7 @@
+## 1.6.0 (2022-12-01)
+New: Import iNaturalist observations as subjects
+New: Import ML data extracts from Caesar
+
 ## 1.5.0 (2022-06-16)
 - New: Caesar connection/configuration
 - New: Enable SubjectSet-specific classification exports
