@@ -1,4 +1,5 @@
 from __future__ import absolute_import, division, print_function
+from copy import deepcopy
 
 from panoptes_client.panoptes import (
     LinkCollection,
@@ -9,7 +10,6 @@ from panoptes_client.panoptes import (
 from panoptes_client.project_role import ProjectRole
 from panoptes_client.exportable import Exportable
 from panoptes_client.utils import batchable
-
 
 class ProjectLinkCollection(LinkCollection):
     def add(self, objs):
@@ -36,8 +36,32 @@ class Project(PanoptesObject, Exportable):
         'introduction',
         'private',
         'primary_language',
+        'configuration',
     )
     _link_collection = ProjectLinkCollection
+
+    def __init__(self, raw={}, etag=None):
+        super(Project, self).__init__(raw, etag)
+        if not self.configuration:
+            self.configuration = {}
+            self._original_configuration = {}
+
+    def set_raw(self, raw, etag=None, loaded=True):
+        super(Project, self).set_raw(raw, etag, loaded)
+        if loaded and self.configuration:
+            self._original_configuration = deepcopy(self.configuration)
+        elif loaded:
+            self._original_configuration = None
+
+    def save(self):
+        """
+        Adds project configuration to the list of savable attributes
+        if it has changed.
+        """
+        if not self.configuration == self._original_configuration:
+            self.modified_attributes.add('configuration')
+
+        super(Project, self).save()
 
     @classmethod
     def find(cls, id='', slug=None):
@@ -171,6 +195,42 @@ class Project(PanoptesObject, Exportable):
                 'metadata': metadata,
             }},
         )
+
+    def copy(self, new_subject_set_name=None):
+        """
+        Copy this project to a new project that will be owned by the
+        currently authenticated user.
+
+        A new_subject_set_name string argument can be passed which will be
+        used to name a new SubjectSet for the copied project.
+        This is useful for having an upload target straight after cloning.
+
+        Examples::
+
+            project.copy()
+            project.copy("My new subject set for uploading")
+        """
+        payload = {}
+        if new_subject_set_name:
+            payload['create_subject_set'] = new_subject_set_name
+
+        response = self.http_post(
+            '{}/copy'.format(self.id),
+            json=payload,
+        )
+
+        # find the API resource response in the response tuple
+        resource_response = response[0]
+        # save the etag from the copied project response
+        etag = response[1]
+        # extract the raw copied project resource response
+        raw_resource_response = resource_response[self._api_slug][0]
+
+        # convert it into a new project model representation
+        # ensure we provide the etag - without it the resource won't be savable
+        copied_project = Project(raw_resource_response, etag)
+
+        return copied_project
 
 
 LinkResolver.register(Project)

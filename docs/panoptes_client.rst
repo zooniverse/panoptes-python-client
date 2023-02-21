@@ -13,6 +13,7 @@ of the ``panoptes_client`` package:
 - :py:class:`.SubjectSet`
 - :py:class:`.User`
 - :py:class:`.Workflow`
+- :py:class:`.Caesar`
 
 For example::
 
@@ -114,3 +115,10 @@ panoptes\_client\.workflow\_version module
     :undoc-members:
     :show-inheritance:
     :exclude-members: http_get
+
+panoptes\_client\.caesar module
+-------------------------------
+
+.. automodule:: panoptes_client.caesar
+    :members:
+    :show-inheritance:

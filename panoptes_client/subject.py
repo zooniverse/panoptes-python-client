@@ -1,4 +1,5 @@
 from __future__ import absolute_import, division, print_function
+from panoptes_client.subject_workflow_status import SubjectWorkflowStatus
 
 _OLD_STR_TYPES = (str,)
 try:
@@ -103,7 +104,7 @@ class Subject(PanoptesObject):
         if not self.metadata:
             self.metadata = {}
             self._original_metadata = {}
-        self._media_files = []
+        self._media_files = [None] * len(self.locations)
 
     def save(self, client=None):
         """
@@ -174,6 +175,9 @@ class Subject(PanoptesObject):
                             ),
                             log_args=False,
                         )
+
+                self._media_files = [None] * len(self.locations)
+
             finally:
                 if not async_save:
                     upload_exec.shutdown()
@@ -183,6 +187,7 @@ class Subject(PanoptesObject):
             url,
             headers={
                 'Content-Type': media_type,
+                'x-ms-blob-type': 'BlockBlob',
             },
             data=media_data,
         )
@@ -213,6 +218,16 @@ class Subject(PanoptesObject):
         elif loaded:
             self._original_metadata = None
 
+    def subject_workflow_status(self, workflow_id):
+        """
+        Returns SubjectWorkflowStatus of Subject in Workflow
+
+        Example::
+
+            subject.subject_workflow_status(4321)
+        """
+        return next(SubjectWorkflowStatus.where(subject_id=self.id, workflow_id=workflow_id))
+
     def add_location(self, location, media_type=None):
         """
         Add a media location to this subject.
@@ -233,6 +248,7 @@ class Subject(PanoptesObject):
         if type(location) is dict:
             self.locations.append(location)
             self._media_files.append(None)
+            self.modified_attributes.add('locations')
             return
         elif type(location) in (str,) + _OLD_STR_TYPES:
             f = open(location, 'rb')
@@ -256,6 +272,7 @@ class Subject(PanoptesObject):
                     media_type = 'image/{}'.format(media_type)
             self.locations.append(media_type)
             self._media_files.append(media_data)
+            self.modified_attributes.add('locations')
         finally:
             f.close()
 

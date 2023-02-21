@@ -6,6 +6,7 @@ import logging
 import os
 import requests
 import threading
+import pkg_resources
 
 from datetime import datetime, timedelta
 from redo import retrier
@@ -19,6 +20,8 @@ RETRY_BACKOFF_INTERVAL = 5
 
 if os.environ.get('PANOPTES_DEBUG'):
     logging.basicConfig(level=logging.DEBUG)
+else:
+    logging.basicConfig()
 
 
 class Panoptes(object):
@@ -54,6 +57,7 @@ class Panoptes(object):
     _http_headers = {
         'default': {
             'Accept': 'application/vnd.api+json; version=1',
+            'User-Agent': 'panoptes-python-client/version=' + pkg_resources.require('panoptes_client')[0].version
         },
         'GET': {},
         'PUT': {
@@ -526,7 +530,7 @@ class Panoptes(object):
                 grant_type = 'client_credentials'
 
             if not self.logged_in:
-                if grant_type is 'password':
+                if grant_type == 'password':
                     if not self.login():
                         return
 
@@ -667,7 +671,6 @@ class PanoptesObject(object):
 
             Project.where(launch_approved=True)
         """
-
         _id = kwargs.pop('id', '')
         return cls.paginated_results(*cls.http_get(_id, params=kwargs))
 
@@ -706,7 +709,7 @@ class PanoptesObject(object):
         try:
             if (
                 name not in PanoptesObject.RESERVED_ATTRIBUTES
-                and name is not 'id'
+                and name != 'id'
                 and not self._loaded
             ):
                 self.reload()
