@@ -13,7 +13,7 @@ class Caesar(object):
         'unique_count', 'rectangle', 'sqs'
     ]
     RULE_TO_ACTION_TYPES = {
-        'subject': ['retire_subject', 'add_subject_to_set', 'add_to_collection', 'external'],
+        'subject': ['retire_subject', 'add_subject_to_set', 'add_to_collection', 'external', 'external_with_basic_auth'],
         'user': ['promote_user']
     }
 
