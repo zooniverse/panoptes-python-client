@@ -1,3 +1,17 @@
+## 1.6.0 (2022-12-01)
+New: Import iNaturalist observations as subjects
+New: Import ML data extracts from Caesar
+
+## 1.5.0 (2022-06-16)
+- New: Caesar connection/configuration
+- New: Enable SubjectSet-specific classification exports
+- Fix: Broken installs due to strict version constraints with requests and idna in python 3
+- Fix: Fix media uploads for existing subjects
+
+## 1.4.0 (2021-06-01)
+- New: Subject unretirement in Workflow
+- New: Get SubjectWorkflowStatuses via Workflow, Subject, or SubjectSet
+
 ## 1.3.0 (2020-09-27)
 - Change: Allow uploads to Azure cloud, add header to cloud upload PUT requests
 

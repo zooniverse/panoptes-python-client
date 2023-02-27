@@ -65,8 +65,8 @@ You can run the tests with Docker. This will run them under Python 3 and Python
 2:
 
 ```
-docker-compose build test && docker-compose run test
-docker-compose build test2 && docker-compose run test2
+docker-compose build tests && docker-compose run tests
+docker-compose build tests2 && docker-compose run tests2
 ```
 
 Or you can run them directly in Python with:
