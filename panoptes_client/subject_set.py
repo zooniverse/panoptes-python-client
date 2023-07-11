@@ -94,6 +94,9 @@ class SubjectSet(PanoptesObject, Exportable):
             subject_set.links.add(subjects)
         """
 
+        # reload the subject set to make sure the online version not stale
+        self.reload()
+
         return self.links.subjects.add(subjects)
 
     def remove(self, subjects):
