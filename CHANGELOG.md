@@ -1,3 +1,7 @@
+## 1.6.1 (2023-07-11)
+Change: Manifest file now ensures the license is included on PyPI.
+Change: When linking subjects to a set, the set is reloaded to avoid stale object errors.
+
 ## 1.6.0 (2022-12-01)
 New: Import iNaturalist observations as subjects
 New: Import ML data extracts from Caesar
