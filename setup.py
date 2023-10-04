@@ -17,7 +17,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        'requests>=2.4.2,
+        'requests>=2.4.2',
         'future>=0.16',
         'python-magic>=0.4',
         'redo>=1.7',
