@@ -81,7 +81,7 @@ class SubjectSet(PanoptesObject, Exportable):
 
     def save(self):
         """
-        Adds workflow configuration, retirement, and tasks dicts to the list of
+        Adds subject set metadata dict to the list of
         savable attributes if it has changed.
         """
         if not self.metadata == self._original_metadata:
