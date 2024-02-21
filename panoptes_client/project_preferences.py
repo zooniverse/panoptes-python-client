@@ -90,7 +90,7 @@ class ProjectPreferences(PanoptesObject):
             raise TypeError
 
     @classmethod
-    def fetch_settings(cls,  user=None, project=None ):
+    def fetch_settings(cls, user=None, project=None ):
         _user_id = None
         _project_id = None
 
@@ -106,7 +106,7 @@ class ProjectPreferences(PanoptesObject):
         else:
             raise TypeError
 
-        params = {'user_id': _user_id, 'admin':True}
+        params = {'user_id': _user_id, 'admin': True}
 
         if _project_id is not None:
             params['project_id'] = _project_id
