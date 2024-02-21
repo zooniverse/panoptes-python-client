@@ -89,4 +89,32 @@ class ProjectPreferences(PanoptesObject):
         else:
             raise TypeError
 
+    @classmethod
+    def fetch_settings(cls,  user=None, project=None ):
+        _user_id = None
+        _project_id = None
+
+        if isinstance(user, User):
+            _user_id = user.id
+        elif isinstance(user, (int, str,)):
+            _user_id = user
+
+        if isinstance(project, Project):
+            _project_id = project.id
+        elif isinstance(project, (int, str,)):
+            _project_id = project
+        else:
+            raise TypeError
+
+        params = {'user_id': _user_id, 'admin':True}
+
+        if _project_id is not None:
+            params['project_id'] = _project_id
+
+        return cls.http_get(
+            'read_settings',
+            params=params
+        )[0]
+
+
 LinkResolver.register(ProjectPreferences)
