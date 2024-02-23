@@ -96,7 +96,7 @@ class ProjectPreferences(PanoptesObject):
 
         - **user** and **project** can be either a :py:class:`.User` and
           :py:class:`.Project` instance respectively, or they can be given as
-          IDs. If either argument is given, the other is also required.
+          IDs.
         - **user** parameter is optional and only **project** is required
 
         Examples::
