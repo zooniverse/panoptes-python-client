@@ -90,14 +90,25 @@ class ProjectPreferences(PanoptesObject):
             raise TypeError
 
     @classmethod
-    def fetch_settings(cls, user=None, project=None ):
+    def fetch_settings(cls, project=None, user=None):
+        """
+        Fetch project preference settings for a particular project and user(optional).
+
+        - **user** and **project** can be either a :py:class:`.User` and
+          :py:class:`.Project` instance respectively, or they can be given as
+          IDs. If either argument is given, the other is also required.
+        - **user** parameter is optional and only **project** is required
+
+        Examples::
+
+            ProjectPreferences.fetch_settings(User(1234), Project(1234))
+            ProjectPreferences.fetch_settings(1234, 1234)
+            ProjectPreferences.fetch_settings(User(1234))
+            ProjectPreferences.fetch_settings(1234)
+        """
+
         _user_id = None
         _project_id = None
-
-        if isinstance(user, User):
-            _user_id = user.id
-        elif isinstance(user, (int, str,)):
-            _user_id = user
 
         if isinstance(project, Project):
             _project_id = project.id
@@ -105,6 +116,11 @@ class ProjectPreferences(PanoptesObject):
             _project_id = project
         else:
             raise TypeError
+
+        if isinstance(user, User):
+            _user_id = user.id
+        elif isinstance(user, (int, str,)):
+            _user_id = user
 
         params = {'user_id': _user_id, 'admin': True}
 
