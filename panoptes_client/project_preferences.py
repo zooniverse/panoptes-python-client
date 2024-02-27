@@ -101,9 +101,9 @@ class ProjectPreferences(PanoptesObject):
 
         Examples::
 
-            ProjectPreferences.fetch_settings(User(1234), Project(1234))
+            ProjectPreferences.fetch_settings(Project(1234), User(1234))
             ProjectPreferences.fetch_settings(1234, 1234)
-            ProjectPreferences.fetch_settings(User(1234))
+            ProjectPreferences.fetch_settings(Project(1234))
             ProjectPreferences.fetch_settings(1234)
         """
 
@@ -122,10 +122,10 @@ class ProjectPreferences(PanoptesObject):
         elif isinstance(user, (int, str,)):
             _user_id = user
 
-        params = {'user_id': _user_id, 'admin': True}
+        params = {'project_id': _project_id}
 
-        if _project_id is not None:
-            params['project_id'] = _project_id
+        if _user_id is not None:
+            params['user_id'] = _user_id
 
         return cls.http_get(
             'read_settings',
