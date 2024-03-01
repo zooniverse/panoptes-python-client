@@ -298,6 +298,19 @@ Project owners with client credentials can update their users' project settings
         settings=new_settings,
     )
 
+Project owners can also fetch the settings of a project::
+
+    project = Project.find("1234")
+
+    ProjectPreferences.fetch_settings(project=project)
+
+And optionally, a user::
+
+    project = Project.find("1234")
+    user = User.find("1234")
+
+    ProjectPreferences.fetch_settings(project=project, user=user)
+
 Alternatively, the project ID and user ID can be passed in directly if they are
 already known::
 
