@@ -283,10 +283,8 @@ Add subject set to first workflow in project::
     workflow = project.links.workflows[0]
     workflow.links.subject_sets.add(subject_set)
 
-Project owners with client credentials can update their users' project settings
-(workflow_id only)::
-
-    Panoptes.connect(client_id="example", client_secret="example")
+Project owners and collaborators can update their users' project settings
+(workflow_id only; for use with leveling up feature)::
 
     user = User.find("1234")
     project = Project.find("1234")
@@ -307,7 +305,7 @@ already known::
         settings=new_settings,
     )
 
-Project owners can also fetch the settings of a project::
+Project owner/collaborator can also fetch all project settings for a project::
 
     project = Project.find("1234")
 
@@ -315,7 +313,7 @@ Project owners can also fetch the settings of a project::
         project=project
     )
 
-And optionally, a user::
+Or the project settings for a particular user::
 
     project = Project.find("1234")
     user = User.find("1234")
