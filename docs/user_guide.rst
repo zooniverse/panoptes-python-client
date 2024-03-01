@@ -298,19 +298,6 @@ Project owners with client credentials can update their users' project settings
         settings=new_settings,
     )
 
-Project owners can also fetch the settings of a project::
-
-    project = Project.find("1234")
-
-    ProjectPreferences.fetch_settings(project=project)
-
-And optionally, a user::
-
-    project = Project.find("1234")
-    user = User.find("1234")
-
-    ProjectPreferences.fetch_settings(project=project, user=user)
-
 Alternatively, the project ID and user ID can be passed in directly if they are
 already known::
 
@@ -318,6 +305,32 @@ already known::
         project=project_id,
         user=user_id,
         settings=new_settings,
+    )
+
+Project owners can also fetch the settings of a project::
+
+    project = Project.find("1234")
+
+    ProjectPreferences.fetch_settings(
+        project=project
+    )
+
+And optionally, a user::
+
+    project = Project.find("1234")
+    user = User.find("1234")
+
+    ProjectPreferences.fetch_settings(
+        project=project,
+        user=user
+    )
+
+Project settings can also be fetched with the project ID and user ID
+directly if already known::
+
+    ProjectPreferences.fetch_settings(
+        project=project_id,
+        user=user_id
     )
 
 Importing iNaturalist observations to Panoptes as subjects is possible via an
