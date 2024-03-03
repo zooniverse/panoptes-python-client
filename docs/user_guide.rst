@@ -283,10 +283,8 @@ Add subject set to first workflow in project::
     workflow = project.links.workflows[0]
     workflow.links.subject_sets.add(subject_set)
 
-Project owners with client credentials can update their users' project settings
-(workflow_id only)::
-
-    Panoptes.connect(client_id="example", client_secret="example")
+Project owners and collaborators can update their users' project settings
+(workflow_id only; for use with leveling up feature)::
 
     user = User.find("1234")
     project = Project.find("1234")
@@ -305,6 +303,32 @@ already known::
         project=project_id,
         user=user_id,
         settings=new_settings,
+    )
+
+Project owner/collaborator can also fetch all project settings for a project::
+
+    project = Project.find("1234")
+
+    ProjectPreferences.fetch_settings(
+        project=project
+    )
+
+Or the project settings for a particular user::
+
+    project = Project.find("1234")
+    user = User.find("1234")
+
+    ProjectPreferences.fetch_settings(
+        project=project,
+        user=user
+    )
+
+Project settings can also be fetched with the project ID and user ID
+directly if already known::
+
+    ProjectPreferences.fetch_settings(
+        project=project_id,
+        user=user_id
     )
 
 Importing iNaturalist observations to Panoptes as subjects is possible via an
