@@ -19,9 +19,16 @@ class Caesar(object):
 
     def __init__(
         self,
-        endpoint='https://caesar.zooniverse.org',
+        endpoint=None,
         redirect_url='https://caesar.zooniverse.org/auth/zooniverse/callback'
     ):
+        _default_endpoint = 'https://caesar.zooniverse.org'
+        if hasattr(Panoptes._local, 'panoptes_client') and Panoptes._local.panoptes_client.endpoint == 'https://panoptes-staging.zooniverse.org':
+            _default_endpoint = 'https://caesar-staging.zooniverse.org'
+
+        if endpoint is None:
+            endpoint = _default_endpoint
+
         self.endpoint = endpoint
         self.headers = {
             'Accept': 'application/json'
