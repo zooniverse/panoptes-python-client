@@ -23,7 +23,7 @@ class Caesar(object):
         redirect_url='https://caesar.zooniverse.org/auth/zooniverse/callback'
     ):
         _default_endpoint = 'https://caesar.zooniverse.org'
-        if hasattr(Panoptes._local, 'panoptes_client') and Panoptes._local.panoptes_client.endpoint == 'https://panoptes-staging.zooniverse.org':
+        if Panoptes.client().endpoint == 'https://panoptes-staging.zooniverse.org':
             _default_endpoint = 'https://caesar-staging.zooniverse.org'
 
         if endpoint is None:
