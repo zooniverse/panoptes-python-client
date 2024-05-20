@@ -205,6 +205,9 @@ class Project(PanoptesObject, Exportable):
         used to name a new SubjectSet for the copied project.
         This is useful for having an upload target straight after cloning.
 
+        Requirements: the source project must not be live and project.configuration
+        must have a template key (typically, set to true).
+
         Examples::
 
             project.copy()
