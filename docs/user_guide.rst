@@ -392,7 +392,8 @@ You can set the template flag using the Project.save() method. See example below
     project.configuration = {"template": True}
     project.save()
 
-How to use::
+How to use
+~~~~~~~~~~
 This functionality can be accessed by the Panoptes python client. It exists on the Project module and can be called with the `copy` method::
 
     Project(project_id).copy()
@@ -409,7 +410,7 @@ Multiple types of exports can be generated using the Python Client, including pr
 For the examples below, we will demonstrate commands for a project wide classifications export, but these functions work for any export type.
 
 Get Exports
---------------
+~~~~~~~~~~~
 
 As the name implies, this method downloads a data export over HTTP. This uses the `get_export` method and can be called by passing in the following parameters::
 
@@ -430,8 +431,8 @@ These wrappers take care of correctly decoding the export content for the CSV pa
     for row in classification_export.csv_dictreader():
     print(row)
 
-Get Exports
---------------
+Generate Exports
+~~~~~~~~~~~~~~~
 As the name implies, this method generates/starts a data export. This uses the `generate_export` method and can be called by passing in the `export_type` parameter::
 
     export_info = Project(project_id).generate_export(export_type='classifications')
@@ -439,11 +440,11 @@ As the name implies, this method generates/starts a data export. This uses the `
 This would return `export_info` as a dictionary containing the metadata on the selected export
 
 Wait Exports
---------------
+~~~~~~~~~~~~
 As the name implies, this method blocks/waits until an in-progress export is ready. It uses the `wait_export` method and can be called passing the following parameters::
 
     export_type #string specifying which type of export should be downloaded
-    
+
     timeout #is the maximum number of seconds to wait.
 
     export_info = Project(project_id).wait_export(export_type='classifications')
@@ -451,7 +452,7 @@ As the name implies, this method blocks/waits until an in-progress export is rea
 This would return `export_info` as a dictionary containing the metadata on the selected export and throw a `PanoptesAPIException` once the time limit is exceeded and the export is not ready
 
 Describing Exports
---------------
+~~~~~~~~~~~~~~~~~~
 This method fetches information/metadata about a specific type of export. This uses the `describe_export` method and can be called by passing in the export_type(classifications, subject_sets) this way::
 
     export_info = Project(project_id).describe_export(export_type='classifications')
