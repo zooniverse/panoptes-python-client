@@ -331,6 +331,8 @@ directly if already known::
         user=user_id
     )
 
+iNaturalist Imports
+~~~~~~~~~~~~~~~~~~~
 Importing iNaturalist observations to Panoptes as subjects is possible via an
 API endpoint. Project owners and collaborators can use this client to send
 a request to begin that import process::
@@ -354,8 +356,8 @@ is no progress to observe. You can refresh the subject set in the project builde
 to see how far along it is, and the authenticated user will receive an email
 when this job is completed.
 
-Other examples Caesar features by Workflow
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Caesar features by Workflow
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Most Caesar use cases are usually through a workflow: the following are examples of Caesar functions that can be done via Workflow.
 
 Add Caesar Extractor by Workflow::
@@ -382,8 +384,8 @@ Adding Subject Effect for a Subject Rule with id `1234` by Workflow. Ths particu
 
     workflow.add_caesar_rule_effect('subject', 1234, 'retire_subject', {'reason' : 'consensus'})
 
-Other examples Project Copier
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Project Copier
+~~~~~~~~~~~~~~
 The project copier feature clones an existing template project (i.e., projects which have the project.configuration `template` flag set as true and are not live).
 
 You can set the template flag using the Project.save() method. See example below::
@@ -402,8 +404,8 @@ You can also pass an optional `new_subject_set_name` parameter and this would be
 
     Project(project_id).copy(new_subject_set_name='My New Subject Set')
 
-Other examples Programmatic Data Exports
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Programmatic Data Exports
+~~~~~~~~~~~~~~~~~~~~~~~~~
 The Panoptes Python Client allows you to generate, describe, and download data exports (e.g., classifications, subjects, workflows) via the Python ``panoptes_client`` library.
 
 Multiple types of exports can be generated using the Python Client, including project-level products (classifications, subjects, workflows) as smaller scale classification exports (for workflows and subject sets).
