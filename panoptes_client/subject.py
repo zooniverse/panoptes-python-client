@@ -215,8 +215,6 @@ class Subject(PanoptesObject):
         super(Subject, self).set_raw(raw, etag, loaded)
         if loaded and self.metadata:
             self._original_metadata = deepcopy(self.metadata)
-        elif loaded:
-            self._original_metadata = None
 
     def subject_workflow_status(self, workflow_id):
         """
