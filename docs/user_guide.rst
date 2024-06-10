@@ -386,14 +386,14 @@ Other examples Project Copier
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The project copier feature clones an existing template project (i.e., projects which have the project.configuration `template` flag set as true and are not live).
 
-You can set the template flag using the Project.save() method. See example below:::
+You can set the template flag using the Project.save() method. See example below::
 
     project = Project(project_id)
     project.configuration = {"template": True}
     project.save()
 
 How to use::
-This functionality can be accessed by the Panoptes python client. It exists on the Project module and can be called with the `copy` method.
+This functionality can be accessed by the Panoptes python client. It exists on the Project module and can be called with the `copy` method::
 
     Project(project_id).copy()
 
@@ -412,15 +412,19 @@ Get Exports
 --------------
 
 As the name implies, this method downloads a data export over HTTP. This uses the `get_export` method and can be called by passing in the following parameters::
+
     export_type #string specifying which type of export should be downloaded
+
     generate #a boolean specifying if to generate a new export and wait for it to be ready, or to just download the latest existing export
+
     wait #a boolean specifying whether to wait for an in-progress export to finish, if there is one. Has no effect if generate is true.
+
     wait_timeout #is the number of seconds to wait if wait is True. Has no effect if wait is False or if generate is True.
 
     classification_export = Project(project_id).get_export(export_type="classifications")
 
 The returned Response object has two additional attributes as a convenience for working with the CSV content; `csv_reader` and `csv_dictreader`, which are wrappers for `csv.reader()` and `csv.DictReader` respectively.
-These wrappers take care of correctly decoding the export content for the CSV parser
+These wrappers take care of correctly decoding the export content for the CSV parser::
 
     classification_export = Project(1234).get_export('classifications')
     for row in classification_export.csv_dictreader():
@@ -437,7 +441,9 @@ This would return `export_info` as a dictionary containing the metadata on the s
 Wait Exports
 --------------
 As the name implies, this method blocks/waits until an in-progress export is ready. It uses the `wait_export` method and can be called passing the following parameters::
+
     export_type #string specifying which type of export should be downloaded
+    
     timeout #is the maximum number of seconds to wait.
 
     export_info = Project(project_id).wait_export(export_type='classifications')
