@@ -76,8 +76,6 @@ class SubjectSet(PanoptesObject, Exportable):
         super(SubjectSet, self).set_raw(raw, etag, loaded)
         if loaded and self.metadata:
             self._original_metadata = deepcopy(self.metadata)
-        elif loaded:
-            self._original_metadata = None
 
     def save(self):
         """
