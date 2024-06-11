@@ -1,3 +1,10 @@
+## 1.6.2 (2024-07-11)
+- Fix: Documentation fixes
+- Fix: Caesar connect respect connection env
+- New: Add fetch_settings to project_preferences class
+- New: Add support for SubjectSet metadata as editable attribute
+- Fix: Remove max limit on dependency versions
+
 ## 1.6.1 (2023-07-11)
 Change: Manifest file now ensures the license is included on PyPI.
 Change: When linking subjects to a set, the set is reloaded to avoid stale object errors.
