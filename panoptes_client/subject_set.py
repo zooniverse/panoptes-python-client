@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function
 from builtins import str
+from copy import deepcopy
 from panoptes_client.subject_workflow_status import SubjectWorkflowStatus
 
 from panoptes_client.panoptes import (
@@ -56,16 +57,35 @@ class SubjectSet(PanoptesObject, Exportable):
     _link_slug = 'subject_sets'
     _edit_attributes = (
         'display_name',
+        'metadata',
         {
             'links': (
                 'project',
-            ),
-            'metadata': (
-                'category',
             )
         },
     )
     _link_collection = SubjectSetLinkCollection
+
+    def __init__(self, raw={}, etag=None):
+        super(SubjectSet, self).__init__(raw, etag)
+        if not self.metadata:
+            self.metadata = {}
+            self._original_metadata = {}
+
+    def set_raw(self, raw, etag=None, loaded=True):
+        super(SubjectSet, self).set_raw(raw, etag, loaded)
+        if loaded and self.metadata:
+            self._original_metadata = deepcopy(self.metadata)
+
+    def save(self):
+        """
+        Adds subject set metadata dict to the list of
+        savable attributes if it has changed.
+        """
+        if not self.metadata == self._original_metadata:
+            self.modified_attributes.add('metadata')
+
+        super(SubjectSet, self).save()
 
     @property
     def subjects(self):

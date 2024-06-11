@@ -33,6 +33,7 @@ class TestSubjectSet(unittest.TestCase):
                 json={
                     'subject_sets': {
                         'display_name': 'Name',
+                        'metadata': {},
                         'links': {
                             'project': 1234,
                         }
