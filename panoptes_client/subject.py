@@ -21,16 +21,16 @@ try:
     import magic
     MEDIA_TYPE_DETECTION = 'magic'
 except ImportError:
-    import pkg_resources
+    import importlib.metadata
     try:
-        pkg_resources.require("python-magic")
+        importlib.metadata.version("python-magic")
         logging.getLogger('panoptes_client').warn(
             'Broken libmagic installation detected. The python-magic module is'
             ' installed but can\'t be imported. Please check that both '
             'python-magic and the libmagic shared library are installed '
             'correctly. Uploading media other than images may not work.'
         )
-    except pkg_resources.DistributionNotFound:
+    except importlib.metadata.PackageNotFoundError:
         pass
     import imghdr
     MEDIA_TYPE_DETECTION = 'imghdr'
