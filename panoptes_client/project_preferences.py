@@ -127,10 +127,10 @@ class ProjectPreferences(PanoptesObject):
         if _user_id is not None:
             params['user_id'] = _user_id
 
-        return cls.http_get(
+        return cls.paginated_results(*cls.http_get(
             'read_settings',
             params=params
-        )[0]
+        ))
 
 
 LinkResolver.register(ProjectPreferences)

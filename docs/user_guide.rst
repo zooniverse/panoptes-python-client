@@ -309,27 +309,28 @@ Project owner/collaborator can also fetch all project settings for a project::
 
     project = Project.find("1234")
 
-    ProjectPreferences.fetch_settings(
-        project=project
-    )
+    pp_all = ProjectPreferences.fetch_settings(project=project)
+
+    for pp in pp_all:
+        print('Workflow ID: {}, User ID: {}'.format(pp.settings['workflow_id'], pp.raw['links']['user']))
 
 Or the project settings for a particular user::
 
     project = Project.find("1234")
     user = User.find("1234")
 
-    ProjectPreferences.fetch_settings(
-        project=project,
-        user=user
-    )
+    pp_all = ProjectPreferences.fetch_settings(project=project, user=user)
+
+    pp = next(pp_all)
+    print('Workflow ID: {}, User ID: {}'.format(pp.settings['workflow_id'], pp.raw['links']['user']))
 
 Project settings can also be fetched with the project ID and user ID
 directly if already known::
 
-    ProjectPreferences.fetch_settings(
-        project=project_id,
-        user=user_id
-    )
+    pp_all = ProjectPreferences.fetch_settings(project=project_id, user=user_id)
+
+    pp = next(pp_all)
+    print('Workflow ID: {}, User ID: {}'.format(pp.settings['workflow_id'], pp.raw['links']['user']))
 
 iNaturalist Imports
 ~~~~~~~~~~~~~~~~~~~
