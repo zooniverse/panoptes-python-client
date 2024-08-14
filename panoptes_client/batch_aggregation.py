@@ -20,7 +20,7 @@ class BatchAggregation(object):
             single_agg = self.get_aggregation(agg_id)
             self.delete_aggregation(agg_id, single_agg[1])
         except PanoptesAPIException as err:
-             raise err
+            raise err
 
     def run_aggregation(self, payload, delete_if_exists):
         try:

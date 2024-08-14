@@ -238,7 +238,7 @@ class TestWorkflow(unittest.TestCase):
             "aggregations": {
                 "links": {
                     "user": 1,
-                    "workflow": 1,
+                    "workflow": workflow.id,
                 }
             }
         }

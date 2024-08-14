@@ -9,7 +9,6 @@ else:
 
 class TestBatchAggregation(unittest.TestCase):
 
-
     def setUp(self):
         super().setUp()
         self.mock_client_patch = patch('panoptes_client.panoptes.Panoptes.client')

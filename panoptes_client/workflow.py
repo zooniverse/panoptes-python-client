@@ -539,7 +539,7 @@ class Workflow(PanoptesObject, Exportable):
 
         return BatchAggregation().get_aggregations(self.id)[0]
 
-    def run_batch_aggregation(self, user = None, delete_if_exists = False):
+    def run_batch_aggregation(self, user=None, delete_if_exists=False):
         """
         This method will start a new batch aggregation run, Will return a dict with the created aggregation if successful.
 
@@ -561,9 +561,9 @@ class Workflow(PanoptesObject, Exportable):
 
         payload = {
             "aggregations": {
-              "links": {
-                "user": _user_id,
-                "workflow": self.id,
+                "links": {
+                    "user": _user_id,
+                    "workflow": self.id,
               }
             }
         }
