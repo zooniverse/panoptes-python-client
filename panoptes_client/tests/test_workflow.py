@@ -33,7 +33,6 @@ class TestWorkflow(unittest.TestCase):
         self.addCleanup(batch_agg_run_aggregation_patch.stop)
         self.addCleanup(batch_agg_get_aggregations_patch.stop)
 
-
         self.agg_mock_value = [{
             'aggregations': [{
                 'id': '1',
@@ -237,10 +236,10 @@ class TestWorkflow(unittest.TestCase):
         workflow.run_batch_aggregation(user=1)
         payload = {
             "aggregations": {
-              "links": {
-                "user": 1,
-                "workflow": workflow.id,
-              }
+                "links": {
+                    "user": 1,
+                    "workflow": 1,
+                }
             }
         }
         self.batch_agg_run_aggregation_mock.assert_called_with(payload, False)
@@ -269,4 +268,3 @@ class TestWorkflow(unittest.TestCase):
 
         self.batch_agg_get_aggregations_mock.assert_called_once()
         self.assertEqual(links, None)
-

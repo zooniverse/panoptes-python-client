@@ -553,9 +553,9 @@ class Workflow(PanoptesObject, Exportable):
         """
 
         if(isinstance(user, User)):
-             _user_id = user.id
+            _user_id = user.id
         elif (isinstance(user, (int, str,))):
-             _user_id = user
+            _user_id = user
         else:
             raise TypeError
 

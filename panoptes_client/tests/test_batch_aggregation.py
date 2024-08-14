@@ -1,6 +1,5 @@
 import unittest
 import sys
-from panoptes_client.panoptes import Panoptes, PanoptesAPIException
 from panoptes_client.batch_aggregation import BatchAggregation
 
 if sys.version_info <= (3, 0):
@@ -9,6 +8,7 @@ else:
     from unittest.mock import patch
 
 class TestBatchAggregation(unittest.TestCase):
+
 
     def setUp(self):
         super().setUp()
@@ -31,12 +31,13 @@ class TestBatchAggregation(unittest.TestCase):
 
         self.payload = {
             "aggregations": {
-              "links": {
-                "user": 1,
-                "workflow": 1,
-              }
+                "links": {
+                    "user": 1,
+                    "workflow": 1,
+                }
             }
         }
+
         self.agg_mock_value = [{
             'aggregations': [{
                 'id': '1',
@@ -70,4 +71,3 @@ class TestBatchAggregation(unittest.TestCase):
         BatchAggregation().run_aggregation(payload=self.payload, delete_if_exists=False)
         self.fetch_and_delete_aggregation_mock.assert_not_called()
         self.create_aggregation_mock.assert_called_with(self.payload)
-
