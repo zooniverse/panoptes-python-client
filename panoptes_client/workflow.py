@@ -11,6 +11,8 @@ from panoptes_client.subject_set import SubjectSet
 from panoptes_client.utils import batchable
 
 from panoptes_client.caesar import Caesar
+from panoptes_client.batch_aggregation import BatchAggregation
+from panoptes_client.user import User
 
 
 class Workflow(PanoptesObject, Exportable):
@@ -529,6 +531,55 @@ class Workflow(PanoptesObject, Exportable):
         self.add_alice_extractors()
         self.add_alice_reducers()
         self.add_alice_rules_and_effects()
+
+    def get_batch_aggregations(self):
+        """
+        This method will fetch existing aggregations if any. It will return a dict with the existing aggregations.
+        """
+
+        return BatchAggregation().get_aggregations(self.id)[0]
+
+    def run_batch_aggregation(self, user = None, delete_if_exists = False):
+        """
+        This method will start a new batch aggregation run, Will return a dict with the created aggregation if successful.
+
+        - **user** can be either a :py:class:`.User` or an ID.
+        - **delete_if_exists** parameter is optional if true, deletes any previous instance
+        -
+        Examples::
+
+            Workflow(1234).run_batch_aggregation(1234)
+            Workflow(1234).run_batch_aggregation(user=1234, delete_if_exists=True)
+        """
+
+        if(isinstance(user, User)):
+             _user_id = user.id
+        elif (isinstance(user, (int, str,))):
+             _user_id = user
+        else:
+            raise TypeError
+
+        payload = {
+            "aggregations": {
+              "links": {
+                "user": _user_id,
+                "workflow": self.id,
+              }
+            }
+        }
+        return BatchAggregation().run_aggregation(payload, delete_if_exists)
+
+    def check_batch_aggregation_run_status(self):
+        """
+        This method will fetch existing aggregation status if any.
+        """
+        return self.get_batch_aggregations()['aggregations'][0]['status']
+
+    def get_batch_aggregation_links(self):
+        """
+        This method will fetch existing aggregation links if any.
+        """
+        return self.get_batch_aggregations()['aggregations'][0]['uuid']
 
     @property
     def versions(self):

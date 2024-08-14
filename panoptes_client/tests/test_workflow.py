@@ -3,6 +3,7 @@ import sys
 from panoptes_client.panoptes import PanoptesAPIException
 from panoptes_client.workflow import Workflow
 from panoptes_client.caesar import Caesar
+from panoptes_client.batch_aggregation import BatchAggregation
 
 if sys.version_info <= (3, 0):
     from mock import patch
@@ -23,6 +24,28 @@ class TestWorkflow(unittest.TestCase):
         self.addCleanup(caesar_post_patch.stop)
         self.addCleanup(caesar_get_patch.stop)
         self.addCleanup(caesar_put_patch.stop)
+
+        batch_agg_run_aggregation_patch = patch.object(BatchAggregation, 'run_aggregation')
+        batch_agg_get_aggregations_patch = patch.object(BatchAggregation, 'get_aggregations')
+        self.batch_agg_run_aggregation_mock = batch_agg_run_aggregation_patch.start()
+        self.batch_agg_get_aggregations_mock = batch_agg_get_aggregations_patch.start()
+
+        self.addCleanup(batch_agg_run_aggregation_patch.stop)
+        self.addCleanup(batch_agg_get_aggregations_patch.stop)
+
+
+        self.agg_mock_value = [{
+            'aggregations': [{
+                'id': '1',
+                'href': '/aggregations/1',
+                'created_at': '2024-08-13T10:26:32.560Z',
+                'updated_at': '2024-08-13T10:26:32.576Z',
+                'uuid': None,
+                'task_id': 'task_id',
+                'status': 'pending',
+                'links': {'project': '1', 'workflow': '1', 'user': '1'}
+            }]
+        }, 'etag']
 
     def test_save_to_caesar_update(self):
         workflow = Workflow(1)
@@ -208,3 +231,42 @@ class TestWorkflow(unittest.TestCase):
 
         self.caesar_post_mock.assert_not_called()
         self.assertEqual('Invalid action for rule type', str(invalid_effect_err.exception))
+
+    def test_get_batch_aggregations_without_delete_param(self):
+        workflow = Workflow(1)
+        workflow.run_batch_aggregation(user=1)
+        payload = {
+            "aggregations": {
+              "links": {
+                "user": 1,
+                "workflow": workflow.id,
+              }
+            }
+        }
+        self.batch_agg_run_aggregation_mock.assert_called_with(payload, False)
+
+    def test_get_batch_aggregations_with_invalid_params(self):
+        with self.assertRaises(TypeError):
+            workflow = Workflow(1)
+            workflow.run_batch_aggregation(user=None)
+
+        self.batch_agg_run_aggregation_mock.assert_not_called()
+
+    def test_check_batch_aggregation_run_status(self):
+        self.batch_agg_get_aggregations_mock.return_value = self.agg_mock_value
+
+        workflow = Workflow(1)
+        status = workflow.check_batch_aggregation_run_status()
+
+        self.batch_agg_get_aggregations_mock.assert_called_once()
+        self.assertEqual(status, 'pending')
+
+    def test_get_batch_aggregation_links(self):
+        self.batch_agg_get_aggregations_mock.return_value = self.agg_mock_value
+
+        workflow = Workflow(1)
+        links = workflow.get_batch_aggregation_links()
+
+        self.batch_agg_get_aggregations_mock.assert_called_once()
+        self.assertEqual(links, None)
+
