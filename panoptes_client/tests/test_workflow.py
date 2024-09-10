@@ -25,19 +25,6 @@ class TestWorkflow(unittest.TestCase):
         self.addCleanup(caesar_get_patch.stop)
         self.addCleanup(caesar_put_patch.stop)
 
-        self.agg_mock_value = [{
-            'aggregations': [{
-                'id': '1',
-                'href': '/aggregations/1',
-                'created_at': '2024-08-13T10:26:32.560Z',
-                'updated_at': '2024-08-13T10:26:32.576Z',
-                'uuid': None,
-                'task_id': 'task_id',
-                'status': 'pending',
-                'links': {'project': '1', 'workflow': '1', 'user': '1'}
-            }]
-        }, 'etag']
-
     def test_save_to_caesar_update(self):
         workflow = Workflow(1)
         workflow.save_to_caesar()
