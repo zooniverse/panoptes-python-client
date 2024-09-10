@@ -269,7 +269,7 @@ class TestAggregation(unittest.TestCase):
     @patch.object(Workflow, 'get_batch_aggregations')
     def test_get_agg_property(self, mock_get_batch_aggregations):
         mock_aggregation = MagicMock()
-        setattr(mock_aggregation, 'test_property', 'returned_test_value')
+        mock_aggregation.test_property = 'returned_test_value'
 
         mock_get_batch_aggregations.return_value = iter([mock_aggregation])
 
