@@ -13,7 +13,7 @@ from panoptes_client.utils import batchable
 from panoptes_client.caesar import Caesar
 from panoptes_client.user import User
 from panoptes_client.aggregation import Aggregation
-
+import six
 
 class Workflow(PanoptesObject, Exportable):
     _api_slug = 'workflows'
@@ -580,7 +580,8 @@ class Workflow(PanoptesObject, Exportable):
     def _get_agg_property(self, param):
         try:
             aggs = self.get_batch_aggregations()
-            return getattr(aggs.next(), param, None)
+            next = six.next(aggs)
+            return getattr(next, param, None)
         except StopIteration:
             raise PanoptesAPIException(
                 "Could not find Aggregations for Workflow with id='{}'".format(self.id)

@@ -223,6 +223,7 @@ class TestWorkflow(unittest.TestCase):
         self.caesar_post_mock.assert_not_called()
         self.assertEqual('Invalid action for rule type', str(invalid_effect_err.exception))
 
+
 class TestAggregation(unittest.TestCase):
     def setUp(self):
         self.instance = Workflow(1)
@@ -256,11 +257,10 @@ class TestAggregation(unittest.TestCase):
         mock_current_agg.delete = MagicMock()
         mock_find.return_value = mock_current_agg
 
-
         mock_save_func = MagicMock()
 
         mock_save.return_value = mock_save_func()
-        self.instance.run_aggregation(self.mock_user_id,True)
+        self.instance.run_aggregation(self.mock_user_id, True)
 
         mock_current_agg.delete.assert_called_once()
 
@@ -268,13 +268,10 @@ class TestAggregation(unittest.TestCase):
 
     @patch.object(Workflow, 'get_batch_aggregations')
     def test_get_agg_property(self, mock_get_batch_aggregations):
-        mock_aggregation = self._mock_aggregation()
-        mock_aggregation.test_property = 'returned_test_value'
+        mock_aggregation = MagicMock()
+        setattr(mock_aggregation, 'test_property', 'returned_test_value')
 
-        mock_aggregations = MagicMock()
-        mock_aggregations.next.return_value = mock_aggregation
-        mock_get_batch_aggregations.return_value = mock_aggregations
-
+        mock_get_batch_aggregations.return_value = iter([mock_aggregation])
 
         result = self.instance._get_agg_property('test_property')
 
@@ -282,9 +279,7 @@ class TestAggregation(unittest.TestCase):
 
     @patch.object(Workflow, 'get_batch_aggregations')
     def test_get_agg_property_failed(self, mock_get_batch_aggregations):
-        mock_aggregations = MagicMock()
-        mock_aggregations.next.side_effect = StopIteration
-        mock_get_batch_aggregations.return_value = mock_aggregations
+        mock_get_batch_aggregations.return_value = iter([])
 
         with self.assertRaises(PanoptesAPIException):
-            self.instance._get_agg_property('some_property')
+            self.instance._get_agg_property('test_property')
