@@ -5,14 +5,14 @@ from panoptes_client.set_member_subject import SetMemberSubject
 from panoptes_client.subject_workflow_status import SubjectWorkflowStatus
 
 from panoptes_client.exportable import Exportable
-from panoptes_client.panoptes import PanoptesObject, LinkResolver
+from panoptes_client.panoptes import PanoptesObject, LinkResolver, PanoptesAPIException
 from panoptes_client.subject import Subject
 from panoptes_client.subject_set import SubjectSet
 from panoptes_client.utils import batchable
 
 from panoptes_client.caesar import Caesar
-from panoptes_client.batch_aggregation import BatchAggregation
 from panoptes_client.user import User
+from panoptes_client.aggregation import Aggregation
 
 
 class Workflow(PanoptesObject, Exportable):
@@ -532,14 +532,7 @@ class Workflow(PanoptesObject, Exportable):
         self.add_alice_reducers()
         self.add_alice_rules_and_effects()
 
-    def get_batch_aggregations(self):
-        """
-        This method will fetch existing aggregations if any. It will return a dict with the existing aggregations.
-        """
-
-        return BatchAggregation().get_aggregations(self.id)[0]
-
-    def run_batch_aggregation(self, user=None, delete_if_exists=False):
+    def run_aggregation(self, user=None, delete_if_exists=False):
         """
         This method will start a new batch aggregation run, Will return a dict with the created aggregation if successful.
 
@@ -548,8 +541,8 @@ class Workflow(PanoptesObject, Exportable):
         -
         Examples::
 
-            Workflow(1234).run_batch_aggregation(1234)
-            Workflow(1234).run_batch_aggregation(user=1234, delete_if_exists=True)
+            Workflow(1234).run_aggregation(1234)
+            Workflow(1234).run_aggregation(user=1234, delete_if_exists=True)
         """
 
         if(isinstance(user, User)):
@@ -557,29 +550,53 @@ class Workflow(PanoptesObject, Exportable):
         elif (isinstance(user, (int, str,))):
             _user_id = user
         else:
-            raise TypeError
+            raise TypeError('Invalid user parameter')
 
-        payload = {
-            "aggregations": {
-                "links": {
-                    "user": _user_id,
-                    "workflow": self.id,
-              }
-            }
-        }
-        return BatchAggregation().run_aggregation(payload, delete_if_exists)
+        try:
+            workflow_aggs = self.get_batch_aggregations()
+            if workflow_aggs.object_count > 0:
+                agg_id = workflow_aggs.next().id
+                current_wf_agg = Aggregation.find(agg_id)
+                if delete_if_exists:
+                    current_wf_agg.delete()
+                    return self._create_agg(_user_id)
+                else:
+                    return current_wf_agg
+            else:
+                return self._create_agg(_user_id)
+        except PanoptesAPIException as err:
+            raise err
+
+    def get_batch_aggregations(self):
+        return Aggregation.where(workflow_id=self.id)
+
+    def _create_agg(self, user_id):
+        new_agg = Aggregation()
+        new_agg.links.workflow = self.id
+        new_agg.links.user = user_id
+        new_agg.save()
+        return new_agg
+
+    def _get_agg_property(self, param):
+        try:
+            aggs = self.get_batch_aggregations()
+            return getattr(aggs.next(), param, None)
+        except StopIteration:
+            raise PanoptesAPIException(
+                "Could not find Aggregations for Workflow with id='{}'".format(self.id)
+            )
 
     def check_batch_aggregation_run_status(self):
         """
         This method will fetch existing aggregation status if any.
         """
-        return self.get_batch_aggregations()['aggregations'][0]['status']
+        return self._get_agg_property('status')
 
     def get_batch_aggregation_links(self):
         """
         This method will fetch existing aggregation links if any.
         """
-        return self.get_batch_aggregations()['aggregations'][0]['uuid']
+        return self._get_agg_property('uuid')
 
     @property
     def versions(self):

@@ -3,12 +3,12 @@ import sys
 from panoptes_client.panoptes import PanoptesAPIException
 from panoptes_client.workflow import Workflow
 from panoptes_client.caesar import Caesar
-from panoptes_client.batch_aggregation import BatchAggregation
+from panoptes_client.aggregation import Aggregation
 
 if sys.version_info <= (3, 0):
-    from mock import patch
+    from mock import patch, MagicMock
 else:
-    from unittest.mock import patch
+    from unittest.mock import patch, MagicMock
 
 
 class TestWorkflow(unittest.TestCase):
@@ -24,14 +24,6 @@ class TestWorkflow(unittest.TestCase):
         self.addCleanup(caesar_post_patch.stop)
         self.addCleanup(caesar_get_patch.stop)
         self.addCleanup(caesar_put_patch.stop)
-
-        batch_agg_run_aggregation_patch = patch.object(BatchAggregation, 'run_aggregation')
-        batch_agg_get_aggregations_patch = patch.object(BatchAggregation, 'get_aggregations')
-        self.batch_agg_run_aggregation_mock = batch_agg_run_aggregation_patch.start()
-        self.batch_agg_get_aggregations_mock = batch_agg_get_aggregations_patch.start()
-
-        self.addCleanup(batch_agg_run_aggregation_patch.stop)
-        self.addCleanup(batch_agg_get_aggregations_patch.stop)
 
         self.agg_mock_value = [{
             'aggregations': [{
@@ -231,40 +223,68 @@ class TestWorkflow(unittest.TestCase):
         self.caesar_post_mock.assert_not_called()
         self.assertEqual('Invalid action for rule type', str(invalid_effect_err.exception))
 
-    def test_get_batch_aggregations_without_delete_param(self):
-        workflow = Workflow(1)
-        workflow.run_batch_aggregation(user=1)
-        payload = {
-            "aggregations": {
-                "links": {
-                    "user": 1,
-                    "workflow": workflow.id,
-                }
-            }
-        }
-        self.batch_agg_run_aggregation_mock.assert_called_with(payload, False)
+class TestAggregation(unittest.TestCase):
+    def setUp(self):
+        self.instance = Workflow(1)
+        self.mock_user_id = 1
 
-    def test_get_batch_aggregations_with_invalid_params(self):
-        with self.assertRaises(TypeError):
-            workflow = Workflow(1)
-            workflow.run_batch_aggregation(user=None)
+    def _mock_aggregation(self):
+        mock_aggregation = MagicMock()
+        mock_aggregation.object_count = 1
+        mock_aggregation.next = MagicMock(return_value=MagicMock(id=1))
+        return mock_aggregation
 
-        self.batch_agg_run_aggregation_mock.assert_not_called()
+    @patch.object(Aggregation, 'where')
+    @patch.object(Aggregation, 'find')
+    def test_run_aggregation_with_user_object(self, mock_find, mock_where):
+        mock_where.return_value = self._mock_aggregation()
 
-    def test_check_batch_aggregation_run_status(self):
-        self.batch_agg_get_aggregations_mock.return_value = self.agg_mock_value
+        mock_current_agg = MagicMock()
+        mock_find.return_value = mock_current_agg
 
-        workflow = Workflow(1)
-        status = workflow.check_batch_aggregation_run_status()
+        result = self.instance.run_aggregation(self.mock_user_id, False)
 
-        self.batch_agg_get_aggregations_mock.assert_called_once()
-        self.assertEqual(status, 'pending')
+        self.assertEqual(result, mock_current_agg)
 
-    def test_get_batch_aggregation_links(self):
-        self.batch_agg_get_aggregations_mock.return_value = self.agg_mock_value
+    @patch.object(Aggregation, 'find')
+    @patch.object(Aggregation, 'where')
+    @patch.object(Aggregation, 'save')
+    def test_run_aggregation_with_delete_if_true(self, mock_save, mock_where, mock_find):
+        mock_where.return_value = self._mock_aggregation()
 
-        workflow = Workflow(1)
-        links = workflow.get_batch_aggregation_links()
+        mock_current_agg = MagicMock()
+        mock_current_agg.delete = MagicMock()
+        mock_find.return_value = mock_current_agg
 
-        self.batch_agg_get_aggregations_mock.assert_called_once()
-        self.assertEqual(links, None)
+
+        mock_save_func = MagicMock()
+
+        mock_save.return_value = mock_save_func()
+        self.instance.run_aggregation(self.mock_user_id,True)
+
+        mock_current_agg.delete.assert_called_once()
+
+        mock_save_func.assert_called_once()
+
+    @patch.object(Workflow, 'get_batch_aggregations')
+    def test_get_agg_property(self, mock_get_batch_aggregations):
+        mock_aggregation = self._mock_aggregation()
+        mock_aggregation.test_property = 'returned_test_value'
+
+        mock_aggregations = MagicMock()
+        mock_aggregations.next.return_value = mock_aggregation
+        mock_get_batch_aggregations.return_value = mock_aggregations
+
+
+        result = self.instance._get_agg_property('test_property')
+
+        self.assertEqual(result, 'returned_test_value')
+
+    @patch.object(Workflow, 'get_batch_aggregations')
+    def test_get_agg_property_failed(self, mock_get_batch_aggregations):
+        mock_aggregations = MagicMock()
+        mock_aggregations.next.side_effect = StopIteration
+        mock_get_batch_aggregations.return_value = mock_aggregations
+
+        with self.assertRaises(PanoptesAPIException):
+            self.instance._get_agg_property('some_property')

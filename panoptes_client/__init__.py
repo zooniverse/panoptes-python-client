@@ -13,4 +13,3 @@ from panoptes_client.workflow import Workflow
 from panoptes_client.subject_workflow_status import SubjectWorkflowStatus
 from panoptes_client.caesar import Caesar
 from panoptes_client.inaturalist import Inaturalist
-from panoptes_client.batch_aggregation import BatchAggregation
