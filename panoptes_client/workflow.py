@@ -580,8 +580,7 @@ class Workflow(PanoptesObject, Exportable):
     def _get_agg_property(self, param):
         try:
             aggs = self.get_batch_aggregations()
-            next = six.next(aggs)
-            return getattr(next, param, None)
+            return getattr(six.next(aggs), param, None)
         except StopIteration:
             raise PanoptesAPIException(
                 "Could not find Aggregations for Workflow with id='{}'".format(self.id)
