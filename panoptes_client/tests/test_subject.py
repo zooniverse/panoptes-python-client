@@ -1,9 +1,10 @@
 import io
 import unittest
-from unittest.mock import patch, mock_open, Mock
+from unittest.mock import patch, mock_open
 
-from panoptes_client.subject import Subject, UnknownMediaException, ALLOWED_EXTENSIONS, MEDIA_TYPE_DETECTION
+from panoptes_client.subject import Subject, UnknownMediaException
 import mimetypes
+
 
 class TestSubject(unittest.TestCase):
     def setUp(self):
@@ -51,10 +52,8 @@ class TestSubject(unittest.TestCase):
         self.assertEqual(self.subject._media_files[-1], b"fake image data")
         self.assertIn("locations", self.subject.modified_attributes)
 
-
     def test_add_location_invalid_manual_mimetype(self):
         data = b"fake data"
         fake_file = io.BytesIO(data)
         with self.assertRaises(UnknownMediaException):
             self.subject.add_location(fake_file, manual_mimetype="application/javascript")
-
