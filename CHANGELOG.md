@@ -1,4 +1,4 @@
-## 1.6.3 (2024-03-07)
+## 1.7.0 (2024-03-07)
 - Fix: Improve MIME typing on auto detection for subject locations
 - New: Add MIME type assignment to subject locations
 - New: Add batch Aggregation
