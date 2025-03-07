@@ -16,7 +16,6 @@ import time
 
 from copy import deepcopy
 from concurrent.futures import ThreadPoolExecutor
-# always importing so we can run test properly
 import mimetypes
 
 try:
@@ -27,8 +26,8 @@ except ImportError:
     try:
         importlib.metadata.version("python-magic")
         logging.getLogger('panoptes_client').info(
-            'libmagic installation not detected.'
-            ' Media type determination will be based on file extensions.'
+            'libmagic not operational, likely due to lack of shared libraries. '
+            'Media MIME type determination will be based on file extensions.'
         )
     except importlib.metadata.PackageNotFoundError:
         pass
@@ -46,19 +45,18 @@ UPLOAD_RETRY_LIMIT = 5
 RETRY_BACKOFF_INTERVAL = 5
 ASYNC_SAVE_THREADS = 5
 
-ALLOWED_EXTENSIONS = {
-    ".jpg": "image/jpeg",
-    ".jpeg": "image/jpeg",
-    ".png": "image/png",
-    ".gif": "image/gif",
-    ".svg": "image/svg+xml",
-    ".mp3": "audio/mpeg",
-    ".mp4": "video/mp4",
-    ".m4a": "audio/mp4",
-    ".mpeg": "video/mpeg",
-    ".txt": "text/plain",
-    ".json": "application/json",
-}
+ALLOWED_MIME_TYPES = [
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/svg+xml",
+    "audio/mpeg",
+    "video/mp4",
+    "audio/mp4",
+    "video/mpeg",
+    "text/plain",
+    "application/json",
+]
 
 class Subject(PanoptesObject):
     _api_slug = 'subjects'
@@ -239,7 +237,7 @@ class Subject(PanoptesObject):
         """
         return next(SubjectWorkflowStatus.where(subject_id=self.id, workflow_id=workflow_id))
 
-    def add_location(self, location: str, manual_mimetype: str = None):
+    def add_location(self, location, manual_mimetype=None):
         """
         Add a media location to this subject.
 
@@ -254,7 +252,7 @@ class Subject(PanoptesObject):
             subject.add_location(my_file)
             subject.add_location('/data/image.jpg')
             subject.add_location({'image/png': 'https://example.com/image.png'})
-            subject.add_location(my_file, 'image/png')
+            subject.add_location(my_file, manual_mimetype='image/png')
         """
         if type(location) is dict:
             self.locations.append(location)
@@ -282,7 +280,7 @@ class Subject(PanoptesObject):
                         'media-types'
                     )
 
-            if media_type not in ALLOWED_EXTENSIONS.values():
+            if media_type not in ALLOWED_MIME_TYPES:
                 raise UnknownMediaException(f"File type {media_type} is not allowed.")
 
             self.locations.append(media_type)
