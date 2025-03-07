@@ -16,6 +16,7 @@ import time
 
 from copy import deepcopy
 from concurrent.futures import ThreadPoolExecutor
+import mimetypes
 
 try:
     import magic
@@ -24,16 +25,13 @@ except ImportError:
     import importlib.metadata
     try:
         importlib.metadata.version("python-magic")
-        logging.getLogger('panoptes_client').warn(
-            'Broken libmagic installation detected. The python-magic module is'
-            ' installed but can\'t be imported. Please check that both '
-            'python-magic and the libmagic shared library are installed '
-            'correctly. Uploading media other than images may not work.'
+        logging.getLogger('panoptes_client').info(
+            'libmagic not operational, likely due to lack of shared libraries. '
+            'Media MIME type determination will be based on file extensions.'
         )
     except importlib.metadata.PackageNotFoundError:
         pass
-    import imghdr
-    MEDIA_TYPE_DETECTION = 'imghdr'
+    MEDIA_TYPE_DETECTION = 'mimetypes'
 
 from panoptes_client.panoptes import (
     LinkResolver,
@@ -46,6 +44,19 @@ from redo import retry
 UPLOAD_RETRY_LIMIT = 5
 RETRY_BACKOFF_INTERVAL = 5
 ASYNC_SAVE_THREADS = 5
+
+ALLOWED_MIME_TYPES = [
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/svg+xml",
+    "audio/mpeg",
+    "video/mp4",
+    "audio/mp4",
+    "video/mpeg",
+    "text/plain",
+    "application/json",
+]
 
 class Subject(PanoptesObject):
     _api_slug = 'subjects'
@@ -226,7 +237,7 @@ class Subject(PanoptesObject):
         """
         return next(SubjectWorkflowStatus.where(subject_id=self.id, workflow_id=workflow_id))
 
-    def add_location(self, location):
+    def add_location(self, location, manual_mimetype=None):
         """
         Add a media location to this subject.
 
@@ -234,11 +245,14 @@ class Subject(PanoptesObject):
           local file, or a :py:class:`dict` containing MIME types and URLs for
           remote media.
 
+        - **manual_mimetype** optional, passes in a specific MIME type for media item.
+
         Examples::
 
             subject.add_location(my_file)
             subject.add_location('/data/image.jpg')
             subject.add_location({'image/png': 'https://example.com/image.png'})
+            subject.add_location(my_file, manual_mimetype='image/png')
         """
         if type(location) is dict:
             self.locations.append(location)
@@ -252,10 +266,12 @@ class Subject(PanoptesObject):
 
         try:
             media_data = f.read()
-            if MEDIA_TYPE_DETECTION == 'magic':
+            if manual_mimetype is not None:
+                media_type = manual_mimetype
+            elif MEDIA_TYPE_DETECTION == 'magic':
                 media_type = magic.from_buffer(media_data, mime=True)
             else:
-                media_type = imghdr.what(None, media_data)
+                media_type = mimetypes.guess_type(location)[0]
                 if not media_type:
                     raise UnknownMediaException(
                         'Could not detect file type. Please try installing '
@@ -263,7 +279,10 @@ class Subject(PanoptesObject):
                         'io/en/latest/user_guide.html#uploading-non-image-'
                         'media-types'
                     )
-                media_type = 'image/{}'.format(media_type)
+
+            if media_type not in ALLOWED_MIME_TYPES:
+                raise UnknownMediaException(f"File type {media_type} is not allowed.")
+
             self.locations.append(media_type)
             self._media_files.append(media_data)
             self.modified_attributes.add('locations')
