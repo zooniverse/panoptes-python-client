@@ -1,3 +1,10 @@
+## 1.6.3 (2024-03-07)
+- Fix: Improve MIME typing on auto detection for subject locations
+- New: Add MIME type assignment to subject locations
+- New: Add batch Aggregation
+- Fix: Paginate `fetch_settings` response on project preferences class
+- Update: Replace pkg_resources with importlib.metadata
+
 ## 1.6.2 (2024-07-11)
 - Fix: Documentation fixes
 - Fix: Caesar connect respect connection env
