@@ -283,6 +283,15 @@ Add subject set to first workflow in project::
     workflow = project.links.workflows[0]
     workflow.links.subject_sets.add(subject_set)
 
+Look up user resource according to login / username::
+
+    user_results = User.where(login='username')
+    user = next(user_results)
+
+Look up user resource for current logged in user::
+
+    user = User.me()
+    
 Project owners and collaborators can update their users' project settings
 (workflow_id only; for use with leveling up feature)::
 
