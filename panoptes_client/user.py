@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from panoptes_client.panoptes import PanoptesObject, LinkResolver
+from panoptes_client.panoptes import Panoptes, PanoptesObject, LinkResolver
 from panoptes_client.utils import isiterable, split
 
 BATCH_SIZE = 50
@@ -55,6 +55,13 @@ class User(PanoptesObject):
         """
 
         return User.http_get('{}/avatar'.format(self.id))[0]
+
+    def me():
+        """
+        Instantiate User for logged-in user account.
+        """
+        
+        return User.find(Panoptes.client().logged_in_user_id)
 
 LinkResolver.register(User)
 LinkResolver.register(User, 'owner')

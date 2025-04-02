@@ -138,6 +138,9 @@ class Panoptes(object):
             'https://www.zooniverse.org'
         )
         self.logged_in = False
+        self.logged_in_user_id = None
+        self.bearer_token = None
+        self.admin = admin
         self.username = None
         self.password = None
         self._auth(login, username, password)
@@ -157,10 +160,6 @@ class Panoptes(object):
                 self.endpoint,
                 self._endpoint_client_ids['default']
             )
-
-        self.logged_in = False
-        self.bearer_token = None
-        self.admin = admin
 
         self.logger = logging.getLogger('panoptes_client')
 
@@ -505,6 +504,7 @@ class Panoptes(object):
                 response.json().get('error', 'Login failed')
             )
         self.logged_in = True
+        self.logged_in_user_id = int(response.json()['users'][0]['id'])
         return response
 
     def interactive_login(self):
