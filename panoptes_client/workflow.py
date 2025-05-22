@@ -596,7 +596,9 @@ class Workflow(PanoptesObject, Exportable):
         """
         This method will fetch existing aggregation links if any.
         """
-        return self._get_agg_property('uuid')
+        uuid = self._get_agg_property('uuid')
+        return {'reductions': 'https://aggregationdata.blob.core.windows.net/{}/{}_reductions.csv'.format(uuid,self.id),
+                'aggregation': 'https://aggregationdata.blob.core.windows.net/{}/{}_aggregation.zip'.format(uuid,self.id)}
 
     @property
     def versions(self):
