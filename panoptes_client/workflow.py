@@ -557,7 +557,7 @@ class Workflow(PanoptesObject, Exportable):
         try:
             workflow_aggs = Aggregation.where(workflow_id=self.id)
             if workflow_aggs.object_count > 0:
-                current_wf_agg = workflow_aggs.next()
+                current_wf_agg = next(workflow_aggs)
                 if delete_if_exists:
                     current_wf_agg.delete()
                     return self._create_agg(_user_id)
@@ -570,8 +570,8 @@ class Workflow(PanoptesObject, Exportable):
             raise err
 
     def get_batch_aggregation(self):
-        try: 
-            return Aggregation.where(workflow_id=self.id).next()
+        try:
+            return next(Aggregation.where(workflow_id=self.id))
         except StopIteration:
             raise PanoptesAPIException(
                 'Could not find Aggregation for Workflow {}'.format(self.id)
@@ -598,8 +598,8 @@ class Workflow(PanoptesObject, Exportable):
         This method will fetch existing aggregation links if any.
         """
         uuid = self._get_agg_property('uuid')
-        return {'reductions': 'https://aggregationdata.blob.core.windows.net/{}/{}_reductions.csv'.format(uuid,self.id),
-                'aggregation': 'https://aggregationdata.blob.core.windows.net/{}/{}_aggregation.zip'.format(uuid,self.id)}
+        return {'reductions': 'https://aggregationdata.blob.core.windows.net/{}/{}_reductions.csv'.format(uuid, self.id),
+                'aggregation': 'https://aggregationdata.blob.core.windows.net/{}/{}_aggregation.zip'.format(uuid, self.id)}
 
     @property
     def versions(self):
