@@ -537,7 +537,7 @@ class Workflow(PanoptesObject, Exportable):
         This method will start a new batch aggregation run, Will return a dict with the created aggregation if successful.
 
         - **user** can be either a :py:class:`.User` or an ID.
-        - **delete_if_exists** parameter is optional if true, deletes any previous instance
+        - **delete_if_exists** parameter is optional; if true, deletes any previous instance
         -
         Examples::
 
@@ -553,22 +553,27 @@ class Workflow(PanoptesObject, Exportable):
             raise TypeError('Invalid user parameter')
 
         try:
-            workflow_aggs = self.get_batch_aggregations()
+            workflow_aggs = Aggregation.where(workflow_id=self.id)
             if workflow_aggs.object_count > 0:
-                agg_id = workflow_aggs.next().id
-                current_wf_agg = Aggregation.find(agg_id)
+                current_wf_agg = workflow_aggs.next()
                 if delete_if_exists:
                     current_wf_agg.delete()
                     return self._create_agg(_user_id)
                 else:
+                    print('Aggregation exists for Workflow {}'.format(self.id))
                     return current_wf_agg
             else:
                 return self._create_agg(_user_id)
         except PanoptesAPIException as err:
             raise err
 
-    def get_batch_aggregations(self):
-        return Aggregation.where(workflow_id=self.id)
+    def get_batch_aggregation(self):
+        try: 
+            return Aggregation.where(workflow_id=self.id).next()
+        except StopIteration:
+            raise PanoptesAPIException(
+                'Could not find Aggregation for Workflow {}'.format(self.id)
+            )
 
     def _create_agg(self, user_id):
         new_agg = Aggregation()
@@ -578,13 +583,7 @@ class Workflow(PanoptesObject, Exportable):
         return new_agg
 
     def _get_agg_property(self, param):
-        try:
-            aggs = self.get_batch_aggregations()
-            return getattr(six.next(aggs), param, None)
-        except StopIteration:
-            raise PanoptesAPIException(
-                "Could not find Aggregations for Workflow with id='{}'".format(self.id)
-            )
+        return getattr(self.get_batch_aggregation(), param, None)
 
     def check_batch_aggregation_run_status(self):
         """
