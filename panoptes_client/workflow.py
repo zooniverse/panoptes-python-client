@@ -536,12 +536,12 @@ class Workflow(PanoptesObject, Exportable):
         """
         This method will start a new batch aggregation run, Will return a dict with the created aggregation if successful.
 
-        - **user** can be either a :py:class:`.User` or an ID.
-        - **delete_if_exists** parameter is optional; if true, deletes any previous instance
-        -
+        - **user** can be either a :py:class:`.User` or an ID. Defaults to logged in user if not set.
+        - **delete_if_exists** parameter is optional; if true, deletes any previous instance.
+
         Examples::
 
-            Workflow(1234).run_aggregation(1234)
+            Workflow(1234).run_aggregation()
             Workflow(1234).run_aggregation(user=1234, delete_if_exists=True)
         """
 
@@ -549,8 +549,10 @@ class Workflow(PanoptesObject, Exportable):
             _user_id = user.id
         elif (isinstance(user, (int, str,))):
             _user_id = user
+        elif User.me():
+            _user_id = User.me().id
         else:
-            raise TypeError('Invalid user parameter')
+            raise TypeError('Invalid user parameter. Provide user ID or login.')
 
         try:
             workflow_aggs = Aggregation.where(workflow_id=self.id)
