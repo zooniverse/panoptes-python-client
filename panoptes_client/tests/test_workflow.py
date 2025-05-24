@@ -216,57 +216,66 @@ class TestAggregation(unittest.TestCase):
         self.instance = Workflow(1)
         self.mock_user_id = 1
 
-    def _mock_aggregation(self):
-        mock_aggregation = MagicMock()
-        mock_aggregation.object_count = 1
-        mock_aggregation.next = MagicMock(return_value=MagicMock(id=1))
-        return mock_aggregation
-
     @patch.object(Aggregation, 'where')
-    @patch.object(Aggregation, 'find')
-    def test_run_aggregation_with_user_object(self, mock_find, mock_where):
-        mock_where.return_value = self._mock_aggregation()
-
+    def test_run_aggregation_existing(self, mock_where):
         mock_current_agg = MagicMock()
-        mock_find.return_value = mock_current_agg
+        mock_current_agg.delete = MagicMock()
+
+        mock_aggregations = MagicMock()
+        mock_aggregations.object_count = 1
+        mock_aggregations.__next__.return_value = mock_current_agg
+        mock_where.return_value = mock_aggregations
 
         result = self.instance.run_aggregation(self.mock_user_id, False)
 
+        mock_current_agg.delete.assert_not_called()
         self.assertEqual(result, mock_current_agg)
 
-    @patch.object(Aggregation, 'find')
     @patch.object(Aggregation, 'where')
     @patch.object(Aggregation, 'save')
-    def test_run_aggregation_with_delete_if_true(self, mock_save, mock_where, mock_find):
-        mock_where.return_value = self._mock_aggregation()
-
+    def test_run_aggregation_existing_and_delete(self, mock_save, mock_where):
         mock_current_agg = MagicMock()
         mock_current_agg.delete = MagicMock()
-        mock_find.return_value = mock_current_agg
+
+        mock_aggregations = MagicMock()
+        mock_aggregations.object_count = 1
+        mock_aggregations.__next__.return_value = mock_current_agg
+        mock_where.return_value = mock_aggregations
 
         mock_save_func = MagicMock()
-
         mock_save.return_value = mock_save_func()
-        self.instance.run_aggregation(self.mock_user_id, True)
+
+        result = self.instance.run_aggregation(self.mock_user_id, True)
 
         mock_current_agg.delete.assert_called_once()
-
         mock_save_func.assert_called_once()
+        self.assertNotEqual(result, mock_current_agg)
 
-    @patch.object(Workflow, 'get_batch_aggregations')
-    def test_get_agg_property(self, mock_get_batch_aggregations):
+    @patch.object(Aggregation, 'where')
+    def test_get_batch_aggregation(self, mock_where):
+        mock_current_agg = MagicMock()
+        mock_aggregations = MagicMock()
+        mock_aggregations.__next__.return_value = mock_current_agg
+        mock_where.return_value = mock_aggregations
+
+        result = self.instance.get_batch_aggregation()
+
+        self.assertEqual(result, mock_current_agg)
+
+    @patch.object(Aggregation, 'where')
+    def test_get_batch_aggregation_failure(self, mock_where):
+        mock_where.return_value = iter([])
+
+        with self.assertRaises(PanoptesAPIException):
+            self.instance.get_batch_aggregation()
+
+    @patch.object(Workflow, 'get_batch_aggregation')
+    def test_get_agg_property(self, mock_get_batch_aggregation):
         mock_aggregation = MagicMock()
         mock_aggregation.test_property = 'returned_test_value'
 
-        mock_get_batch_aggregations.return_value = iter([mock_aggregation])
+        mock_get_batch_aggregation.return_value = mock_aggregation
 
         result = self.instance._get_agg_property('test_property')
 
         self.assertEqual(result, 'returned_test_value')
-
-    @patch.object(Workflow, 'get_batch_aggregations')
-    def test_get_agg_property_failed(self, mock_get_batch_aggregations):
-        mock_get_batch_aggregations.return_value = iter([])
-
-        with self.assertRaises(PanoptesAPIException):
-            self.instance._get_agg_property('test_property')
