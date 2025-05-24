@@ -13,7 +13,7 @@ from panoptes_client.utils import batchable
 from panoptes_client.caesar import Caesar
 from panoptes_client.user import User
 from panoptes_client.aggregation import Aggregation
-import six
+import logging
 
 class Workflow(PanoptesObject, Exportable):
     _api_slug = 'workflows'
@@ -562,7 +562,10 @@ class Workflow(PanoptesObject, Exportable):
                     current_wf_agg.delete()
                     return self._create_agg(_user_id)
                 else:
-                    print('Aggregation exists for Workflow {}'.format(self.id))
+                    logging.getLogger('panoptes_client').info(
+                        'Aggregation exists for Workflow {}. '.format(self.id) +
+                        'Set delete_if_exists to True to create new aggregation.'
+                    )
                     return current_wf_agg
             else:
                 return self._create_agg(_user_id)
