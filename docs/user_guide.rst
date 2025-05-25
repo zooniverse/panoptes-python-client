@@ -418,7 +418,7 @@ Data Exports
 ~~~~~~~~~~~~
 The Panoptes Python Client allows you to generate, describe, and download data exports (e.g., classifications, subjects, workflows) via the Python ``panoptes_client`` library.
 
-Multiple types of exports can be generated using the Python Client, including project-level products (classifications, subjects, workflows) as smaller scale classification exports (for workflows and subject sets).
+Multiple types of exports can be generated using the Python Client, including project-level products (classifications, subjects, workflows) and smaller scale classification exports (for workflows and subject sets).
 For the examples below, we will demonstrate commands for a project wide classifications export, but these functions work for any export type.
 
 **Get Exports**
@@ -472,3 +472,26 @@ For the subject set classification export, classifications are included in the e
 
 1. The subject referenced in the classification is a member of the relevant subject set.
 2. The relevant subject set is currently linked to the workflow referenced in the classification.
+
+Automated Aggregation of Classifications
+++++++++++++++++++++++++++++++++++++++++
+
+The Zooniverse supports research teams by maintaining the ``panoptes_aggregation`` Python package
+(see `docs <https://aggregation-caesar.zooniverse.org/docs>`_ and `repo <https://github.com/zooniverse/aggregation-for-caesar>`_).
+This software requires local installation to run, which can be a deterrent for its use.
+As an alternative to installing and running this aggregation code, we provide a Zooniverse-hosted service for producing aggregated results for simple datasets.
+This "batch aggregation" feature for simple data aggregation needs that only require baseline extrators and reducers without any custom configuration.
+Please see :py:meth:`.Workflow.run_aggregation` and :py:meth:`.Workflow.get_batch_aggregation_links` docstrings for full details.
+
+Example Usage::
+
+    # Generate input data exports: workflow-level classification export and project-level workflows export
+    Workflow(1234).generate_export('classification')
+    Project(2345).generate_export('workflows')
+
+    # Request batch aggregation data product
+    Workflow(1234).run_aggregation()
+
+    # Fetch batch aggregation download URLs
+    urls = Workflow(1234).get_batch_aggregation_links()
+    print(urls['reductions'])
