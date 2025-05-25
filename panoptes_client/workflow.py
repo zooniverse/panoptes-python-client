@@ -573,6 +573,9 @@ class Workflow(PanoptesObject, Exportable):
             raise err
 
     def get_batch_aggregation(self):
+        """
+        This method will fetch existing aggregation resource, if any.
+        """
         try:
             return next(Aggregation.where(workflow_id=self.id))
         except StopIteration:
@@ -592,13 +595,17 @@ class Workflow(PanoptesObject, Exportable):
 
     def check_batch_aggregation_run_status(self):
         """
-        This method will fetch existing aggregation status if any.
+        This method will fetch existing aggregation status, if any.
         """
         return self._get_agg_property('status')
 
     def get_batch_aggregation_links(self):
         """
-        This method will fetch existing aggregation links if any.
+        This method will fetch existing aggregation links, if any.
+
+        Data product options, returned as dictionary of type/URL key-value pairs:
+        1. reductions: subject-level reductions results CSV
+        2. aggregation: a ZIP file containing all inputs (workflow-level classification export, project-level workflows export) and outputs (extracts, reductions)
         """
         uuid = self._get_agg_property('uuid')
         return {'reductions': 'https://aggregationdata.blob.core.windows.net/{}/{}_reductions.csv'.format(uuid, self.id),
