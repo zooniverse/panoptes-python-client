@@ -5,7 +5,7 @@ from panoptes_client.set_member_subject import SetMemberSubject
 from panoptes_client.subject_workflow_status import SubjectWorkflowStatus
 
 from panoptes_client.exportable import Exportable
-from panoptes_client.panoptes import PanoptesObject, LinkResolver, PanoptesAPIException
+from panoptes_client.panoptes import Panoptes, PanoptesObject, LinkResolver, PanoptesAPIException
 from panoptes_client.subject import Subject
 from panoptes_client.subject_set import SubjectSet
 from panoptes_client.utils import batchable
@@ -593,7 +593,7 @@ class Workflow(PanoptesObject, Exportable):
     def _get_agg_property(self, param):
         return getattr(self.get_batch_aggregation(), param, None)
 
-    def check_batch_aggregation_run_status(self):
+    def get_batch_aggregation_status(self):
         """
         This method will fetch existing aggregation status, if any.
         """
@@ -608,8 +608,12 @@ class Workflow(PanoptesObject, Exportable):
         2. aggregation: a ZIP file containing all inputs (workflow-level classification export, project-level workflows export) and outputs (extracts, reductions)
         """
         uuid = self._get_agg_property('uuid')
-        return {'reductions': 'https://aggregationdata.blob.core.windows.net/{}/{}_reductions.csv'.format(uuid, self.id),
-                'aggregation': 'https://aggregationdata.blob.core.windows.net/{}/{}_aggregation.zip'.format(uuid, self.id)}
+        aggregation_url = 'https://aggregationdata.blob.core.windows.net'
+        env = 'production'
+        if Panoptes.client().endpoint == 'https://panoptes-staging.zooniverse.org':
+            env = 'staging'
+        return {'reductions': f'{aggregation_url}/{env}/{uuid}/{self.id}_reductions.csv',
+                'aggregation': f'{aggregation_url}/{env}/{uuid}/{self.id}_aggregation.zip'}
 
     @property
     def versions(self):
