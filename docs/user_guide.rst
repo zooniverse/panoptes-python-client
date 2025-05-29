@@ -58,10 +58,15 @@ Uploading non-image media types
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you wish to upload subjects with non-image media (e.g. audio or video),
-you will need to make sure you have the ``libmagic`` library installed. If you
-don't already have ``libmagic``, please see the `dependency information for
-python-magic <https://github.com/ahupp/python-magic#dependencies>`_ for more
-details.
+it is desirable to have the ``libmagic`` library installed for type detection.
+If you don't already have ``libmagic``, please see the `dependency information 
+for python-magic <https://github.com/ahupp/python-magic#installation>`_ for
+more details.
+
+If `libmagic` is not installed, assignment of MIME types (e.g., image/jpeg,
+video/mp4, text/plain, application/json, etc) will be based on file extensions.
+Be aware that if file names and extension aren't accurate, this could lead to
+issues when the media is loaded.
 
 Usage Examples
 --------------
