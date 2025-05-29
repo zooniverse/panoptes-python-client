@@ -473,6 +473,16 @@ For the subject set classification export, classifications are included in the e
 1. The subject referenced in the classification is a member of the relevant subject set.
 2. The relevant subject set is currently linked to the workflow referenced in the classification.
 
+Example Usage::
+
+    # For a SubjectSet, check which Workflows to which it is currently linked
+    subject_set = SubjectSet.find(1234)
+    for wf in subject_set.links.workflows:
+        print(wf.id, wf.display_name)
+
+    # Generate Export
+    subject_set_classification_export = subject_set.get_export('classifications', generate=True)
+
 Automated Aggregation of Classifications
 ++++++++++++++++++++++++++++++++++++++++
 
@@ -480,7 +490,7 @@ The Zooniverse supports research teams by maintaining the ``panoptes_aggregation
 (see `docs <https://aggregation-caesar.zooniverse.org/docs>`_ and `repo <https://github.com/zooniverse/aggregation-for-caesar>`_).
 This software requires local installation to run, which can be a deterrent for its use.
 As an alternative to installing and running this aggregation code, we provide a Zooniverse-hosted service for producing aggregated results for simple datasets.
-This "batch aggregation" feature for simple data aggregation needs that only require baseline extrators and reducers without any custom configuration.
+This "batch aggregation" feature is built to perform simple workflow-level data aggregation that uses baseline extractors and reducers without any custom configuration.
 Please see :py:meth:`.Workflow.run_aggregation` and :py:meth:`.Workflow.get_batch_aggregation_links` docstrings for full details.
 
 Example Usage::
@@ -494,4 +504,7 @@ Example Usage::
 
     # Fetch batch aggregation download URLs
     urls = Workflow(1234).get_batch_aggregation_links()
-    print(urls['reductions'])
+    print(urls)
+
+    # Load Reductions CSV using Pandas
+    pd.read_csv(urls['reductions'])
