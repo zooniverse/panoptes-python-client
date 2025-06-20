@@ -58,10 +58,15 @@ Uploading non-image media types
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you wish to upload subjects with non-image media (e.g. audio or video),
-you will need to make sure you have the ``libmagic`` library installed. If you
-don't already have ``libmagic``, please see the `dependency information for
-python-magic <https://github.com/ahupp/python-magic#dependencies>`_ for more
-details.
+it is desirable to have the ``libmagic`` library installed for type detection.
+If you don't already have ``libmagic``, please see the `dependency information 
+for python-magic <https://github.com/ahupp/python-magic#installation>`_ for
+more details.
+
+If `libmagic` is not installed, assignment of MIME types (e.g., image/jpeg,
+video/mp4, text/plain, application/json, etc) will be based on file extensions.
+Be aware that if file names and extension aren't accurate, this could lead to
+issues when the media is loaded.
 
 Usage Examples
 --------------
@@ -414,58 +419,97 @@ You can also pass an optional `new_subject_set_name` parameter and this would be
 
     Project(project_id).copy(new_subject_set_name='My New Subject Set')
 
-Programmatic Data Exports
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Data Exports
+~~~~~~~~~~~~
 The Panoptes Python Client allows you to generate, describe, and download data exports (e.g., classifications, subjects, workflows) via the Python ``panoptes_client`` library.
 
-Multiple types of exports can be generated using the Python Client, including project-level products (classifications, subjects, workflows) as smaller scale classification exports (for workflows and subject sets).
+Multiple types of exports can be generated using the Python Client, including project-level products (classifications, subjects, workflows) and smaller scale classification exports (for workflows and subject sets).
 For the examples below, we will demonstrate commands for a project wide classifications export, but these functions work for any export type.
 
 **Get Exports**
 
-As the name implies, this method downloads a data export over HTTP. This uses the `get_export` method and can be called by passing in the following parameters::
+As the name implies, this method downloads a data export over HTTP. This uses the `get_export` method and can be called by passing in the following parameters:
 
-    export_type #string specifying which type of export should be downloaded
+* *export_type*: string specifying which type of export should be downloaded.
+* *generate*: a boolean specifying whether to generate a new export and wait for it to be ready, or to just download the latest existing export. Default is False.
+* *wait*: a boolean specifying whether to wait for an in-progress export to finish, if there is one. Has no effect if `generate` is true (wait will occur in this case). Default is False.
+* *wait_timeout*: the number of seconds to wait if `wait` is True or `generate` is True. Has no effect if `wait` and `generate` are both False. Default is None (wait indefinetly).
 
-    generate #a boolean specifying if to generate a new export and wait for it to be ready, or to just download the latest existing export
+Examples::
 
-    wait #a boolean specifying whether to wait for an in-progress export to finish, if there is one. Has no effect if generate is true.
+    # Fetch existing export
+    classification_export = Project(1234).get_export('classifications')
 
-    wait_timeout #is the number of seconds to wait if wait is True. Has no effect if wait is False or if generate is True.
+    # Generate export, wait indefinetly for result to complete
+    classification_export = Project(1234).get_export('classifications', generate=True)
 
-    classification_export = Project(project_id).get_export(export_type="classifications")
+    # Fetch export currently being processed, wait up to 600 seconds for export to complete
+    classification_export = Project(1234).get_export('classifications', wait=True, wait_timeout=600)
 
 The returned Response object has two additional attributes as a convenience for working with the CSV content; `csv_reader` and `csv_dictreader`, which are wrappers for `csv.reader()` and `csv.DictReader` respectively.
 These wrappers take care of correctly decoding the export content for the CSV parser::
 
     classification_export = Project(1234).get_export('classifications')
     for row in classification_export.csv_dictreader():
-    print(row)
+        print(row)
 
 **Generate Exports**
 
 As the name implies, this method generates/starts a data export. This uses the `generate_export` method and can be called by passing in the `export_type` parameter::
 
-    export_info = Project(project_id).generate_export(export_type='classifications')
+    export_info = Project(1234).generate_export('classifications')
 
-This would return `export_info` as a dictionary containing the metadata on the selected export
-
-**Wait Exports**
-
-As the name implies, this method blocks/waits until an in-progress export is ready. It uses the `wait_export` method and can be called passing the following parameters::
-
-    export_type #string specifying which type of export should be downloaded
-
-    timeout #is the maximum number of seconds to wait.
-
-    export_info = Project(project_id).wait_export(export_type='classifications')
-
-This would return `export_info` as a dictionary containing the metadata on the selected export and throw a `PanoptesAPIException` once the time limit is exceeded and the export is not ready
+This kick off the export generation process and returns `export_info` as a dictionary containing the metadata on the selected export.
 
 **Describing Exports**
 
-This method fetches information/metadata about a specific type of export. This uses the `describe_export` method and can be called by passing in the export_type(classifications, subject_sets) this way::
+This method fetches information/metadata about a specific type of export. This uses the `describe_export` method and can be called by passing the `export_type` (e.g., classifications, subjects) this way::
 
-    export_info = Project(project_id).describe_export(export_type='classifications')
+    export_info = Project(1234).describe_export('classifications')
 
-This would return `export_info` as a dictionary containing the metadata on the selected export
+This would return `export_info` as a dictionary containing the metadata on the selected export.
+
+Subject Set Classification Exports
+++++++++++++++++++++++++++++++++++
+
+As mentioned above, it is possible to request a classifications export for project, workflow, or subject set scope.
+For the subject set classification export, classifications are included in the export if they satisfy two selection criteria:
+
+1. The subject referenced in the classification is a member of the relevant subject set.
+2. The relevant subject set is currently linked to the workflow referenced in the classification.
+
+Example Usage::
+
+    # For a SubjectSet, check which Workflows to which it is currently linked
+    subject_set = SubjectSet.find(1234)
+    for wf in subject_set.links.workflows:
+        print(wf.id, wf.display_name)
+
+    # Generate Export
+    subject_set_classification_export = subject_set.get_export('classifications', generate=True)
+
+Automated Aggregation of Classifications
+++++++++++++++++++++++++++++++++++++++++
+
+The Zooniverse supports research teams by maintaining the ``panoptes_aggregation`` Python package
+(see `docs <https://aggregation-caesar.zooniverse.org/docs>`_ and `repo <https://github.com/zooniverse/aggregation-for-caesar>`_).
+This software requires local installation to run, which can be a deterrent for its use.
+As an alternative to installing and running this aggregation code, we provide a Zooniverse-hosted service for producing aggregated results for simple datasets.
+This "batch aggregation" feature is built to perform simple workflow-level data aggregation that uses baseline extractors and reducers without any custom configuration.
+Please see :py:meth:`.Workflow.run_aggregation` and :py:meth:`.Workflow.get_batch_aggregation_links` docstrings for full details.
+
+Example Usage::
+
+    # Generate input data exports: workflow-level classification export and project-level workflows export
+    Workflow(1234).generate_export('classification')
+    Project(2345).generate_export('workflows')
+
+    # Request batch aggregation data product
+    Workflow(1234).run_aggregation()
+
+    # Fetch batch aggregation download URLs
+    urls = Workflow(1234).get_batch_aggregation_links()
+    print(urls)
+
+    # Load Reductions CSV using Pandas
+    pd.read_csv(urls['reductions'])

@@ -5,7 +5,7 @@ from panoptes_client.set_member_subject import SetMemberSubject
 from panoptes_client.subject_workflow_status import SubjectWorkflowStatus
 
 from panoptes_client.exportable import Exportable
-from panoptes_client.panoptes import PanoptesObject, LinkResolver, PanoptesAPIException
+from panoptes_client.panoptes import Panoptes, PanoptesObject, LinkResolver, PanoptesAPIException
 from panoptes_client.subject import Subject
 from panoptes_client.subject_set import SubjectSet
 from panoptes_client.utils import batchable
@@ -13,7 +13,7 @@ from panoptes_client.utils import batchable
 from panoptes_client.caesar import Caesar
 from panoptes_client.user import User
 from panoptes_client.aggregation import Aggregation
-import six
+import logging
 
 class Workflow(PanoptesObject, Exportable):
     _api_slug = 'workflows'
@@ -536,12 +536,12 @@ class Workflow(PanoptesObject, Exportable):
         """
         This method will start a new batch aggregation run, Will return a dict with the created aggregation if successful.
 
-        - **user** can be either a :py:class:`.User` or an ID.
-        - **delete_if_exists** parameter is optional if true, deletes any previous instance
-        -
+        - **user** can be either a :py:class:`.User` or an ID. Defaults to logged in user if not set.
+        - **delete_if_exists** parameter is optional; if true, deletes any previous instance.
+
         Examples::
 
-            Workflow(1234).run_aggregation(1234)
+            Workflow(1234).run_aggregation()
             Workflow(1234).run_aggregation(user=1234, delete_if_exists=True)
         """
 
@@ -549,26 +549,39 @@ class Workflow(PanoptesObject, Exportable):
             _user_id = user.id
         elif (isinstance(user, (int, str,))):
             _user_id = user
+        elif User.me():
+            _user_id = User.me().id
         else:
-            raise TypeError('Invalid user parameter')
+            raise TypeError('Invalid user parameter. Provide user ID or login.')
 
         try:
-            workflow_aggs = self.get_batch_aggregations()
+            workflow_aggs = Aggregation.where(workflow_id=self.id)
             if workflow_aggs.object_count > 0:
-                agg_id = workflow_aggs.next().id
-                current_wf_agg = Aggregation.find(agg_id)
+                current_wf_agg = next(workflow_aggs)
                 if delete_if_exists:
                     current_wf_agg.delete()
                     return self._create_agg(_user_id)
                 else:
+                    logging.getLogger('panoptes_client').info(
+                        'Aggregation exists for Workflow {}. '.format(self.id) +
+                        'Set delete_if_exists to True to create new aggregation.'
+                    )
                     return current_wf_agg
             else:
                 return self._create_agg(_user_id)
         except PanoptesAPIException as err:
             raise err
 
-    def get_batch_aggregations(self):
-        return Aggregation.where(workflow_id=self.id)
+    def get_batch_aggregation(self):
+        """
+        This method will fetch existing aggregation resource, if any.
+        """
+        try:
+            return next(Aggregation.where(workflow_id=self.id))
+        except StopIteration:
+            raise PanoptesAPIException(
+                'Could not find Aggregation for Workflow {}'.format(self.id)
+            )
 
     def _create_agg(self, user_id):
         new_agg = Aggregation()
@@ -578,25 +591,29 @@ class Workflow(PanoptesObject, Exportable):
         return new_agg
 
     def _get_agg_property(self, param):
-        try:
-            aggs = self.get_batch_aggregations()
-            return getattr(six.next(aggs), param, None)
-        except StopIteration:
-            raise PanoptesAPIException(
-                "Could not find Aggregations for Workflow with id='{}'".format(self.id)
-            )
+        return getattr(self.get_batch_aggregation(), param, None)
 
-    def check_batch_aggregation_run_status(self):
+    def get_batch_aggregation_status(self):
         """
-        This method will fetch existing aggregation status if any.
+        This method will fetch existing aggregation status, if any.
         """
         return self._get_agg_property('status')
 
     def get_batch_aggregation_links(self):
         """
-        This method will fetch existing aggregation links if any.
+        This method will fetch existing aggregation links, if any.
+
+        Data product options, returned as dictionary of type/URL key-value pairs:
+        1. reductions: subject-level reductions results CSV
+        2. aggregation: a ZIP file containing all inputs (workflow-level classification export, project-level workflows export) and outputs (extracts, reductions)
         """
-        return self._get_agg_property('uuid')
+        uuid = self._get_agg_property('uuid')
+        aggregation_url = 'https://aggregationdata.blob.core.windows.net'
+        env = 'production'
+        if Panoptes.client().endpoint == 'https://panoptes-staging.zooniverse.org':
+            env = 'staging'
+        return {'reductions': f'{aggregation_url}/{env}/{uuid}/{self.id}_reductions.csv',
+                'aggregation': f'{aggregation_url}/{env}/{uuid}/{self.id}_aggregation.zip'}
 
     @property
     def versions(self):
