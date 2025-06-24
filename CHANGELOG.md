@@ -1,3 +1,8 @@
+## 1.7.1 (2025-06-24)
+- New: Track logged in user
+- Fix: Batch aggregation links updated
+- Change: Set user to User.me() by default for new batch aggregation requests
+
 ## 1.7.0 (2024-03-07)
 - Fix: Improve MIME typing on auto detection for subject locations
 - New: Add MIME type assignment to subject locations
