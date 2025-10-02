@@ -222,6 +222,10 @@ class Subject(PanoptesObject):
         else:
             return False
 
+    @property
+    def attached_images(self):
+        return self.http_get('{}/attached_images'.format(self.id))[0]
+
     def set_raw(self, raw, etag=None, loaded=True):
         super(Subject, self).set_raw(raw, etag, loaded)
         if loaded and self.metadata:
@@ -289,6 +293,79 @@ class Subject(PanoptesObject):
         finally:
             f.close()
 
+    def add_attached_image(
+        self,
+        src=None,
+        content_type='image/png',
+        external_link=True,
+        metadata=None,
+    ):
+        metadata = metadata or {}
+        media_data = {
+            'content_type': content_type,
+            'external_link': external_link,
+            'metadata': metadata,
+        }
+        if src:
+            media_data['src'] = src
+        json_response, _ = self.http_post(
+            '{}/attached_images'.format(self.id),
+            json={'media': media_data},
+        )
+        return json_response['media'][0]['src']
+
+    def add_attached_images(self, attached_media):
+        """
+        Add a attached_media to this subject. This should not be confused with subject location.
+        A subject location is the content of the subject that a volunteer will classify.
+        A subject attached_media is ancillary data associated to the subject that get displayed on the Subject's Talk Page.
+
+        - **attached_media** can be an open :py:class:`file` object, a path to a
+          local file, or a :py:class:`dict` containing MIME types and URLs for
+          remote media.
+
+        Examples::
+
+            subject.add_attached_images(my_file)
+            subject.add_attached_images('/data/image.jpg')
+            subject.add_attached_images({'image/png': 'https://example.com/image.png'})
+        """
+        if type(attached_media) is dict:
+            for content_type, url in attached_media.items():
+                self.add_attached_image(
+                    src=url,
+                    content_type=content_type,
+                    external_link=True,
+                )
+            return
+        elif type(attached_media) in (str,) + _OLD_STR_TYPES:
+            f = open(attached_media, 'rb')
+        else:
+            f = attached_media
+
+        media_type = None
+        try:
+            media_data = f.read()
+            if MEDIA_TYPE_DETECTION == 'magic':
+                media_type = magic.from_buffer(media_data, mime=True)
+            else:
+                media_type = imghdr.what(None, media_data)
+                if not media_type:
+                    raise UnknownMediaException(
+                        'Could not detect file type. Please try installing '
+                        'libmagic: https://panoptes-python-client.readthedocs.'
+                        'io/en/latest/user_guide.html#uploading-non-image-'
+                        'media-types'
+                    )
+                media_type = 'image/{}'.format(media_type)
+        finally:
+            f.close()
+        file_url = self.add_attached_image(
+            src=None,
+            content_type=media_type,
+            external_link=False,
+        )
+        self._upload_media(file_url, media_data, media_type)
 
 class UnknownMediaException(Exception):
     pass
