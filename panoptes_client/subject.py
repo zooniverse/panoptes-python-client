@@ -75,7 +75,8 @@ class Subject(PanoptesObject):
     @classmethod
     def async_saves(cls):
         """
-        Returns a context manager to allow asynchronously creating subjects.
+        Returns a context manager to allow asynchronously creating subjects or creating subject attached images
+        .
         Using this context manager will create a pool of threads which will
         create multiple subjects at once and upload any local files
         simultaneously.
@@ -89,6 +90,12 @@ class Subject(PanoptesObject):
                     s.links.project = 1234
                     s.add_location(filename)
                     s.save()
+
+            with Subject.async_saves():
+                local_files = [...]
+                for filename in local_files:
+                    s = Subject(1234)
+                    s.save_attached_image(local_file)
 
         Alternatively, you can manually shut down the thread pool::
 
@@ -205,6 +212,20 @@ class Subject(PanoptesObject):
         upload_response.raise_for_status()
         return upload_response
 
+    def _detect_media_type(self, media_data=None):
+        if MEDIA_TYPE_DETECTION == 'magic':
+            return magic.from_buffer(media_data, mime=True)
+        else:
+            media_type = imghdr.what(None, media_data)
+            if not media_type:
+                raise UnknownMediaException(
+                        'Could not detect file type. Please try installing '
+                        'libmagic: https://panoptes-python-client.readthedocs.'
+                        'io/en/latest/user_guide.html#uploading-non-image-'
+                        'media-types'
+                )
+            return 'image/{}'.format(media_type)
+
     @property
     def async_save_result(self):
         """
@@ -299,6 +320,7 @@ class Subject(PanoptesObject):
         content_type='image/png',
         external_link=True,
         metadata=None,
+        client=None
     ):
         metadata = metadata or {}
         media_data = {
@@ -308,13 +330,50 @@ class Subject(PanoptesObject):
         }
         if src:
             media_data['src'] = src
-        json_response, _ = self.http_post(
+
+        if not client:
+            client = Panoptes.client()
+
+        with client:
+            json_response, _ = self.http_post(
             '{}/attached_images'.format(self.id),
             json={'media': media_data},
         )
-        return json_response['media'][0]['src']
 
-    def add_attached_images(self, attached_media):
+            return json_response['media'][0]['src']
+
+    def _save_attached_image(self, attached_media, client=None):
+        if not client:
+            client = Panoptes.client()
+
+        with client:
+            if type(attached_media) is dict:
+                for content_type, url in attached_media.items():
+                    self.add_attached_image(
+                        src=url,
+                        content_type=content_type,
+                        external_link=True,
+                    )
+                return
+            elif type(attached_media) in (str,) + _OLD_STR_TYPES:
+                f = open(attached_media, 'rb')
+            else:
+                f = attached_media
+
+            media_type = None
+            try:
+                media_data = f.read()
+                media_type = self._detect_media_type(media_data)
+            finally:
+                f.close()
+            file_url = self.add_attached_image(
+                src=None,
+                content_type=media_type,
+                external_link=False,
+            )
+            self._upload_media(file_url, media_data, media_type)
+
+    def save_attached_image(self,attached_media, client=None):
         """
         Add a attached_media to this subject. This should not be confused with subject location.
         A subject location is the content of the subject that a volunteer will classify.
@@ -326,46 +385,42 @@ class Subject(PanoptesObject):
 
         Examples::
 
-            subject.add_attached_images(my_file)
-            subject.add_attached_images('/data/image.jpg')
-            subject.add_attached_images({'image/png': 'https://example.com/image.png'})
+            subject.save_attached_image(my_file)
+            subject.save_attached_image('/data/image.jpg')
+            subject.save_attached_image({'image/png': 'https://example.com/image.png'})
         """
-        if type(attached_media) is dict:
-            for content_type, url in attached_media.items():
-                self.add_attached_image(
-                    src=url,
-                    content_type=content_type,
-                    external_link=True,
-                )
-            return
-        elif type(attached_media) in (str,) + _OLD_STR_TYPES:
-            f = open(attached_media, 'rb')
-        else:
-            f = attached_media
+        if not client:
+            client = Panoptes.client()
 
-        media_type = None
-        try:
-            media_data = f.read()
-            if MEDIA_TYPE_DETECTION == 'magic':
-                media_type = magic.from_buffer(media_data, mime=True)
-            else:
-                media_type = imghdr.what(None, media_data)
-                if not media_type:
-                    raise UnknownMediaException(
-                        'Could not detect file type. Please try installing '
-                        'libmagic: https://panoptes-python-client.readthedocs.'
-                        'io/en/latest/user_guide.html#uploading-non-image-'
-                        'media-types'
-                    )
-                media_type = 'image/{}'.format(media_type)
-        finally:
-            f.close()
-        file_url = self.add_attached_image(
-            src=None,
-            content_type=media_type,
-            external_link=False,
-        )
-        self._upload_media(file_url, media_data, media_type)
+        async_save = hasattr(self._local, 'save_exec')
+
+        with client:
+            import pdb; pdb.set_trace()
+
+            try:
+                if async_save:
+                    upload_exec = self._local.save_exec
+                else:
+                    upload_exec = ThreadPoolExecutor(max_workers=ASYNC_SAVE_THREADS)
+                upload_exec.submit(
+                    retry,
+                    self._save_attached_image,
+                    args=(
+                        attached_media,
+                        client
+                    ),
+                    attempts=UPLOAD_RETRY_LIMIT,
+                    sleeptime=RETRY_BACKOFF_INTERVAL,
+                    retry_exceptions=(
+                        requests.exceptions.RequestException
+                    ),
+                    log_args=False,
+                )
+            finally:
+                if not async_save:
+                    # Shuts down and waits for the task if this isn't being used in a `async_saves` block
+                    upload_exec.shutdown(wait=True)
+
 
 class UnknownMediaException(Exception):
     pass
