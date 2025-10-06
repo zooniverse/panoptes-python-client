@@ -337,8 +337,7 @@ class Subject(PanoptesObject):
         with client:
             json_response, _ = self.http_post(
             '{}/attached_images'.format(self.id),
-            json={'media': media_data},
-        )
+            json={'media': media_data})
 
             return json_response['media'][0]['src']
 
@@ -408,7 +407,7 @@ class Subject(PanoptesObject):
                     upload_exec = self._local.save_exec
                 else:
                     upload_exec = ThreadPoolExecutor(max_workers=ASYNC_SAVE_THREADS)
-                upload_exec.submit(
+                future_result = upload_exec.submit(
                     retry,
                     self._save_attached_image,
                     args=(
@@ -423,6 +422,7 @@ class Subject(PanoptesObject):
                     ),
                     log_args=False,
                 )
+                return future_result.result()
             finally:
                 if not async_save:
                     # Shuts down and waits for the task if this isn't being used in a `async_saves` block
