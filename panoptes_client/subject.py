@@ -215,18 +215,19 @@ class Subject(PanoptesObject):
     def _detect_media_type(self, media_data=None, manual_mimetype=None):
         if manual_mimetype is not None:
             return manual_mimetype
+
         if MEDIA_TYPE_DETECTION == 'magic':
             return magic.from_buffer(media_data, mime=True)
-        else:
-            media_type = mimetypes.guess_type(media_data)[0]
-            if not media_type:
-                raise UnknownMediaException(
-                        'Could not detect file type. Please try installing '
-                        'libmagic: https://panoptes-python-client.readthedocs.'
-                        'io/en/latest/user_guide.html#uploading-non-image-'
-                        'media-types'
-                )
-            return 'image/{}'.format(media_type)
+
+        media_type = mimetypes.guess_type(media_data)[0]
+        if not media_type:
+            raise UnknownMediaException(
+                    'Could not detect file type. Please try installing '
+                    'libmagic: https://panoptes-python-client.readthedocs.'
+                    'io/en/latest/user_guide.html#uploading-non-image-'
+                    'media-types'
+            )
+        return media_type
 
     def _validate_media_type(self, media_type=None):
         if media_type not in ALLOWED_MIME_TYPES:
@@ -299,7 +300,7 @@ class Subject(PanoptesObject):
             media_data = f.read()
             media_type = self._detect_media_type(media_data, manual_mimetype)
 
-            self._validate_media_type(media_type=media_type)
+            self._validate_media_type(media_type)
 
             self.locations.append(media_type)
             self._media_files.append(media_data)
