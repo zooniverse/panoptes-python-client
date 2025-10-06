@@ -401,7 +401,6 @@ class Subject(PanoptesObject):
         async_save = hasattr(self._local, 'save_exec')
 
         with client:
-            import pdb; pdb.set_trace()
             metadata = metadata or {}
 
             try:
