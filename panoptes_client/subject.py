@@ -212,11 +212,13 @@ class Subject(PanoptesObject):
         upload_response.raise_for_status()
         return upload_response
 
-    def _detect_media_type(self, media_data=None):
+    def _detect_media_type(self, media_data=None, manual_mimetype=None):
+        if manual_mimetype is not None:
+            return manual_mimetype
         if MEDIA_TYPE_DETECTION == 'magic':
             return magic.from_buffer(media_data, mime=True)
         else:
-            media_type = imghdr.what(None, media_data)
+            media_type = mimetypes.guess_type(media_data)[0]
             if not media_type:
                 raise UnknownMediaException(
                         'Could not detect file type. Please try installing '
@@ -291,19 +293,7 @@ class Subject(PanoptesObject):
 
         try:
             media_data = f.read()
-            if manual_mimetype is not None:
-                media_type = manual_mimetype
-            elif MEDIA_TYPE_DETECTION == 'magic':
-                media_type = magic.from_buffer(media_data, mime=True)
-            else:
-                media_type = mimetypes.guess_type(location)[0]
-                if not media_type:
-                    raise UnknownMediaException(
-                        'Could not detect file type. Please try installing '
-                        'libmagic: https://panoptes-python-client.readthedocs.'
-                        'io/en/latest/user_guide.html#uploading-non-image-'
-                        'media-types'
-                    )
+            media_type = self._detect_media_type(media_data, manual_mimetype)
 
             if media_type not in ALLOWED_MIME_TYPES:
                 raise UnknownMediaException(f"File type {media_type} is not allowed.")
@@ -341,7 +331,7 @@ class Subject(PanoptesObject):
 
             return json_response['media'][0]['src']
 
-    def _save_attached_image(self, attached_media, metadata=None, client=None):
+    def _save_attached_image(self, attached_media, manual_mimetype=None, metadata=None, client=None):
         if not client:
             client = Panoptes.client()
 
@@ -365,7 +355,7 @@ class Subject(PanoptesObject):
             media_type = None
             try:
                 media_data = f.read()
-                media_type = self._detect_media_type(media_data)
+                media_type = self._detect_media_type(media_data, manual_mimetype)
             finally:
                 f.close()
             file_url = self.add_attached_image(
@@ -376,7 +366,7 @@ class Subject(PanoptesObject):
             )
             self._upload_media(file_url, media_data, media_type)
 
-    def save_attached_image(self,attached_media, metadata=None, client=None):
+    def save_attached_image(self,attached_media, manual_mimetype=None, metadata=None, client=None):
         """
         Add a attached_media to this subject.
         NOTE: This should NOT be confused with subject location.
@@ -412,6 +402,7 @@ class Subject(PanoptesObject):
                     self._save_attached_image,
                     args=(
                         attached_media,
+                        manual_mimetype,
                         metadata,
                         client
                     ),
