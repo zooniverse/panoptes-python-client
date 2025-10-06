@@ -222,10 +222,10 @@ class Subject(PanoptesObject):
         media_type = mimetypes.guess_type(media_data)[0]
         if not media_type:
             raise UnknownMediaException(
-                    'Could not detect file type. Please try installing '
-                    'libmagic: https://panoptes-python-client.readthedocs.'
-                    'io/en/latest/user_guide.html#uploading-non-image-'
-                    'media-types'
+                'Could not detect file type. Please try installing '
+                'libmagic: https://panoptes-python-client.readthedocs.'
+                'io/en/latest/user_guide.html#uploading-non-image-'
+                'media-types'
             )
         return media_type
 
@@ -329,9 +329,7 @@ class Subject(PanoptesObject):
             client = Panoptes.client()
 
         with client:
-            json_response, _ = self.http_post(
-            '{}/attached_images'.format(self.id),
-            json={'media': media_data})
+            json_response, _ = self.http_post('{}/attached_images'.format(self.id), json={'media': media_data})
 
             return json_response['media'][0]['src']
 
@@ -371,7 +369,7 @@ class Subject(PanoptesObject):
             )
             self._upload_media(file_url, media_data, media_type)
 
-    def save_attached_image(self,attached_media, manual_mimetype=None, metadata=None, client=None):
+    def save_attached_image(self, attached_media, manual_mimetype=None, metadata=None, client=None):
         """
         Add a attached_media to this subject.
         NOTE: This should NOT be confused with subject location.
