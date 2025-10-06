@@ -228,6 +228,10 @@ class Subject(PanoptesObject):
                 )
             return 'image/{}'.format(media_type)
 
+    def _validate_media_type(self, media_type=None):
+        if media_type not in ALLOWED_MIME_TYPES:
+            raise UnknownMediaException(f"File type {media_type} is not allowed.")
+
     @property
     def async_save_result(self):
         """
@@ -295,8 +299,7 @@ class Subject(PanoptesObject):
             media_data = f.read()
             media_type = self._detect_media_type(media_data, manual_mimetype)
 
-            if media_type not in ALLOWED_MIME_TYPES:
-                raise UnknownMediaException(f"File type {media_type} is not allowed.")
+            self._validate_media_type(media_type=media_type)
 
             self.locations.append(media_type)
             self._media_files.append(media_data)
@@ -356,6 +359,7 @@ class Subject(PanoptesObject):
             try:
                 media_data = f.read()
                 media_type = self._detect_media_type(media_data, manual_mimetype)
+                self._validate_media_type(media_type)
             finally:
                 f.close()
             file_url = self.add_attached_image(
