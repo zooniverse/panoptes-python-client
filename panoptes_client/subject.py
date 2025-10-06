@@ -394,6 +394,7 @@ class Subject(PanoptesObject):
 
         async_save = hasattr(self._local, 'save_exec')
 
+        future_result = None
         with client:
             metadata = metadata or {}
 
@@ -418,11 +419,11 @@ class Subject(PanoptesObject):
                     ),
                     log_args=False,
                 )
-                return future_result.result()
             finally:
                 if not async_save:
                     # Shuts down and waits for the task if this isn't being used in a `async_saves` block
                     upload_exec.shutdown(wait=True)
+        return future_result
 
 
 class UnknownMediaException(Exception):
