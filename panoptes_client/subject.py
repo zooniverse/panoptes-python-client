@@ -342,16 +342,19 @@ class Subject(PanoptesObject):
 
             return json_response['media'][0]['src']
 
-    def _save_attached_image(self, attached_media, client=None):
+    def _save_attached_image(self, attached_media, metadata=None, client=None):
         if not client:
             client = Panoptes.client()
 
         with client:
+            metadata = metadata or {}
+
             if type(attached_media) is dict:
                 for content_type, url in attached_media.items():
                     self.add_attached_image(
                         src=url,
                         content_type=content_type,
+                        metadata=metadata,
                         external_link=True,
                     )
                 return
@@ -369,25 +372,28 @@ class Subject(PanoptesObject):
             file_url = self.add_attached_image(
                 src=None,
                 content_type=media_type,
+                metadata=metadata,
                 external_link=False,
             )
             self._upload_media(file_url, media_data, media_type)
 
-    def save_attached_image(self,attached_media, client=None):
+    def save_attached_image(self,attached_media, metadata=None, client=None):
         """
-        Add a attached_media to this subject. This should not be confused with subject location.
+        Add a attached_media to this subject.
+        NOTE: This should NOT be confused with subject location.
         A subject location is the content of the subject that a volunteer will classify.
         A subject attached_media is ancillary data associated to the subject that get displayed on the Subject's Talk Page.
 
         - **attached_media** can be an open :py:class:`file` object, a path to a
           local file, or a :py:class:`dict` containing MIME types and URLs for
           remote media.
+        - **metadata** can be a :py:class:`dict` that stores additional info on attached_media.
 
         Examples::
 
             subject.save_attached_image(my_file)
             subject.save_attached_image('/data/image.jpg')
-            subject.save_attached_image({'image/png': 'https://example.com/image.png'})
+            subject.save_attached_image(my_file, {'metadata_test': 'Object 1'})
         """
         if not client:
             client = Panoptes.client()
@@ -396,6 +402,7 @@ class Subject(PanoptesObject):
 
         with client:
             import pdb; pdb.set_trace()
+            metadata = metadata or {}
 
             try:
                 if async_save:
@@ -407,6 +414,7 @@ class Subject(PanoptesObject):
                     self._save_attached_image,
                     args=(
                         attached_media,
+                        metadata,
                         client
                     ),
                     attempts=UPLOAD_RETRY_LIMIT,
