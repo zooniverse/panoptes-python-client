@@ -75,7 +75,7 @@ class Subject(PanoptesObject):
     @classmethod
     def async_saves(cls):
         """
-        Returns a context manager to allow asynchronously creating subjects or creating subject attached images
+        Returns a context manager to allow asynchronously creating subjects or creating and uploading subject attached images/media.
         .
         Using this context manager will create a pool of threads which will
         create multiple subjects at once and upload any local files
@@ -252,6 +252,11 @@ class Subject(PanoptesObject):
 
     @property
     def attached_images(self):
+        """
+        A dict containing attached images/media of a subject. This should NOT be confused with subject locations.
+        A subject_location is a media record that saves the location of the media that will be classified in a project's classifier.
+        A subject_attached_image is a media record that serves as ancillary/auxiliary media to the subject and will be shown on a subject's Talk page.
+        """
         return self.http_get('{}/attached_images'.format(self.id))[0]
 
     def set_raw(self, raw, etag=None, loaded=True):
@@ -316,6 +321,22 @@ class Subject(PanoptesObject):
         metadata=None,
         client=None
     ):
+        """
+        Add a media location for attached_images (i.e. any media that serves as ancillary/auxilliary) for this subject.
+
+        - **src**  is a string path to a local or externally hosted file.
+        - **content_type** optional string, passes in a specific MIME type for media item.
+        - **external_link** optional boolean, Panoptes API sets to False if src is None type. True if src of media is an externally hosted url.
+        - **metadata** optional dict, serves as metadata for the attached_image/media
+        - **client** optional Panoptes.client() instance. Sent as a parameter for threading purposes for parallelization so that thread uses the correct client context.
+
+        Examples::
+
+            subject.add_attached_image(src='/data/image.jpg')
+            subject.add_attached_image(src='https://example.com/image.jpg', content_type='image/jpg', external_link=True)
+            subject.add_attached_image(src='https://example.com/image.jpg', content_type='image/jpg', external_link=True, metadata={'kitty': 'opalite'})
+
+        """
         metadata = metadata or {}
         media_data = {
             'content_type': content_type,
@@ -379,13 +400,34 @@ class Subject(PanoptesObject):
         - **attached_media** can be an open :py:class:`file` object, a path to a
           local file, or a :py:class:`dict` containing MIME types and URLs for
           remote media.
+        - **manual_mimetype** optional string, passes in a specific MIME type for media item.
         - **metadata** can be a :py:class:`dict` that stores additional info on attached_media.
+        - **client** optional Panoptes.client() instance. Sent as a parameter for threading purposes for parallelization so that thread uses the correct client context.
 
         Examples::
 
             subject.save_attached_image(my_file)
             subject.save_attached_image('/data/image.jpg')
-            subject.save_attached_image(my_file, {'metadata_test': 'Object 1'})
+            subject.save_attached_image(attached_media=my_file, manual_mimetype='image/jpg', metadata={'metadata_test': 'Object 1'})
+
+        We can utilize `async_saves` to upload/save attached_images in parallel.
+
+        Examples::
+            from concurrent.futures import as_completed
+            subject = Subject(1234)
+
+            # list of file locations
+            local_files = [...]
+
+            with Subject.async_saves():
+                future_to_file = {subject.save_attached_image(file_location): file_location for file_location in local_files}
+                for future in as_completed(future_to_file):
+                    local_file = future_to_file[future]
+                    try:
+                        future.result()
+                    except Exception as exc:
+                        print(f"Upload failed for {local_file}")
+
         """
         if not client:
             client = Panoptes.client()
