@@ -75,8 +75,9 @@ class Subject(PanoptesObject):
     @classmethod
     def async_saves(cls):
         """
-        Returns a context manager to allow asynchronously creating subjects or creating and uploading subject attached images/media.
-        .
+        Returns a context manager to allow asynchronously creating subjects
+        or creating and uploading subject attached images/media.
+
         Using this context manager will create a pool of threads which will
         create multiple subjects at once and upload any local files
         simultaneously.
