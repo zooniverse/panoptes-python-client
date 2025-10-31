@@ -333,6 +333,7 @@ class Subject(PanoptesObject):
 
         Examples::
 
+            # Upload local image by passing path to file
             subject.add_attached_image(src='/data/image.jpg')
             subject.add_attached_image(src='https://example.com/image.jpg', content_type='image/jpg', external_link=True)
             subject.add_attached_image(src='https://example.com/image.jpg', content_type='image/jpg', external_link=True, metadata={'kitty': 'opalite'})
