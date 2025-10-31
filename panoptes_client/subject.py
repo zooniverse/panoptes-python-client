@@ -337,6 +337,7 @@ class Subject(PanoptesObject):
             subject.add_attached_image(src='/data/image.jpg')
             # Upload externally hosted image
             subject.add_attached_image(src='https://example.com/image.jpg', content_type='image/jpg', external_link=True)
+            # Upload externally hosted image with additional (optional) metadata
             subject.add_attached_image(src='https://example.com/image.jpg', content_type='image/jpg', external_link=True, metadata={'kitty': 'opalite'})
 
         """
