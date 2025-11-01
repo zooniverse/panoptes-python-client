@@ -35,6 +35,7 @@ except ImportError:
 
 from panoptes_client.panoptes import (
     LinkResolver,
+    ObjectNotSavedException,
     Panoptes,
     PanoptesAPIException,
     PanoptesObject,
@@ -254,10 +255,14 @@ class Subject(PanoptesObject):
     @property
     def attached_images(self):
         """
-        A dict containing attached images/media of a subject. This should NOT be confused with subject locations.
-        A subject_location is a media record that saves the location of the media that will be classified in a project's classifier.
-        A subject_attached_image is a media record that serves as ancillary/auxiliary media to the subject and will be shown on a subject's Talk page.
+        A dict containing attached images/media of a subject. This should NOT
+        be confused with subject locations. A subject_location is a media
+        record that saves the location of the media that will be classified in a project's classifier.
+        A subject_attached_image is a media record that serves as
+        ancillary/auxiliary media to the subject and will be shown on a subject's Talk page.
         """
+        if self.id is None:
+            raise ObjectNotSavedException
         return self.http_get('{}/attached_images'.format(self.id))[0]
 
     def set_raw(self, raw, etag=None, loaded=True):
@@ -314,33 +319,16 @@ class Subject(PanoptesObject):
         finally:
             f.close()
 
-    def add_attached_image(
+    def _add_attached_image(
         self,
+        content_type,
         src=None,
-        content_type='image/png',
         external_link=True,
         metadata=None,
-        client=None
+        client=None,
     ):
-        """
-        Add a media location for attached_images (i.e. any media that serves as ancillary/auxilliary) for this subject.
-
-        - **src**  is a string path to a local or externally hosted file.
-        - **content_type** optional string, passes in a specific MIME type for media item.
-        - **external_link** optional boolean, Panoptes API sets to False if src is None type. True if src of media is an externally hosted url.
-        - **metadata** optional dict, serves as metadata for the attached_image/media
-        - **client** optional Panoptes.client() instance. Sent as a parameter for threading purposes for parallelization so that thread uses the correct client context.
-
-        Examples::
-
-            # Upload local image by passing path to file
-            subject.add_attached_image(src='/data/image.jpg')
-            # Upload externally hosted image
-            subject.add_attached_image(src='https://example.com/image.jpg', content_type='image/jpg', external_link=True)
-            # Upload externally hosted image with additional (optional) metadata
-            subject.add_attached_image(src='https://example.com/image.jpg', content_type='image/jpg', external_link=True, metadata={'kitty': 'opalite'})
-
-        """
+        if self.id is None:
+            raise ObjectNotSavedException
         metadata = metadata or {}
         media_data = {
             'content_type': content_type,
@@ -367,9 +355,9 @@ class Subject(PanoptesObject):
 
             if type(attached_media) is dict:
                 for content_type, url in attached_media.items():
-                    self.add_attached_image(
-                        src=url,
+                    self._add_attached_image(
                         content_type=content_type,
+                        src=url,
                         metadata=metadata,
                         external_link=True,
                     )
@@ -386,15 +374,21 @@ class Subject(PanoptesObject):
                 self._validate_media_type(media_type)
             finally:
                 f.close()
-            file_url = self.add_attached_image(
-                src=None,
+            file_url = self._add_attached_image(
                 content_type=media_type,
+                src=None,
                 metadata=metadata,
                 external_link=False,
             )
             self._upload_media(file_url, media_data, media_type)
 
-    def save_attached_image(self, attached_media, manual_mimetype=None, metadata=None, client=None):
+    def save_attached_image(
+        self,
+        attached_media,
+        manual_mimetype=None,
+        metadata=None,
+        client=None
+    ):
         """
         Add a attached_media to this subject.
         NOTE: This should NOT be confused with subject location.
@@ -413,6 +407,7 @@ class Subject(PanoptesObject):
             subject.save_attached_image(my_file)
             subject.save_attached_image('/data/image.jpg')
             subject.save_attached_image(attached_media=my_file, manual_mimetype='image/jpg', metadata={'metadata_test': 'Object 1'})
+            subject.save_attached_image({"image/png": "https://example.com/test.png"})
 
         We can utilize `async_saves` to upload/save attached_images in parallel.
 
