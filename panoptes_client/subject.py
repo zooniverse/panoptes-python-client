@@ -404,9 +404,13 @@ class Subject(PanoptesObject):
 
         Examples::
 
+            # Upload image by sending in a :py:class:`file` object
             subject.save_attached_image(my_file)
+            # Upload local image by passing path to file
             subject.save_attached_image('/data/image.jpg')
+            # Upload local image and set mimetype and record's metadata
             subject.save_attached_image(attached_media=my_file, manual_mimetype='image/jpg', metadata={'metadata_test': 'Object 1'})
+            # Upload externally hosted image
             subject.save_attached_image({"image/png": "https://example.com/test.png"})
 
         We can utilize `async_saves` to upload/save attached_images in parallel.
