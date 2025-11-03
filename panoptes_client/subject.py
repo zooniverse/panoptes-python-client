@@ -321,8 +321,8 @@ class Subject(PanoptesObject):
 
     def _add_attached_image(
         self,
-        content_type,
         src=None,
+        content_type='image/png',
         external_link=True,
         metadata=None,
         client=None,
@@ -356,8 +356,8 @@ class Subject(PanoptesObject):
             if type(attached_media) is dict:
                 for content_type, url in attached_media.items():
                     self._add_attached_image(
-                        content_type=content_type,
                         src=url,
+                        content_type=content_type,
                         metadata=metadata,
                         external_link=True,
                     )
@@ -375,8 +375,8 @@ class Subject(PanoptesObject):
             finally:
                 f.close()
             file_url = self._add_attached_image(
-                content_type=media_type,
                 src=None,
+                content_type=media_type,
                 metadata=metadata,
                 external_link=False,
             )
