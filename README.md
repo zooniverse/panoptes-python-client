@@ -30,8 +30,7 @@ Upgrade an existing installation:
 $ pip install -U panoptes-client
 ```
 
-The Panoptes Client is supported on all versions of Python 2 and 3, from Python
-2.7 onwards.
+The Panoptes Client is supported on all versions of Python 3 onwards.
 
 ## Usage Examples
 
@@ -61,12 +60,10 @@ for information about how you can get involved.
 
 ### Running the Tests
 
-You can run the tests with Docker. This will run them under Python 3 and Python
-2:
+You can run the tests with Docker. This will run them under Python 3:
 
 ```
 docker-compose build tests && docker-compose run tests
-docker-compose build tests2 && docker-compose run tests2
 ```
 
 Or you can run them directly in Python with:
