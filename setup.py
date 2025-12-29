@@ -18,7 +18,6 @@ setup(
     include_package_data=True,
     install_requires=[
         'requests>=2.4.2',
-        'future>=0.16',
         'python-magic>=0.4',
         'redo>=1.7',
         'six>=1.9',
@@ -30,6 +29,5 @@ setup(
         'docs': [
             'sphinx',
         ],
-        ':python_version == "2.7"': ['futures'],
     }
 )

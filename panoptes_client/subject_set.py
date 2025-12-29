@@ -1,4 +1,3 @@
-from __future__ import absolute_import, division, print_function
 from builtins import str
 from copy import deepcopy
 from panoptes_client.subject_workflow_status import SubjectWorkflowStatus

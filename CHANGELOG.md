@@ -1,3 +1,6 @@
+## 1.8.0 (TBD)
+- Change: Drop support for Python 2 and remove dependency on future.
+
 ## 1.7.1 (2025-06-24)
 - New: Track logged in user
 - Fix: Batch aggregation links updated
