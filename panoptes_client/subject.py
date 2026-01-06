@@ -484,7 +484,7 @@ class Subject(PanoptesObject):
         """
         try:
             _, etag = self._get_attached_image(attached_image_id)
-            return self.http_delete('{}/attached_images/{}'.format(self.id, attached_image_id), etag = etag)
+            return self.http_delete('{}/attached_images/{}'.format(self.id, attached_image_id), etag=etag)
         except PanoptesAPIException as err:
             raise err
 
