@@ -467,6 +467,35 @@ class Subject(PanoptesObject):
                     upload_exec.shutdown(wait=True)
         return future_result
 
+    def delete_attached_image(
+        self,
+        attached_image_id
+    ):
+        """
+        Delete attached_media from the subject.
+        NOTE: This should NOT be confused with subject location.
+        A subject location is the content of the subject that a volunteer will classify.
+        A subject attached_media is ancillary data associated to the subject that get displayed on the Subject's Talk Page.
+
+        - **attached_image_id** ID of the subject atached_media you want to delete
+
+        Examples::
+            subject.delete_attached_image(123)
+        """
+        try:
+            _, etag = self._get_attached_image(attached_image_id)
+            return self.http_delete('{}/attached_images/{}'.format(self.id, attached_image_id), etag=etag)
+        except PanoptesAPIException as err:
+            raise err
+
+    def _get_attached_image(
+        self,
+        attached_image_id
+    ):
+        if self.id is None or attached_image_id is None:
+            raise ObjectNotSavedException
+        return self.http_get('{}/attached_images/{}'.format(self.id, attached_image_id))
+
 
 class UnknownMediaException(Exception):
     pass
