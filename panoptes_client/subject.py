@@ -472,7 +472,7 @@ class Subject(PanoptesObject):
         attached_image_id
     ):
         """
-        Delete attached_media from this subject.
+        Delete attached_media from the subject.
         NOTE: This should NOT be confused with subject location.
         A subject location is the content of the subject that a volunteer will classify.
         A subject attached_media is ancillary data associated to the subject that get displayed on the Subject's Talk Page.
