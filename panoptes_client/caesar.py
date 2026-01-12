@@ -1,4 +1,5 @@
 from panoptes_client.panoptes import Panoptes, PanoptesAPIException
+from panoptes_client.python_rule_generator import CaesarRuleGenerator
 
 
 class Caesar(object):
@@ -16,6 +17,7 @@ class Caesar(object):
         'subject': ['retire_subject', 'add_subject_to_set', 'add_to_collection', 'external', 'external_with_basic_auth'],
         'user': ['promote_user']
     }
+    CONDITION_STRING_FORMATS = ["caesar", "python"]
 
     def __init__(
         self,
@@ -177,7 +179,7 @@ class Caesar(object):
 
         return self.http_post(f'workflows/{workflow_id}/reducers', json=payload)[0]
 
-    def create_workflow_rule(self, workflow_id, rule_type, condition_string='[]'):
+    def create_workflow_rule(self, workflow_id, rule_type, condition_string='[]', condition_string_format="caesar"):
         """
         Adds a Caesar rule for given workflow. Will return rule as a dict with 'id' if successful.
 
@@ -194,8 +196,12 @@ class Caesar(object):
             caesar.create_workflow_rule(workflow.id, 'subject','["gte", ["lookup", "complete.0", 0], ["const", 3]]')
 
         """
-
+        self.validate_condition_string_format(condition_string_format)
         self.validate_rule_type(rule_type)
+
+        if condition_string_format == "python":
+            condition_string = self.convert_python_rule(condition_string, workflow_id)
+
         payload = {
             f'{rule_type}_rule': {
                 'condition_string': condition_string
@@ -269,3 +275,12 @@ class Caesar(object):
     def validate_action(self, rule_type, action):
         if action not in self.RULE_TO_ACTION_TYPES[rule_type]:
             raise ValueError('Invalid action for rule type')
+
+    def validate_condition_string_format(self, condition_string_format):
+        if condition_string_format not in self.CONDITION_STRING_FORMATS:
+            raise ValueError('Invalid condition string format')
+
+    def convert_python_rule(self, rule, workflow_id):
+        rule_generator = CaesarRuleGenerator(rule)
+        valid_reducers = self.get_workflow_reducers(workflow_id=workflow_id)
+        return rule_generator(valid_reducers)
