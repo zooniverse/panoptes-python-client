@@ -139,6 +139,7 @@ class Panoptes(object):
         self.logged_in = False
         self.logged_in_user_id = None
         self.bearer_token = None
+        self._bearer_token_lock = threading.Lock()
         self.admin = admin
         self.username = None
         self.password = None
@@ -522,7 +523,14 @@ class Panoptes(object):
         return self.session.get(url, headers=headers).headers['x-csrf-token']
 
     def get_bearer_token(self):
-        if not self.valid_bearer_token():
+        if self.valid_bearer_token():
+            return self.bearer_token
+
+        with self._bearer_token_lock:
+            # Another thread may have refreshed the token while we waited.
+            if self.valid_bearer_token():
+                return self.bearer_token
+
             grant_type = 'password'
 
             if self.client_secret:
@@ -545,17 +553,27 @@ class Panoptes(object):
                     'client_id': self.client_id,
                 }
 
-            if grant_type == 'client_credentials':
-                bearer_data['client_secret'] = self.client_secret
-                bearer_data['url'] = self.redirect_url
-
-            token_response = self.session.post(
-                self.endpoint + '/oauth/token',
-                bearer_data
-            ).json()
-
-            if 'errors' in token_response:
-                raise PanoptesAPIException(token_response['errors'])
+            try:
+                token_response = self._request_bearer_token(
+                    bearer_data,
+                    grant_type,
+                )
+            except PanoptesAPIException:
+                if grant_type != 'password':
+                    raise
+                self.bearer_token = None
+                self.refresh_token = None
+                self.logged_in = False
+                if not self.login():
+                    raise
+                bearer_data = {
+                    'grant_type': grant_type,
+                    'client_id': self.client_id,
+                }
+                token_response = self._request_bearer_token(
+                    bearer_data,
+                    grant_type,
+                )
 
             self.bearer_token = token_response['access_token']
             if (self.bearer_token and grant_type == 'client_credentials'):
@@ -569,6 +587,32 @@ class Panoptes(object):
                 + timedelta(seconds=token_response['expires_in'])
             )
         return self.bearer_token
+
+    def _request_bearer_token(self, bearer_data, grant_type):
+        if grant_type == 'client_credentials':
+            bearer_data['client_secret'] = self.client_secret
+            bearer_data['url'] = self.redirect_url
+
+        token_response = self.session.post(
+            self.endpoint + '/oauth/token',
+            bearer_data
+        ).json()
+
+        if 'errors' in token_response:
+            raise PanoptesAPIException(token_response['errors'])
+
+        if 'access_token' not in token_response:
+            raise PanoptesAPIException(
+                token_response.get(
+                    'error_description',
+                    token_response.get(
+                        'error',
+                        'Authentication failed: no access token returned'
+                    )
+                )
+            )
+
+        return token_response
 
     def valid_bearer_token(self):
         # Return invalid if there is no token
