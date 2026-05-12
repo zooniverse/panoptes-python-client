@@ -527,6 +527,7 @@ class Panoptes(object):
             return self.bearer_token
 
         with self._bearer_token_lock:
+            # Another thread may have refreshed the token while we waited.
             if self.valid_bearer_token():
                 return self.bearer_token
 
