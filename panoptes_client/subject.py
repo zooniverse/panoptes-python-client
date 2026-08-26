@@ -1,4 +1,5 @@
 from panoptes_client.subject_workflow_status import SubjectWorkflowStatus
+from panoptes_client.set_member_subject import SetMemberSubject
 
 _OLD_STR_TYPES = (str,)
 try:
@@ -466,6 +467,38 @@ class Subject(PanoptesObject):
                     # Shuts down and waits for the task if this isn't being used in a `async_saves` block
                     upload_exec.shutdown(wait=True)
         return future_result
+    
+    def update_priority(self, priority, subject_set_id=None):
+        """
+        Update the priority of this subject in the subject set.
+
+        If subject_set_id is not provided, the priority will be updated in all subject sets that this subject belongs to.
+
+        - **priority** is an integer value that represents the priority of the subject in the subject set.
+
+        Examples::
+
+            subject.update_priority(1)
+            subject.update_priority(2, subject_set_id=1234)
+        """
+
+        if self.id is None:
+            raise ObjectNotSavedException
+        
+        self.metadata['priority'] = priority
+        self.save()
+
+        if subject_set_id is not None:
+            subject_sets = [subject_set_id]
+        else:
+            subject_sets = [s.id for s in self.links.subject_sets]
+
+        for ss_id in subject_sets:
+            sms = next(SetMemberSubject.where(
+                subject_set_id=ss_id,
+                subject_id=self.id))
+            sms.priority = priority
+            sms.save()
 
 
 class UnknownMediaException(Exception):
