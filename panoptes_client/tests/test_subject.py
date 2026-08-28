@@ -58,7 +58,7 @@ class TestSubject(unittest.TestCase):
         fake_file = io.BytesIO(data)
         with self.assertRaises(UnknownMediaException):
             self.subject.add_location(fake_file, manual_mimetype="application/javascript")
-    
+
     def test_update_priority_requires_saved_subject(self):
         with self.assertRaises(ObjectNotSavedException):
             self.subject.update_priority(1)
@@ -87,7 +87,7 @@ class TestSubject(unittest.TestCase):
 
         self.assertEqual(set_member_subject_mock.priority, 5)
         set_member_subject_mock.save.assert_called_once_with()
-    
+
     def test_update_priority_updates_all_subject_sets(self):
         self.subject.id = 123
 

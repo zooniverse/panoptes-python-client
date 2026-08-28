@@ -467,7 +467,7 @@ class Subject(PanoptesObject):
                     # Shuts down and waits for the task if this isn't being used in a `async_saves` block
                     upload_exec.shutdown(wait=True)
         return future_result
-    
+
     def update_priority(self, priority, subject_set_id=None):
         """
         Update the priority of this subject in the subject set.
