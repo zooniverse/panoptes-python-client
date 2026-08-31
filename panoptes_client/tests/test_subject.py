@@ -57,14 +57,15 @@ class TestSubject(unittest.TestCase):
         data = b"fake data"
         fake_file = io.BytesIO(data)
         with self.assertRaises(UnknownMediaException):
-            self.subject.add_location(fake_file, manual_mimetype="application/javascript")
+            self.subject.add_location(
+                fake_file, manual_mimetype="application/javascript")
 
     def test_update_priority_requires_saved_subject(self):
         with self.assertRaises(ObjectNotSavedException):
             self.subject.update_priority(1)
 
     def test_update_priority_updates_priority_for_saved_subject(self):
-        self.subject.id = 123  
+        self.subject.id = 123
         set_member_subject_mock = MagicMock()
 
         with patch.object(self.subject, "save") as mock_save:
@@ -98,16 +99,16 @@ class TestSubject(unittest.TestCase):
 
         with patch.object(self.subject, "save") as mock_save, \
             patch(
-             "panoptes_client.panoptes.LinkResolver.__getattr__",
-             return_value=[subject_set_1, subject_set_2],
-            ),  \
+            "panoptes_client.panoptes.LinkResolver.__getattr__",
+            return_value=[subject_set_1, subject_set_2],
+        ),  \
             patch(
                 "panoptes_client.subject.SetMemberSubject.where",
                 side_effect=[
                     iter([set_member_subject_1]),
                     iter([set_member_subject_2]),
                 ],
-            ) as mock_where:
+        ) as mock_where:
             self.subject.update_priority(5)
 
         self.assertEqual(self.subject.metadata["priority"], 5)
