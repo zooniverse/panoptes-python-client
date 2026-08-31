@@ -9,11 +9,10 @@ from panoptes_client.panoptes import (
 import mimetypes
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
-import time
 import threading
 import requests
 import logging
-from builtins import range, str
+from builtins import str
 from panoptes_client.subject_workflow_status import SubjectWorkflowStatus
 from panoptes_client.set_member_subject import SetMemberSubject
 
