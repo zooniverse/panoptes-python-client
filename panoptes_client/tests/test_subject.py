@@ -40,7 +40,7 @@ class TestSubject(unittest.TestCase):
         self.assertIn("locations", self.subject.modified_attributes)
         mock_magic.from_buffer.assert_called_with(data, mime=True)
 
-    @patch("panoptes_client.subject.mimetypes.guess_type", return_value=("image/jpeg", None))
+    @patch.object(mimetypes, 'guess_type', return_value=("image/jpeg", None))
     def test_add_location_mimetypes_detection(self, mock_guess_type):
         import panoptes_client.subject as subject_module
         subject_module.MEDIA_TYPE_DETECTION = 'mimetypes'
