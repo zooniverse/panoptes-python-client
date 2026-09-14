@@ -58,33 +58,54 @@ Uploading non-image media types
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you wish to upload subjects with non-image media (e.g. audio or video),
-you will need to make sure you have the ``libmagic`` library installed. If you
-don't already have ``libmagic``, please see the `dependency information for
-python-magic <https://github.com/ahupp/python-magic#dependencies>`_ for more
-details.
+you will need to make sure you have the ``libmagic`` library installed for type detection.
+If you don't already have ``libmagic``, please see the `dependency information
+for python-magic <https://github.com/ahupp/python-magic#installation>`_ for
+more details.
+
+If ``libmagic`` is not installed, assignment of MIME types (e.g., image/jpeg,
+video/mp4, text/plain, application/json, etc) will be based on file extensions.
+Be aware that if file names and extensions aren't accurate, this could lead to
+issues when the media is loaded.
 
 Usage Examples
 --------------
 
-Tutorial: Creating a new project
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. _logging-in:
 
-Once you have the client installed, you can import the modules you need from the
-``panoptes_client`` package. For this tutorial, we're going to log into the
-Panoptes API, create a project, create a subject set, and finally create some
-subjects to go in the new set. Let's start by importing all the classes we'll
-need for that::
+Logging in
+~~~~~~~~~~
 
-    from panoptes_client import Panoptes, Project, SubjectSet, Subject
+To perform privileged, project owner-specific actions, import the
+:py:class:`.Panoptes` class and call :py:meth:`.Panoptes.connect`.
 
-Now that we've imported all that, we can use the :py:meth:`.Panoptes.connect`
-method to log in::
+You can pass your Zooniverse username and password directly::
+
+    from panoptes_client import Panoptes
 
     Panoptes.connect(username='example', password='example')
 
-Next we will create our new project. All we need to do is instantiate a new
-instance of :py:class:`.Project`, set some required attributes, and then save
-it, like so::
+You can request an interactive prompt for your username and password::
+
+    from panoptes_client import Panoptes
+
+    Panoptes.connect(login='interactive')
+
+You can also set the ``PANOPTES_USERNAME`` and ``PANOPTES_PASSWORD``
+environment variables and call :py:meth:`.Panoptes.connect` without explicit
+credentials::
+
+    from panoptes_client import Panoptes
+
+    Panoptes.connect()
+
+Creating a project
+~~~~~~~~~~~~~~~~~~
+
+To create a project, import :py:class:`.Project`, instantiate a new project,
+set the required attributes, and then save it::
+
+    from panoptes_client import Project
 
     tutorial_project = Project()
 
@@ -95,10 +116,19 @@ it, like so::
 
     tutorial_project.save()
 
-
 Now if you log into the `Zooniverse project builder
 <https://www.zooniverse.org/lab>`_ you should see the new project listed there.
-Next we will create a subject set in the same way::
+
+Creating a subject set
+~~~~~~~~~~~~~~~~~~~~~~
+
+Subject sets belong to projects. You can create a subject set by importing
+:py:class:`.SubjectSet`, linking it to a project, setting its display name, and
+saving it::
+
+    from panoptes_client import Project, SubjectSet
+
+    tutorial_project = Project.find(1234)
 
     subject_set = SubjectSet()
 
@@ -127,11 +157,18 @@ case). Here ``1234`` is the internal ID number of the subject set (also
 accessible as ``subject_set.id``), so the exact result you get will be slightly
 different.
 
-Now that we have a subject set, let's create some subjects and add them to it.
-For this tutorial, we'll assume you have a :py:class:`dict` containing filenames
-and subject metadata. In reality you might load this from a CSV file, or query a
-database, or generate it in any number of different ways, but this would be
-outside the scope of this tutorial::
+Creating and uploading subjects
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To create subjects and upload subject media, import :py:class:`.Project` and
+:py:class:`.Subject`. For this example, we'll assume you have a :py:class:`dict`
+containing filenames and subject metadata. In reality you might load this from
+a CSV file, or query a database, or generate it in any number of different ways,
+but this would be outside the scope of this example::
+
+    from panoptes_client import Project, Subject
+
+    tutorial_project = Project.find(1234)
 
     subject_metadata = {
         '/Users/me/file1.png': {
@@ -179,8 +216,21 @@ existing metadata. You can also set individual keys as normal::
 
 Or you can leave it empty if you don't need to set anything.
 
-All that's left to do now is to link our new subjects to our new subject set.
-That can be done with the :py:meth:`.SubjectSet.add` method::
+Linking subjects to a subject set
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To link subjects to a subject set, import :py:class:`.Subject` and
+:py:class:`.SubjectSet`, find the subject set, and pass the subjects to the
+:py:meth:`.SubjectSet.add` method::
+
+    from panoptes_client import Subject, SubjectSet
+
+    subject_set = SubjectSet.find(1234)
+    new_subjects = [
+        Subject.find(1),
+        Subject.find(2),
+        Subject.find(3),
+    ]
 
     subject_set.add(new_subjects)
 
@@ -192,8 +242,7 @@ at a time if you need to::
     subject_set.add(subject1)
     subject_set.add(subject2)
 
-And that's all there is to it! Your new subjects are now linked to the new
-subject set.
+Your subjects are now linked to the subject set.
 
 Tutorial: Adding a Workflow to Caesar
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -202,19 +251,19 @@ For this tutorial, we will connect to Caesar and add workflow to Caesar in 2 way
     from panoptes_client import Panoptes, Workflow, Caesar
 
 Now that we've imported all that, we can use the :py:meth:`.Panoptes.connect`
-method to log in (see above tutorial).
+method to log in (see `Logging in`_).
 
-Next we can instantiate an instance of :py:class`.Caesar`::
+Next we can instantiate an instance of :py:class:`.Caesar`::
 
     caesar = Caesar()
 
 Note that the token from coming from :py:meth:`.Panoptes.connect` will also get us connected to Caesar.
 
-We can add workflow to Caesar using this instace of :py:class`.Caesar`, assuming you have a `workflow_id` handy::
+We can add workflow to Caesar using this instance of :py:class:`.Caesar`, assuming you have a `workflow_id` handy::
 
     caesar.save_workflow(1234)
 
-Another way we can do this is via :py:class`.Workflow`. We can do this by first instantiating an instance of :py:class`.Workflow` with provided `workflow_id`::
+Another way we can do this is via :py:class:`.Workflow`. We can do this by first instantiating an instance of :py:class:`.Workflow` with provided `workflow_id`::
 
     workflow = Workflow(1234)
 
@@ -231,9 +280,9 @@ For this tutorial, we're going to retire and unretire subjects in a given workfl
     from panoptes_client import Panoptes, Workflow, Subject, SubjectSet
 
 Now that we've imported all that, we can use the :py:meth:`.Panoptes.connect`
-method to log in (see above tutorial)
+method to log in (see `Logging in`_)
 
-Next we can instantiate an instance of :py:class`.Workflow`, assuming you have a `workflow_id` handy::
+Next we can instantiate an instance of :py:class:`.Workflow`, assuming you have a `workflow_id` handy::
 
     workflow = Workflow('1234')
 
@@ -291,7 +340,7 @@ Look up user resource according to login / username::
 Look up user resource for current logged in user::
 
     user = User.me()
-    
+
 Project owners and collaborators can update their users' project settings
 (workflow_id only; for use with leveling up feature)::
 
