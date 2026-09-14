@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 from panoptes_client.panoptes import Panoptes, PanoptesObject, LinkResolver
 from panoptes_client.utils import isiterable, split
 

@@ -1,4 +1,3 @@
-from __future__ import absolute_import, division, print_function
 from builtins import str
 
 import getpass
@@ -21,7 +20,7 @@ RETRY_BACKOFF_INTERVAL = 5
 if os.environ.get('PANOPTES_DEBUG'):
     logging.basicConfig(level=logging.DEBUG)
 else:
-    logging.basicConfig()
+    logging.basicConfig(level=logging.INFO)
 
 
 class Panoptes(object):
