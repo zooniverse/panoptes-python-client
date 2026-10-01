@@ -213,17 +213,21 @@ class Subject(PanoptesObject):
         upload_response.raise_for_status()
         return upload_response
 
-    def _detect_media_type(self, media_data=None, manual_mimetype=None):
+    def _detect_media_type(self, media_data=None, manual_mimetype=None,
+                           filename=None):
         if manual_mimetype is not None:
             return manual_mimetype
 
         if MEDIA_TYPE_DETECTION == 'magic':
             return magic.from_buffer(media_data, mime=True)
 
-        media_type = mimetypes.guess_type(media_data)[0]
+        media_type = None
+        if isinstance(filename, _OLD_STR_TYPES):
+            media_type = mimetypes.guess_type(filename)[0]
         if not media_type:
             raise UnknownMediaException(
-                'Could not detect file type. Please try installing '
+                'Could not detect file type. Please supply manual_mimetype '
+                'or try installing '
                 'libmagic: https://panoptes-python-client.readthedocs.'
                 'io/en/latest/user_guide.html#uploading-non-image-'
                 'media-types'
@@ -308,7 +312,11 @@ class Subject(PanoptesObject):
 
         try:
             media_data = f.read()
-            media_type = self._detect_media_type(media_data, manual_mimetype)
+            filename = (location if isinstance(location, _OLD_STR_TYPES)
+                        else getattr(f, 'name', None))
+            media_type = self._detect_media_type(
+                media_data, manual_mimetype, filename=filename,
+            )
 
             self._validate_media_type(media_type)
 
@@ -369,7 +377,12 @@ class Subject(PanoptesObject):
             media_type = None
             try:
                 media_data = f.read()
-                media_type = self._detect_media_type(media_data, manual_mimetype)
+                filename = (attached_media
+                            if isinstance(attached_media, _OLD_STR_TYPES)
+                            else getattr(f, 'name', None))
+                media_type = self._detect_media_type(
+                    media_data, manual_mimetype, filename=filename,
+                )
                 self._validate_media_type(media_type)
             finally:
                 f.close()
