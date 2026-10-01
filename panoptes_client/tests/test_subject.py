@@ -28,7 +28,8 @@ class TestSubject(unittest.TestCase):
         self.assertEqual(self.subject._media_files[-1], data)
         self.assertIn("locations", self.subject.modified_attributes)
 
-    @patch("panoptes_client.subject.magic")
+    @patch("panoptes_client.subject.MEDIA_TYPE_DETECTION", "magic")
+    @patch("panoptes_client.subject.magic", create=True)
     def test_add_location_magic_detection(self, mock_magic):
         mock_magic.from_buffer.return_value = "image/jpeg"
         data = b"fake image data"
@@ -41,12 +42,10 @@ class TestSubject(unittest.TestCase):
 
     @patch.object(mimetypes, 'guess_type', return_value=("image/jpeg", None))
     def test_add_location_mimetypes_detection(self, mock_guess_type):
-        import panoptes_client.subject as subject_module
-        subject_module.MEDIA_TYPE_DETECTION = 'mimetypes'
-
         m = mock_open(read_data=b"fake image data")
-        with patch("panoptes_client.subject.open", m, create=True):
-            self.subject.add_location("dummy.jpg")
+        with patch("panoptes_client.subject.MEDIA_TYPE_DETECTION", "mimetypes"):
+            with patch("panoptes_client.subject.open", m, create=True):
+                self.subject.add_location("dummy.jpg")
 
         self.assertEqual(self.subject.locations[-1], "image/jpeg")
         self.assertEqual(self.subject._media_files[-1], b"fake image data")
