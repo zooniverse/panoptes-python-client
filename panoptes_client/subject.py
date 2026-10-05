@@ -1,4 +1,20 @@
+from redo import retry
+from panoptes_client.panoptes import (
+    LinkResolver,
+    ObjectNotSavedException,
+    Panoptes,
+    PanoptesAPIException,
+    PanoptesObject,
+)
+import mimetypes
+from concurrent.futures import ThreadPoolExecutor
+from copy import deepcopy
+import threading
+import requests
+import logging
+from builtins import str
 from panoptes_client.subject_workflow_status import SubjectWorkflowStatus
+from panoptes_client.set_member_subject import SetMemberSubject
 
 _OLD_STR_TYPES = (str,)
 try:
@@ -6,16 +22,6 @@ try:
 except NameError:
     pass
 
-from builtins import range, str
-
-import logging
-import requests
-import threading
-import time
-
-from copy import deepcopy
-from concurrent.futures import ThreadPoolExecutor
-import mimetypes
 
 try:
     import magic
@@ -32,14 +38,6 @@ except ImportError:
         pass
     MEDIA_TYPE_DETECTION = 'mimetypes'
 
-from panoptes_client.panoptes import (
-    LinkResolver,
-    ObjectNotSavedException,
-    Panoptes,
-    PanoptesAPIException,
-    PanoptesObject,
-)
-from redo import retry
 
 UPLOAD_RETRY_LIMIT = 5
 RETRY_BACKOFF_INTERVAL = 5
@@ -57,6 +55,7 @@ ALLOWED_MIME_TYPES = [
     "text/plain",
     "application/json",
 ]
+
 
 class Subject(PanoptesObject):
     _api_slug = 'subjects'
@@ -232,7 +231,8 @@ class Subject(PanoptesObject):
 
     def _validate_media_type(self, media_type=None):
         if media_type not in ALLOWED_MIME_TYPES:
-            raise UnknownMediaException(f"File type {media_type} is not allowed.")
+            raise UnknownMediaException(
+                f"File type {media_type} is not allowed.")
 
     @property
     def async_save_result(self):
@@ -341,7 +341,8 @@ class Subject(PanoptesObject):
             client = Panoptes.client()
 
         with client:
-            json_response, _ = self.http_post('{}/attached_images'.format(self.id), json={'media': media_data})
+            json_response, _ = self.http_post(
+                '{}/attached_images'.format(self.id), json={'media': media_data})
 
             return json_response['media'][0]['src']
 
@@ -369,7 +370,8 @@ class Subject(PanoptesObject):
             media_type = None
             try:
                 media_data = f.read()
-                media_type = self._detect_media_type(media_data, manual_mimetype)
+                media_type = self._detect_media_type(
+                    media_data, manual_mimetype)
                 self._validate_media_type(media_type)
             finally:
                 f.close()
@@ -444,7 +446,8 @@ class Subject(PanoptesObject):
                 if async_save:
                     upload_exec = self._local.save_exec
                 else:
-                    upload_exec = ThreadPoolExecutor(max_workers=ASYNC_SAVE_THREADS)
+                    upload_exec = ThreadPoolExecutor(
+                        max_workers=ASYNC_SAVE_THREADS)
                 future_result = upload_exec.submit(
                     retry,
                     self._save_attached_image,
@@ -466,6 +469,38 @@ class Subject(PanoptesObject):
                     # Shuts down and waits for the task if this isn't being used in a `async_saves` block
                     upload_exec.shutdown(wait=True)
         return future_result
+
+    def update_priority(self, priority, subject_set_id=None):
+        """
+        Update the priority of this subject in the subject set.
+
+        If subject_set_id is not provided, the priority will be updated in all subject sets that this subject belongs to.
+
+        - **priority** is an integer value that represents the priority of the subject in the subject set.
+
+        Examples::
+
+            subject.update_priority(1)
+            subject.update_priority(2, subject_set_id=1234)
+        """
+
+        if self.id is None:
+            raise ObjectNotSavedException
+
+        self.metadata['priority'] = priority
+        self.save()
+
+        if subject_set_id is not None:
+            subject_sets = [subject_set_id]
+        else:
+            subject_sets = [s.id for s in self.links.subject_sets]
+
+        for ss_id in subject_sets:
+            sms = next(SetMemberSubject.where(
+                subject_set_id=ss_id,
+                subject_id=self.id))
+            sms.priority = priority
+            sms.save()
 
 
 class UnknownMediaException(Exception):
