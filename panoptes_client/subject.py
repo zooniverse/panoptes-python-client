@@ -498,7 +498,7 @@ class Subject(PanoptesObject):
         if self.id is None or attached_image_id is None:
             raise ObjectNotSavedException
         return self.http_get('{}/attached_images/{}'.format(self.id, attached_image_id))
-    
+
     def update_priority(self, priority, subject_set_id=None):
         """
         Update the priority of this subject in the subject set.
