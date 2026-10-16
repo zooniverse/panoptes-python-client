@@ -72,6 +72,7 @@ class SubjectSet(PanoptesObject, Exportable):
             self._original_metadata = {}
 
     def set_raw(self, raw, etag=None, loaded=True):
+        raw.setdefault('links', {}).setdefault('subjects', [])
         super(SubjectSet, self).set_raw(raw, etag, loaded)
         if loaded and self.metadata:
             self._original_metadata = deepcopy(self.metadata)
@@ -101,10 +102,6 @@ class SubjectSet(PanoptesObject, Exportable):
 
         for sms in SetMemberSubject.where(subject_set_id=self.id):
             yield sms.links.subject
-
-    def set_raw(self, raw, etag=None, loaded=True):
-        raw.setdefault('links', {}).setdefault('subjects', [])
-        return super(SubjectSet, self).set_raw(raw, etag, loaded)
 
     def add(self, subjects):
         """
