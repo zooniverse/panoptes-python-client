@@ -501,7 +501,7 @@ Please see :py:meth:`.Workflow.run_aggregation` and :py:meth:`.Workflow.get_batc
 Example Usage::
 
     # Generate input data exports: workflow-level classification export and project-level workflows export
-    Workflow(1234).generate_export('classification')
+    Workflow(1234).generate_export('classifications')
     Project(2345).generate_export('workflows')
 
     # Request batch aggregation data product
